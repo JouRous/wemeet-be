@@ -19,7 +19,13 @@ namespace API.Extensions
 
       services.AddDbContext<AppDbContext>(options =>
       {
-        options.UseMySql(config.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0)));
+        var env = Environment.GetEnvironmentVariable("BUILD_ENV");
+        var connStr = config.GetConnectionString("DefaultConnection");
+        if (env != null)
+        {
+          connStr = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+        }
+        options.UseNpgsql(connStr);
       });
 
       return services;
