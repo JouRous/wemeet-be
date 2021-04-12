@@ -1,0 +1,24 @@
+version: '3.7'
+
+services:
+  db:
+    image: mysql
+    environment:
+      MYSQL_DATABASE: 'wemeet'
+      MYSQL_USER: 'wemeet'
+      MYSQL_PASSWORD: '123123'
+      MYSQL_ROOT_PASSWORD: '123123'
+    ports:
+      - 3306:3306
+    expose:
+      - 3306
+    volumes:
+      - app-db:/var/lib/mysql
+  api:
+    build: .
+    ports:
+      - 5000:5000
+    depends_on:
+      - db
+volumes:
+  app-db: {}

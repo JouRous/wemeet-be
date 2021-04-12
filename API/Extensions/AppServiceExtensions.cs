@@ -1,3 +1,4 @@
+using System;
 using API.Data;
 using API.Interfaces;
 using API.Services;
@@ -18,7 +19,7 @@ namespace API.Extensions
 
       services.AddDbContext<AppDbContext>(options =>
       {
-        options.UseSqlite(config.GetConnectionString("DefaultConnection"));
+        options.UseMySql(config.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version(8, 0)));
       });
 
       return services;
