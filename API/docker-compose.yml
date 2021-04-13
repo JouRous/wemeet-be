@@ -12,6 +12,8 @@ services:
     restart: always
     expose:
       - 5432
+    volumes:
+      - app-data:/var/lib/postgresql/data
   api:
     build: .
     ports:
@@ -23,4 +25,4 @@ services:
     depends_on:
       - db
 volumes:
-  app-db: {}
+  app-data:

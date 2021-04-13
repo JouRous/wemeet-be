@@ -1,12 +1,13 @@
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.DTO;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace API.Data
+namespace API.Repositories
 {
   public class UserRepository : IUserRepository
   {
