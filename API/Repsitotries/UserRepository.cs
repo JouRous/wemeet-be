@@ -21,7 +21,7 @@ namespace API.Repositories
 
     public async Task<UserDTO> GetUserAsync(string username)
     {
-      return await _context.Users.Where(user => user.Username == username)
+      return await _context.Users.Where(user => user.UserName == username)
                                  .ProjectTo<UserDTO>(_mapper.ConfigurationProvider)
                                  .SingleOrDefaultAsync();
     }

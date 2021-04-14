@@ -9,6 +9,7 @@ namespace API.Services
     public AutoMapperProfiles()
     {
       CreateMap<AppUser, UserDTO>();
+      CreateMap<RegisterDTO, AppUser>();
     }
   }
 }

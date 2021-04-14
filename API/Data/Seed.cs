@@ -1,18 +1,20 @@
+using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using API.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
   public class Seed
   {
-    public static async Task SeedUsers(AppDbContext context)
+    public static async Task SeedUsers(UserManager<AppUser> userManager)
     {
-      if (await context.Users.AnyAsync())
+      if (await userManager.Users.AnyAsync())
       {
         return;
       }
@@ -25,18 +27,14 @@ namespace API.Data
         return;
       }
 
+
       foreach (var user in users)
       {
-        using var hmac = new HMACSHA512();
+        Console.WriteLine(user.UserName);
+        user.UserName = user.UserName.ToLower();
 
-        user.Username = user.Username.ToLower();
-        user.Password = hmac.ComputeHash(Encoding.UTF8.GetBytes("123123"));
-        user.PasswordSalt = hmac.Key;
-
-        await context.AddAsync(user);
+        await userManager.CreateAsync(user, "123123");
       }
-
-      await context.SaveChangesAsync();
     }
   }
 }

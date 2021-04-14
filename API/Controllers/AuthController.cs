@@ -1,11 +1,10 @@
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
-using API.Data;
 using API.DTO;
 using API.Entities;
 using API.Interfaces;
+using API.Types;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,79 +12,90 @@ namespace API.Controllers
 {
   public class AuthController : BaseApiController
   {
-    private readonly AppDbContext _context;
     private readonly ITokenService _tokenService;
     private readonly IMapper _mapper;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly SignInManager<AppUser> _signInManager;
 
-    public AuthController(AppDbContext context, ITokenService tokenService, IMapper mapper)
+    public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper)
     {
-      _context = context;
       _tokenService = tokenService;
       _mapper = mapper;
+      _userManager = userManager;
+      _signInManager = signInManager;
     }
 
     private async Task<bool> CheckUserExist(string username)
     {
-      return await _context.Users.AnyAsync(user => user.Username == username);
+      return await _userManager.Users.AnyAsync(user => user.UserName == username);
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<AuthDTO>> Register(RegisterDTO registerDTO)
+    public async Task<ActionResult<Response<AuthDTO>>> Register(RegisterDTO registerDTO)
     {
       if (await CheckUserExist(registerDTO.Username))
       {
-        return BadRequest("Username already used!");
+        return BadRequest("User already taken");
       }
 
-      using var hmac = new HMACSHA512();
+      var user = _mapper.Map<AppUser>(registerDTO);
 
-      var appUser = new AppUser
+      user.UserName = registerDTO.Username.ToLower();
+
+      var result = await _userManager.CreateAsync(user, registerDTO.Password);
+
+      if (!result.Succeeded)
       {
-        Username = registerDTO.Username,
-        Password = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDTO.Password)),
-        PasswordSalt = hmac.Key
+        return BadRequest(result.Errors);
+      }
+
+      var returnUser = _mapper.Map<UserDTO>(user);
+
+      var authDTO = new AuthDTO
+      {
+        token = _tokenService.CreateToken(user),
+        User = returnUser
       };
 
-      _context.Users.Add(appUser);
-      await _context.SaveChangesAsync();
-
-      var user = _mapper.Map<UserDTO>(appUser);
-
-      return new AuthDTO
+      return new Response<AuthDTO>
       {
-        User = user,
-        token = _tokenService.CreateToken(appUser)
+        status = 200,
+        success = true,
+        Data = authDTO
       };
+
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<AuthDTO>> Login(LoginDTO loginDTO)
+    public async Task<ActionResult<Response<AuthDTO>>> Login(LoginDTO loginDTO)
     {
-      var appUser = await _context.Users.SingleOrDefaultAsync(user => user.Username == loginDTO.Username);
+      var user = await _userManager.Users.SingleOrDefaultAsync(x => x.UserName == loginDTO.Username.ToLower());
 
-      if (appUser == null)
+      if (user == null)
       {
-        return Unauthorized("Invalid user!");
+        return Unauthorized("Invalid User");
       }
 
-      using var hmac = new HMACSHA512(appUser.PasswordSalt);
+      var result = await _signInManager.CheckPasswordSignInAsync(user, loginDTO.Password, false);
 
-      var computeHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDTO.Password));
-
-      for (int i = 0; i < computeHash.Length; i++)
+      if (!result.Succeeded)
       {
-        if (computeHash[i] != appUser.Password[i])
-        {
-          return Unauthorized("Invalid user!");
-        }
+        return Unauthorized();
       }
 
-      var user = _mapper.Map<UserDTO>(appUser);
+      var returnUser = _mapper.Map<UserDTO>(user);
 
-      return new AuthDTO
+      var authDTO = new AuthDTO
       {
-        User = user,
-        token = _tokenService.CreateToken(appUser)
+        User = returnUser,
+        token = _tokenService.CreateToken(user)
+      };
+
+      return new Response<AuthDTO>
+      {
+        Data = authDTO,
+        success = true,
+        status = 200
       };
     }
   }
