@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.DTO;
+using API.Models;
 
 namespace API.Interfaces
 {
@@ -7,5 +9,6 @@ namespace API.Interfaces
   {
     Task<bool> SaveAllAsync();
     Task<UserDTO> GetUserAsync(string username);
+    Task<Pagination<UserDTO>> GetUsersAsync();
   }
 }

@@ -1,9 +1,13 @@
+using System;
+using System.IO;
 using System.Threading.Tasks;
 using API.DTO;
 using API.Entities;
 using API.Interfaces;
 using API.Types;
 using AutoMapper;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,13 +20,24 @@ namespace API.Controllers
     private readonly IMapper _mapper;
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
+    private readonly RoleManager<AppRole> _roleManager;
+    private readonly IWebHostEnvironment _hostEnvironment;
 
-    public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, IMapper mapper)
+    public AuthController(
+      UserManager<AppUser> userManager,
+      SignInManager<AppUser> signInManager,
+      RoleManager<AppRole> roleManager,
+      ITokenService tokenService,
+      IMapper mapper,
+      IWebHostEnvironment hostEnvironment
+    )
     {
       _tokenService = tokenService;
       _mapper = mapper;
       _userManager = userManager;
       _signInManager = signInManager;
+      _roleManager = roleManager;
+      _hostEnvironment = hostEnvironment;
     }
 
     private async Task<bool> CheckUserExist(string username)
@@ -31,7 +46,7 @@ namespace API.Controllers
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<Response<AuthDTO>>> Register(RegisterDTO registerDTO)
+    public async Task<ActionResult<Response<AuthDTO>>> Register([FromForm] RegisterDTO registerDTO)
     {
       if (await CheckUserExist(registerDTO.Username))
       {
@@ -40,21 +55,29 @@ namespace API.Controllers
 
       var user = _mapper.Map<AppUser>(registerDTO);
 
+      user.Avatar = await SaveImage(registerDTO.AvatarFile);
+
       user.UserName = registerDTO.Username.ToLower();
 
-      var result = await _userManager.CreateAsync(user, registerDTO.Password);
+      var createStatus = await _userManager.CreateAsync(user, registerDTO.Password);
 
-      if (!result.Succeeded)
+      if (!createStatus.Succeeded)
       {
-        return BadRequest(result.Errors);
+        return BadRequest(createStatus.Errors);
       }
 
-      var returnUser = _mapper.Map<UserDTO>(user);
+      var addRoleStatus = await _userManager.AddToRoleAsync(user, "Staff");
+
+      if (!addRoleStatus.Succeeded)
+      {
+        return BadRequest(addRoleStatus.Errors);
+      }
 
       var authDTO = new AuthDTO
       {
-        token = _tokenService.CreateToken(user),
-        User = returnUser
+        token = await _tokenService.CreateToken(user),
+        User = _mapper.Map<UserDTO>(user),
+        Role = await _userManager.GetRolesAsync(user)
       };
 
       return new Response<AuthDTO>
@@ -83,12 +106,11 @@ namespace API.Controllers
         return Unauthorized();
       }
 
-      var returnUser = _mapper.Map<UserDTO>(user);
-
       var authDTO = new AuthDTO
       {
-        User = returnUser,
-        token = _tokenService.CreateToken(user)
+        User = _mapper.Map<UserDTO>(user),
+        token = await _tokenService.CreateToken(user),
+        Role = await _userManager.GetRolesAsync(user)
       };
 
       return new Response<AuthDTO>
@@ -97,6 +119,20 @@ namespace API.Controllers
         success = true,
         status = 200
       };
+    }
+
+    private async Task<string> SaveImage(IFormFile imageFile)
+    {
+      string imageName = DateTime.Now.ToString("yyyymmssfff") + Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+
+      var uploadPath = Path.Combine(_hostEnvironment.ContentRootPath, "Uploads", "Avatars", imageName);
+
+      using (var fileStream = new FileStream(uploadPath, FileMode.Create))
+      {
+        await imageFile.CopyToAsync(fileStream);
+      }
+
+      return imageName;
     }
   }
 }
