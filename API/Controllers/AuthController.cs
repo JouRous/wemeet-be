@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.DTO;
 using API.Entities;
 using API.Interfaces;
+using API.Models;
 using API.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
@@ -40,26 +41,25 @@ namespace API.Controllers
       _hostEnvironment = hostEnvironment;
     }
 
-    private async Task<bool> CheckUserExist(string username)
+    private async Task<bool> CheckUserExist(string email)
     {
-      return await _userManager.Users.AnyAsync(user => user.UserName == username);
+      return await _userManager.Users.AnyAsync(user => user.Email == email);
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<Response<AuthDTO>>> Register([FromForm] RegisterDTO registerDTO)
+    public async Task<ActionResult<Response<AuthModel>>> Register([FromForm] RegisterModel registerModel)
     {
-      if (await CheckUserExist(registerDTO.Username))
+      if (await CheckUserExist(registerModel.Email))
       {
         return BadRequest("User already taken");
       }
 
-      var user = _mapper.Map<AppUser>(registerDTO);
+      var user = _mapper.Map<AppUser>(registerModel);
 
-      user.Avatar = await SaveImage(registerDTO.AvatarFile);
+      user.UserName = user.Email;
+      user.Avatar = await SaveImage(registerModel.AvatarFile);
 
-      user.UserName = registerDTO.Username.ToLower();
-
-      var createStatus = await _userManager.CreateAsync(user, registerDTO.Password);
+      var createStatus = await _userManager.CreateAsync(user, registerModel.Password);
 
       if (!createStatus.Succeeded)
       {
@@ -73,14 +73,14 @@ namespace API.Controllers
         return BadRequest(addRoleStatus.Errors);
       }
 
-      var authDTO = new AuthDTO
+      var authDTO = new AuthModel
       {
         token = await _tokenService.CreateToken(user),
         User = _mapper.Map<UserDTO>(user),
         Role = await _userManager.GetRolesAsync(user)
       };
 
-      return new Response<AuthDTO>
+      return new Response<AuthModel>
       {
         status = 200,
         success = true,
@@ -90,30 +90,30 @@ namespace API.Controllers
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<Response<AuthDTO>>> Login(LoginDTO loginDTO)
+    public async Task<ActionResult<Response<AuthModel>>> Login(LoginModel loginModel)
     {
-      var user = await _userManager.Users.SingleOrDefaultAsync(x => x.UserName == loginDTO.Username.ToLower());
+      var user = await _userManager.Users.SingleOrDefaultAsync(x => x.Email == loginModel.Email.ToLower());
 
       if (user == null)
       {
         return Unauthorized("Invalid User");
       }
 
-      var result = await _signInManager.CheckPasswordSignInAsync(user, loginDTO.Password, false);
+      var result = await _signInManager.CheckPasswordSignInAsync(user, loginModel.Password, false);
 
       if (!result.Succeeded)
       {
         return Unauthorized();
       }
 
-      var authDTO = new AuthDTO
+      var authDTO = new AuthModel
       {
         User = _mapper.Map<UserDTO>(user),
         token = await _tokenService.CreateToken(user),
         Role = await _userManager.GetRolesAsync(user)
       };
 
-      return new Response<AuthDTO>
+      return new Response<AuthModel>
       {
         Data = authDTO,
         success = true,
@@ -123,7 +123,7 @@ namespace API.Controllers
 
     private async Task<string> SaveImage(IFormFile imageFile)
     {
-      string imageName = DateTime.Now.ToString("yyyymmssfff") + Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+      string imageName = DateTime.Now.ToString("yyyymmssfff") + "_" + Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
 
       var uploadPath = Path.Combine(_hostEnvironment.ContentRootPath, "Uploads", "Avatars", imageName);
 

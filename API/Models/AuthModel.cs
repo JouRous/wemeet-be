@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using API.DTO;
 
-namespace API.DTO
+namespace API.Models
 {
-  public class AuthDTO
+  public class AuthModel
   {
     public UserDTO User { get; set; }
     public string token { get; set; }

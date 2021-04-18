@@ -15,7 +15,6 @@ namespace API.Repositories
   public class UserRepository : IUserRepository
   {
     private readonly AppDbContext _context;
-    private readonly PaginationService _paginationService;
     private readonly IMapper _mapper;
     public UserRepository(AppDbContext context, IMapper mapper)
     {
