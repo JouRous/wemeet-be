@@ -10,6 +10,9 @@ namespace API.Data
     public AppDbContext(DbContextOptions options) : base(options)
     { }
 
+    DbSet<Team> Teams { get; set; }
+    DbSet<AppUserTeam> AppUserTeams { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
       base.OnModelCreating(builder);
@@ -25,7 +28,20 @@ namespace API.Data
       .WithOne(r => r.Role)
       .HasForeignKey(ur => ur.RoleId)
       .IsRequired();
+
+      builder.Entity<AppUserTeam>().HasKey(src => new { src.AppUserId, src.TeamId });
+
+      builder.Entity<AppUserTeam>()
+      .HasOne<AppUser>(ut => ut.User)
+      .WithMany(u => u.AppUserTeams)
+      .HasForeignKey(ut => ut.AppUserId);
+
+      builder.Entity<AppUserTeam>()
+      .HasOne<Team>(ut => ut.Team)
+      .WithMany(t => t.AppUserTeams)
+      .HasForeignKey(ut => ut.TeamId);
     }
+
 
   }
 }
