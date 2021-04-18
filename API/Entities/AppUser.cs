@@ -7,5 +7,6 @@ namespace API.Entities
   {
     public string Avatar { get; set; }
     public ICollection<AppUserRole> UserRoles { get; set; }
+    public ICollection<AppUserTeam> AppUserTeams { get; set; }
   }
 }
