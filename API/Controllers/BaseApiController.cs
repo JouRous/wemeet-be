@@ -1,3 +1,4 @@
+using API.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -6,5 +7,6 @@ namespace API.Controllers
   [Route("api/[controller]")]
   public class BaseApiController : ControllerBase
   {
+    protected AppDbContext DbContext => (AppDbContext)HttpContext.RequestServices.GetService(typeof(AppDbContext));
   }
 }

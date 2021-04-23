@@ -36,12 +36,11 @@ namespace API.Data
       .WithMany(u => u.AppUserTeams)
       .HasForeignKey(ut => ut.AppUserId);
 
+
       builder.Entity<AppUserTeam>()
       .HasOne<Team>(ut => ut.Team)
       .WithMany(t => t.AppUserTeams)
       .HasForeignKey(ut => ut.TeamId);
     }
-
-
   }
 }

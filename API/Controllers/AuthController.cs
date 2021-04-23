@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Web;
 using System.Threading.Tasks;
 using API.DTO;
 using API.Entities;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace API.Controllers
 {
@@ -23,12 +25,14 @@ namespace API.Controllers
     private readonly SignInManager<AppUser> _signInManager;
     private readonly RoleManager<AppRole> _roleManager;
     private readonly IWebHostEnvironment _hostEnvironment;
+    private readonly IUnitOfWork _unitOfWork;
 
     public AuthController(
       UserManager<AppUser> userManager,
       SignInManager<AppUser> signInManager,
       RoleManager<AppRole> roleManager,
       ITokenService tokenService,
+      IUnitOfWork unitOfWork,
       IMapper mapper,
       IWebHostEnvironment hostEnvironment
     )
@@ -39,6 +43,7 @@ namespace API.Controllers
       _signInManager = signInManager;
       _roleManager = roleManager;
       _hostEnvironment = hostEnvironment;
+      _unitOfWork = unitOfWork;
     }
 
     private async Task<bool> CheckUserExist(string email)
@@ -54,15 +59,18 @@ namespace API.Controllers
         return BadRequest("User already taken");
       }
 
+      var transaction = await DbContext.Database.BeginTransactionAsync();
       var user = _mapper.Map<AppUser>(registerModel);
 
       user.UserName = user.Email;
       user.Avatar = await SaveImage(registerModel.AvatarFile);
+      user.AppUserTeams = new List<AppUserTeam>();
 
       var createStatus = await _userManager.CreateAsync(user, registerModel.Password);
 
       if (!createStatus.Succeeded)
       {
+        await transaction.RollbackAsync();
         return BadRequest(createStatus.Errors);
       }
 
@@ -70,21 +78,42 @@ namespace API.Controllers
 
       if (!addRoleStatus.Succeeded)
       {
+        await transaction.RollbackAsync();
         return BadRequest(addRoleStatus.Errors);
       }
 
-      var authDTO = new AuthModel
+      if (!String.IsNullOrEmpty(registerModel.TeamId.ToString()))
+      {
+        var appUserTeam = new AppUserTeam
+        {
+          AppUserId = user.Id,
+          TeamId = registerModel.TeamId
+        };
+
+        user.AppUserTeams.Add(appUserTeam);
+        var addTeamResult = await _userManager.UpdateAsync(user);
+
+        if (!addTeamResult.Succeeded)
+        {
+          await transaction.RollbackAsync();
+          return BadRequest();
+        }
+      }
+
+      transaction.Commit();
+
+      var auth = new AuthModel
       {
         token = await _tokenService.CreateToken(user),
         User = _mapper.Map<UserDTO>(user),
         Role = await _userManager.GetRolesAsync(user)
-      };
+      };;
 
       return new Response<AuthModel>
       {
         status = 200,
         success = true,
-        Data = authDTO
+        Data = auth 
       };
 
     }
