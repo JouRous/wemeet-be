@@ -107,13 +107,13 @@ namespace API.Controllers
         token = await _tokenService.CreateToken(user),
         User = _mapper.Map<UserDTO>(user),
         Role = await _userManager.GetRolesAsync(user)
-      };;
+      }; ;
 
       return new Response<AuthModel>
       {
         status = 200,
         success = true,
-        Data = auth 
+        Data = auth
       };
 
     }
