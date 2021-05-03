@@ -1,3 +1,4 @@
+using API.DTO;
 using API.Models;
 
 namespace API.Types
@@ -6,7 +7,7 @@ namespace API.Types
   {
     public int status { get; set; }
     public T Data { get; set; }
-    public Pagination<T> pagination { get; set; }
+    public PaginationDTO pagination { get; set; }
     public bool success { get; set; }
   }
 }

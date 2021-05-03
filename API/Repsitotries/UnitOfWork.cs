@@ -11,6 +11,8 @@ namespace API.Repositories
     private IMapper _mapper;
 
     public IUserRepository USerRepository => new UserRepository(_context, _mapper);
+    public ITeamRepository TeamRepository => new TeamRepository(_context, _mapper);
+
 
     public UnitOfWork(AppDbContext context, IMapper mapper)
     {

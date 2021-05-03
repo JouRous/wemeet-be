@@ -10,8 +10,8 @@ namespace API.Data
     public AppDbContext(DbContextOptions options) : base(options)
     { }
 
-    DbSet<Team> Teams { get; set; }
-    DbSet<AppUserTeam> AppUserTeams { get; set; }
+    public DbSet<Team> Teams { get; set; }
+    public DbSet<AppUserTeam> AppUserTeams { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

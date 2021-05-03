@@ -3,6 +3,6 @@ namespace API.Models
 {
   public class TeamModel
   {
-    public string name;
+    public string Name { get; set; }
   }
 }

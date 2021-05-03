@@ -1,11 +1,13 @@
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using API.DTO;
 using API.Entities;
 using API.Interfaces;
-using API.Models;
+using API.Types;
+using API.Utils;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -17,22 +19,26 @@ namespace API.Controllers
   public class UsersController : BaseApiController
   {
     private readonly UserManager<AppUser> _userManager;
-    private readonly IUserRepository _userRepository;
-    public UsersController(UserManager<AppUser> userManager, IUserRepository userRepository)
+    private readonly IMapper _mapper;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public UsersController(IMapper mapper, UserManager<AppUser> userManager, IUnitOfWork unitOfWork)
     {
       _userManager = userManager;
-      _userRepository = userRepository;
+      _mapper = mapper;
+      _unitOfWork = unitOfWork;
     }
 
 
     [HttpGet("{username}")]
     public async Task<ActionResult<UserDTO>> GetUser(string username)
     {
-      return await _userRepository.GetUserAsync(username);
+      return await _unitOfWork.USerRepository.GetUserAsync(username);
     }
 
     [HttpGet]
-    public async Task<ActionResult<Pagination<UserDTO>>> GetUsers()
+    public async Task<ActionResult<Response<IEnumerable<UserDTO>>>> GetUsers(
+      [FromQuery] PaginationParams paginationParams)
     {
       var token = await HttpContext.GetTokenAsync("access_token");
       var handler = new JwtSecurityTokenHandler();
@@ -46,7 +52,19 @@ namespace API.Controllers
         return Unauthorized("Admin only! Permission denied");
       }
 
-      return await _userRepository.GetUsersAsync();
+      var res = await _unitOfWork.USerRepository.GetUsersAsync(paginationParams);
+
+      var response = new ResponseBuilder<IEnumerable<UserDTO>>()
+                         .AddData(res.Items)
+                         .AddPagination(new PaginationDTO
+                         {
+                           CurrentPage = res.CurrentPage,
+                           PageSize = res.PageSize,
+                           TotalItems = res.TotalItems
+                         })
+                         .Build();
+
+      return response;
     }
   }
 }

@@ -3,6 +3,7 @@ using API.Data;
 using API.Interfaces;
 using API.Repositories;
 using API.Services;
+using API.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

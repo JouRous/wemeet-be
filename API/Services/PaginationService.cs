@@ -15,13 +15,13 @@ namespace API.Services
       Pagination<T> pagination = new Pagination<T>
       {
         TotalItems = query.Count(),
-        PageSize = pageSize,
-        CurrentPage = pageNumber,
+        PageSize = pageSize == 0 ? 10 : pageSize,
+        CurrentPage = pageNumber == 0 ? 1 : pageNumber,
       };
 
-      int skip = (pageNumber - 1) * pageSize;
+      int skip = (pagination.CurrentPage - 1) * pagination.PageSize;
 
-      pagination.Items = await query.Skip(skip).Take(pageSize).ToListAsync();
+      pagination.Items = await query.Skip(skip).Take(pagination.PageSize).ToListAsync();
 
       return pagination;
     }
