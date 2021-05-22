@@ -10,6 +10,7 @@ using API.Services;
 using API.Types;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories
 {
@@ -37,9 +38,11 @@ namespace API.Repositories
     }
 
 
-    public Task<TeamDTO> GetTeamAsync()
+    public async Task<TeamDTO> GetTeamAsync(int teamId)
     {
-      throw new System.NotImplementedException();
+      return await _context.Teams.Where(team => team.Id == teamId)
+                                 .ProjectTo<TeamDTO>(_mapper.ConfigurationProvider)
+                                 .SingleOrDefaultAsync();
     }
   }
 }

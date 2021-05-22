@@ -1,6 +1,7 @@
 using System.IO;
 using System.Text.Json.Serialization;
 using API.Extensions;
+using API.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -27,8 +28,8 @@ namespace API
       services.AddControllers();
       services.AddCors();
 
-      services.AddMvcCore()
-              .AddJsonOptions(opt => opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
+      services.AddMvcCore();
+              /* .AddJsonOptions(opt => opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull); */
 
       services.AddSwaggerGen(c =>
       {
@@ -40,7 +41,7 @@ namespace API
     {
       if (env.IsDevelopment())
       {
-        app.UseDeveloperExceptionPage();
+        // app.UseDeveloperExceptionPage();
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
@@ -48,6 +49,8 @@ namespace API
           c.RoutePrefix = string.Empty;
         });
       }
+
+      app.UseMiddleware<ExceptionHandler>();
 
       app.UseHttpsRedirection();
 

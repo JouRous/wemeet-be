@@ -40,6 +40,16 @@ namespace API.Controllers
       return response;
     }
 
+    [HttpGet("{teamId}")]
+    public async Task<ActionResult<Response<TeamDTO>>> GetTeam(int teamId)
+    {
+      var team = await _unitOfWork.TeamRepository.GetTeamAsync(teamId);
+
+      return new ResponseBuilder<TeamDTO>()
+                  .AddData(team)
+                  .Build();
+    }
+
 
     [HttpPost]
     public async Task<ActionResult<Response<TeamDTO>>> CreateTeam(TeamModel teamModel)
