@@ -17,6 +17,7 @@ namespace API.Extensions
       services.AddScoped<ITokenService, TokenService>();
       services.AddScoped<IUserRepository, UserRepository>();
       services.AddScoped<IUnitOfWork, UnitOfWork>();
+      services.AddTransient<IEmailService, EmailService>();
 
       services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 

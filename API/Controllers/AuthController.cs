@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using API.Services;
 
 namespace API.Controllers
 {
@@ -26,6 +27,7 @@ namespace API.Controllers
         private readonly RoleManager<AppRole> _roleManager;
         private readonly IWebHostEnvironment _hostEnvironment;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailService _emailService;
 
         public AuthController(
           UserManager<AppUser> userManager,
@@ -34,7 +36,8 @@ namespace API.Controllers
           ITokenService tokenService,
           IUnitOfWork unitOfWork,
           IMapper mapper,
-          IWebHostEnvironment hostEnvironment
+          IWebHostEnvironment hostEnvironment,
+          IEmailService emailService
         )
         {
             _tokenService = tokenService;
@@ -44,6 +47,7 @@ namespace API.Controllers
             _roleManager = roleManager;
             _hostEnvironment = hostEnvironment;
             _unitOfWork = unitOfWork;
+            _emailService = emailService;
         }
 
         private async Task<bool> CheckUserExist(string email)
@@ -101,6 +105,8 @@ namespace API.Controllers
             }
 
             transaction.Commit();
+
+            await _emailService.sendMailAsync(user.Email, "Dang ky thanh cong.", "Mat khau la 123123");
 
             var auth = new AuthModel
             {
