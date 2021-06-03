@@ -1,92 +1,173 @@
-using System.Security.Cryptography;
-using System.Text;
+using System;
+using System.IO;
+using System.Web;
 using System.Threading.Tasks;
-using API.Data;
 using API.DTO;
 using API.Entities;
 using API.Interfaces;
+using API.Models;
+using API.Types;
 using AutoMapper;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using API.Services;
 
 namespace API.Controllers
 {
-  public class AuthController : BaseApiController
-  {
-    private readonly AppDbContext _context;
-    private readonly ITokenService _tokenService;
-    private readonly IMapper _mapper;
-
-    public AuthController(AppDbContext context, ITokenService tokenService, IMapper mapper)
+    public class AuthController : BaseApiController
     {
-      _context = context;
-      _tokenService = tokenService;
-      _mapper = mapper;
-    }
+        private readonly ITokenService _tokenService;
+        private readonly IMapper _mapper;
+        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
+        private readonly RoleManager<AppRole> _roleManager;
+        private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailService _emailService;
 
-    private async Task<bool> CheckUserExist(string username)
-    {
-      return await _context.Users.AnyAsync(user => user.Username == username);
-    }
-
-    [HttpPost("register")]
-    public async Task<ActionResult<AuthDTO>> Register(RegisterDTO registerDTO)
-    {
-      if (await CheckUserExist(registerDTO.Username))
-      {
-        return BadRequest("Username already used!");
-      }
-
-      using var hmac = new HMACSHA512();
-
-      var appUser = new AppUser
-      {
-        Username = registerDTO.Username,
-        Password = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDTO.Password)),
-        PasswordSalt = hmac.Key
-      };
-
-      _context.Users.Add(appUser);
-      await _context.SaveChangesAsync();
-
-      var user = _mapper.Map<UserDTO>(appUser);
-
-      return new AuthDTO
-      {
-        User = user,
-        token = _tokenService.CreateToken(appUser)
-      };
-    }
-
-    [HttpPost("login")]
-    public async Task<ActionResult<AuthDTO>> Login(LoginDTO loginDTO)
-    {
-      var appUser = await _context.Users.SingleOrDefaultAsync(user => user.Username == loginDTO.Username);
-
-      if (appUser == null)
-      {
-        return Unauthorized("Invalid user!");
-      }
-
-      using var hmac = new HMACSHA512(appUser.PasswordSalt);
-
-      var computeHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDTO.Password));
-
-      for (int i = 0; i < computeHash.Length; i++)
-      {
-        if (computeHash[i] != appUser.Password[i])
+        public AuthController(
+          UserManager<AppUser> userManager,
+          SignInManager<AppUser> signInManager,
+          RoleManager<AppRole> roleManager,
+          ITokenService tokenService,
+          IUnitOfWork unitOfWork,
+          IMapper mapper,
+          IWebHostEnvironment hostEnvironment,
+          IEmailService emailService
+        )
         {
-          return Unauthorized("Invalid user!");
+            _tokenService = tokenService;
+            _mapper = mapper;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _roleManager = roleManager;
+            _hostEnvironment = hostEnvironment;
+            _unitOfWork = unitOfWork;
+            _emailService = emailService;
         }
-      }
 
-      var user = _mapper.Map<UserDTO>(appUser);
+        private async Task<bool> CheckUserExist(string email)
+        {
+            return await _userManager.Users.AnyAsync(user => user.Email == email);
+        }
 
-      return new AuthDTO
-      {
-        User = user,
-        token = _tokenService.CreateToken(appUser)
-      };
+        [HttpPost("register")]
+        public async Task<ActionResult<Response<AuthModel>>> Register([FromForm] RegisterModel registerModel)
+        {
+            if (await CheckUserExist(registerModel.Email))
+            {
+                return BadRequest("User already taken");
+            }
+
+            var transaction = await DbContext.Database.BeginTransactionAsync();
+            var user = _mapper.Map<AppUser>(registerModel);
+
+            user.UserName = user.Email;
+            user.Avatar = await SaveImage(registerModel.AvatarFile);
+            user.AppUserTeams = new List<AppUserTeam>();
+
+            var createStatus = await _userManager.CreateAsync(user, registerModel.Password);
+
+            if (!createStatus.Succeeded)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest(createStatus.Errors);
+            }
+
+            var addRoleStatus = await _userManager.AddToRoleAsync(user, "Staff");
+
+            if (!addRoleStatus.Succeeded)
+            {
+                await transaction.RollbackAsync();
+                return BadRequest(addRoleStatus.Errors);
+            }
+
+            if (registerModel.TeamId != 0)
+            {
+                var appUserTeam = new AppUserTeam
+                {
+                    AppUserId = user.Id,
+                    TeamId = registerModel.TeamId
+                };
+
+                user.AppUserTeams.Add(appUserTeam);
+                var addTeamResult = await _userManager.UpdateAsync(user);
+
+                if (!addTeamResult.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    return BadRequest();
+                }
+            }
+
+            transaction.Commit();
+
+            await _emailService.sendMailAsync(user.Email, "Dang ky thanh cong.", "Mat khau la 123123");
+
+            var auth = new AuthModel
+            {
+                token = await _tokenService.CreateToken(user),
+                User = _mapper.Map<UserDTO>(user),
+                Role = await _userManager.GetRolesAsync(user)
+            };
+
+            return new Response<AuthModel>
+            {
+                status = 200,
+                success = true,
+                Data = auth
+            };
+
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<Response<AuthModel>>> Login(LoginModel loginModel)
+        {
+            var user = await _userManager.Users.SingleOrDefaultAsync(x => x.Email == loginModel.Email.ToLower());
+
+            if (user == null)
+            {
+                return Unauthorized("Invalid User");
+            }
+
+            var result = await _signInManager.CheckPasswordSignInAsync(user, loginModel.Password, false);
+
+            if (!result.Succeeded)
+            {
+                return Unauthorized();
+            }
+
+            var authDTO = new AuthModel
+            {
+                User = _mapper.Map<UserDTO>(user),
+                token = await _tokenService.CreateToken(user),
+                Role = await _userManager.GetRolesAsync(user)
+            };
+
+            return new Response<AuthModel>
+            {
+                Data = authDTO,
+                success = true,
+                status = 200
+            };
+        }
+
+        private async Task<string> SaveImage(IFormFile imageFile)
+        {
+            string imageName = DateTime.Now.ToString("yyyymmssfff") + "_" + Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+
+            var uploadPath = Path.Combine(_hostEnvironment.ContentRootPath, "Uploads", "Avatars", imageName);
+
+            using (var fileStream = new FileStream(uploadPath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(fileStream);
+            }
+
+            return imageName;
+        }
     }
-  }
 }
