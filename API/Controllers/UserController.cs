@@ -1,11 +1,14 @@
+using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using API.DTO;
 using API.Entities;
 using API.Interfaces;
-using API.Models;
+using API.Types;
+using API.Utils;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -13,40 +16,78 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-  [Authorize]
-  public class UsersController : BaseApiController
-  {
-    private readonly UserManager<AppUser> _userManager;
-    private readonly IUserRepository _userRepository;
-    public UsersController(UserManager<AppUser> userManager, IUserRepository userRepository)
-    {
-      _userManager = userManager;
-      _userRepository = userRepository;
-    }
+	[Authorize]
+	public class UsersController : BaseApiController
+	{
+		private readonly UserManager<AppUser> _userManager;
+		private readonly IMapper _mapper;
+		private readonly IUnitOfWork _unitOfWork;
+
+		public UsersController(IMapper mapper, UserManager<AppUser> userManager, IUnitOfWork unitOfWork)
+		{
+			_userManager = userManager;
+			_mapper = mapper;
+			_unitOfWork = unitOfWork;
+		}
 
 
-    [HttpGet("{username}")]
-    public async Task<ActionResult<UserDTO>> GetUser(string username)
-    {
-      return await _userRepository.GetUserAsync(username);
-    }
+		[HttpGet("{username}")]
+		public async Task<ActionResult<UserDTO>> GetUser(string username)
+		{
+			return await _unitOfWork.USerRepository.GetUserAsync(username);
+		}
 
-    [HttpGet]
-    public async Task<ActionResult<Pagination<UserDTO>>> GetUsers()
-    {
-      var token = await HttpContext.GetTokenAsync("access_token");
-      var handler = new JwtSecurityTokenHandler();
-      var roles = handler.ReadJwtToken(token)
-                         .Claims.Where(c => c.Type.Equals("role")).Select(c => c.Value).ToList();
+		[HttpGet]
+		public async Task<ActionResult<Response<IEnumerable<UserDTO>>>> GetUsers(
+		  [FromQuery] PaginationParams paginationParams)
+		{
+			var token = await HttpContext.GetTokenAsync("access_token");
+			var handler = new JwtSecurityTokenHandler();
+			var roles = handler.ReadJwtToken(token)
+					   .Claims.Where(c => c.Type.Equals("role")).Select(c => c.Value).ToList();
 
-      var checkRole = roles.Any(role => role.Equals("Admin"));
+			var checkRole = roles.Any(role => role.Equals("Admin"));
 
-      if (!checkRole)
-      {
-        return Unauthorized("Admin only! Permission denied");
-      }
+			if (!checkRole)
+			{
+				return Unauthorized("Admin only! Permission denied");
+			}
 
-      return await _userRepository.GetUsersAsync();
-    }
-  }
+			var res = await _unitOfWork.USerRepository.GetUsersAsync(paginationParams);
+
+			var response = new ResponseBuilder<IEnumerable<UserDTO>>()
+					   .AddData(res.Items)
+					   .AddPagination(new PaginationDTO
+					   {
+						   CurrentPage = res.CurrentPage,
+						   PageSize = res.PageSize,
+						   TotalItems = res.TotalItems
+					   })
+					   .Build();
+
+			return response;
+		}
+
+		[HttpGet("me")]
+		public async Task<ActionResult> GetProfile()
+		{
+			var token = await HttpContext.GetTokenAsync("access_token");
+			var handler = new JwtSecurityTokenHandler();
+
+			var email = handler.ReadJwtToken(token)
+					   .Claims.Where(c => c.Type.Equals("email")).Select(c => c.Value).SingleOrDefault();
+			var roles = handler.ReadJwtToken(token)
+					   .Claims.Where(c => c.Type.Equals("role")).Select(c => c.Value).ToList();
+
+			var User = await _unitOfWork.USerRepository.GetUserAsync(email);
+			var profile = new
+			{
+				User = User,
+				Roles = roles
+			};
+
+			return Ok(profile);
+		}
+
+	}
 }

@@ -6,6 +6,7 @@ using API.DTO;
 using API.Interfaces;
 using API.Models;
 using API.Services;
+using API.Types;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,7 @@ namespace API.Repositories
 {
   public class UserRepository : IUserRepository
   {
-    private readonly AppDbContext _context;
+    public readonly AppDbContext _context;
     private readonly IMapper _mapper;
     public UserRepository(AppDbContext context, IMapper mapper)
     {
@@ -29,17 +30,12 @@ namespace API.Repositories
                                  .SingleOrDefaultAsync();
     }
 
-    public async Task<Pagination<UserDTO>> GetUsersAsync()
+    public async Task<Pagination<UserDTO>> GetUsersAsync(PaginationParams paginationParams)
     {
       var query = _context.Users.ProjectTo<UserDTO>(_mapper.ConfigurationProvider).AsQueryable();
 
-      return await PaginationService.GetPagination<UserDTO>(query, 20, 20);
-    }
+      return await PaginationService.GetPagination<UserDTO>(query, paginationParams.currentPage, paginationParams.pageSize);
 
-    public Task<bool> SaveAllAsync()
-    {
-      throw new System.NotImplementedException();
     }
-
   }
 }

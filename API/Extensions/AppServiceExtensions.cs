@@ -3,6 +3,7 @@ using API.Data;
 using API.Interfaces;
 using API.Repositories;
 using API.Services;
+using API.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,8 @@ namespace API.Extensions
     {
       services.AddScoped<ITokenService, TokenService>();
       services.AddScoped<IUserRepository, UserRepository>();
+      services.AddScoped<IUnitOfWork, UnitOfWork>();
+      services.AddTransient<IEmailService, EmailService>();
 
       services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
@@ -26,7 +29,8 @@ namespace API.Extensions
         {
           connStr = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
         }
-        options.UseNpgsql(connStr);
+        // options.UseNpgsql(connStr);
+        options.UseSqlite(connStr);
       });
 
       return services;
