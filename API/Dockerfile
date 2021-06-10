@@ -12,4 +12,6 @@ EXPOSE 5000/tcp
 ENV ASPNETCORE_URLS http://*:5000
 ENV ASPNETCORE_ENVIRONMENT docker
 
+CMD ["dotnet", "ef", "--project", "/app", "database", "update"]
+
 ENTRYPOINT dotnet run
