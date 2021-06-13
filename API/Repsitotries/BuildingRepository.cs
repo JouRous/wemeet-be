@@ -28,15 +28,15 @@ namespace API.Repsitotries
 			_context.Buildings.Add(buildingInfo);
 		}
 
-		public async Task<Pagination<Building>> GetAllByPaginationAsync(PaginationParams paginationQuery)
+		public async Task<Pagination<BuildingDTO>> GetAllByPaginationAsync(PaginationParams paginationQuery)
 		{
-			var data = _context.Buildings.ProjectTo<Building>(_mapper.ConfigurationProvider).AsQueryable();
-			return await PaginationService.GetPagination<Building>(data, paginationQuery.currentPage, paginationQuery.pageSize);
+			var data = _context.Buildings.ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider).AsQueryable();
+			return await PaginationService.GetPagination<BuildingDTO>(data, paginationQuery.currentPage, paginationQuery.pageSize);
 		}
-		public async Task<Building> GetOneAsync(string Id)
+		public async Task<BuildingDTO> GetOneAsync(string Id)
 		{
 			return await _context.Buildings.Where(building => building.Id == Id)
-																 .ProjectTo<Building>(_mapper.ConfigurationProvider)
+																 .ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider)
 																 .SingleOrDefaultAsync();
 		}
 

@@ -7,6 +7,7 @@ namespace API.Interfaces
 		IUserRepository USerRepository { get; }
 		ITeamRepository TeamRepository { get; }
 		IBuildingRepository BuildingRepository { get; }
+		IRoomRepository RoomRepository { get; }
 		Task<bool> Complete();
 		bool HasChanges();
 	}

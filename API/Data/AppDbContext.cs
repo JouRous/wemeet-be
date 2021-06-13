@@ -13,6 +13,7 @@ namespace API.Data
 		public DbSet<Team> Teams { get; set; }
 		public DbSet<Building> Buildings { get; set; }
 		public DbSet<AppUserTeam> AppUserTeams { get; set; }
+		public DbSet<Room> Rooms { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
