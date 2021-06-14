@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace API.Data.Migrations
+namespace API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20210418102952_AddTeamModel")]
-    partial class AddTeamModel
+    [Migration("20210610104828_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -66,12 +66,18 @@ namespace API.Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("ForgetToken")
+                        .HasColumnType("text");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
