@@ -7,6 +7,6 @@ namespace API.Models
     public string Email { get; set; }
     public string Password { get; set; }
     public IFormFile AvatarFile { get; set; }
-    public int TeamId { get; set; }
+    public string TeamId { get; set; }
   }
 }

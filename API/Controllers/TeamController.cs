@@ -41,7 +41,7 @@ namespace API.Controllers
     }
 
     [HttpGet("{teamId}")]
-    public async Task<ActionResult<Response<TeamDTO>>> GetTeam(int teamId)
+    public async Task<ActionResult<Response<TeamDTO>>> GetTeam(string teamId)
     {
       var team = await _unitOfWork.TeamRepository.GetTeamAsync(teamId);
 

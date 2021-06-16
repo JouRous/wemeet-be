@@ -6,9 +6,9 @@ using API.Types;
 
 namespace API.Interfaces
 {
-    public interface ITeamRepository
+  public interface ITeamRepository
   {
-    Task<TeamDTO> GetTeamAsync(int teamId);
+    Task<TeamDTO> GetTeamAsync(string teamId);
     Task<Pagination<TeamDTO>> GetAllAsync(PaginationParams paginationParams);
     void AddTeam(Team team);
   }
