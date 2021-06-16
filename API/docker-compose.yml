@@ -6,14 +6,13 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: "123123"
       MYSQL_DATABASE: "wemeet"
-      PGDATA: "/var/lib/mysql/data"
     ports:
       - 3306:3306
     restart: always
     expose:
       - 3306
     volumes:
-      - app-data:/var/lib/postgresql/data
+      - app-data:/var/lib/mysql/data
   api:
     build: .
     ports:
