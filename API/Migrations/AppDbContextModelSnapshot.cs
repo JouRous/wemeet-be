@@ -4,7 +4,6 @@ using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace API.Migrations
 {
@@ -14,29 +13,27 @@ namespace API.Migrations
 		protected override void BuildModel(ModelBuilder modelBuilder)
 		{
 #pragma warning disable 612, 618
-			modelBuilder
-					.HasAnnotation("Relational:MaxIdentifierLength", 63)
-					.HasAnnotation("ProductVersion", "5.0.6")
-					.HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+            modelBuilder
+                .HasAnnotation("Relational:MaxIdentifierLength", 64)
+                .HasAnnotation("ProductVersion", "6.0.0-preview.4.21253.1");
 
-			modelBuilder.Entity("API.Entities.AppRole", b =>
-					{
-						b.Property<int>("Id")
-											.ValueGeneratedOnAdd()
-											.HasColumnType("integer")
-											.HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+            modelBuilder.Entity("API.Entities.AppRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-						b.Property<string>("ConcurrencyStamp")
-											.IsConcurrencyToken()
-											.HasColumnType("text");
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("longtext");
 
-						b.Property<string>("Name")
-											.HasMaxLength(256)
-											.HasColumnType("character varying(256)");
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
-						b.Property<string>("NormalizedName")
-											.HasMaxLength(256)
-											.HasColumnType("character varying(256)");
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
 						b.HasKey("Id");
 
@@ -47,68 +44,67 @@ namespace API.Migrations
 						b.ToTable("AspNetRoles");
 					});
 
-			modelBuilder.Entity("API.Entities.AppUser", b =>
-					{
-						b.Property<int>("Id")
-											.ValueGeneratedOnAdd()
-											.HasColumnType("integer")
-											.HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+            modelBuilder.Entity("API.Entities.AppUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-						b.Property<int>("AccessFailedCount")
-											.HasColumnType("integer");
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
 
-						b.Property<string>("Avatar")
-											.HasColumnType("text");
+                    b.Property<string>("Avatar")
+                        .HasColumnType("longtext");
 
-						b.Property<string>("ConcurrencyStamp")
-											.IsConcurrencyToken()
-											.HasColumnType("text");
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("longtext");
 
-						b.Property<DateTime>("CreatedAt")
-											.HasColumnType("timestamp without time zone");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
 
-						b.Property<string>("Email")
-											.HasMaxLength(256)
-											.HasColumnType("character varying(256)");
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
-						b.Property<bool>("EmailConfirmed")
-											.HasColumnType("boolean");
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("tinyint(1)");
 
-						b.Property<string>("ForgetToken")
-											.HasColumnType("text");
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("tinyint(1)");
 
-						b.Property<bool>("LockoutEnabled")
-											.HasColumnType("boolean");
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetime(6)");
 
-						b.Property<DateTimeOffset?>("LockoutEnd")
-											.HasColumnType("timestamp with time zone");
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
-						b.Property<string>("NormalizedEmail")
-											.HasMaxLength(256)
-											.HasColumnType("character varying(256)");
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
-						b.Property<string>("NormalizedUserName")
-											.HasMaxLength(256)
-											.HasColumnType("character varying(256)");
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("longtext");
 
-						b.Property<string>("PasswordHash")
-											.HasColumnType("text");
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("longtext");
 
-						b.Property<string>("PhoneNumber")
-											.HasColumnType("text");
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("tinyint(1)");
 
-						b.Property<bool>("PhoneNumberConfirmed")
-											.HasColumnType("boolean");
+                    b.Property<string>("ResetPasswordToken")
+                        .HasColumnType("longtext");
 
-						b.Property<string>("SecurityStamp")
-											.HasColumnType("text");
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("longtext");
 
-						b.Property<bool>("TwoFactorEnabled")
-											.HasColumnType("boolean");
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("tinyint(1)");
 
-						b.Property<string>("UserName")
-											.HasMaxLength(256)
-											.HasColumnType("character varying(256)");
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
 
 						b.HasKey("Id");
 
@@ -122,13 +118,13 @@ namespace API.Migrations
 						b.ToTable("AspNetUsers");
 					});
 
-			modelBuilder.Entity("API.Entities.AppUserRole", b =>
-					{
-						b.Property<int>("UserId")
-											.HasColumnType("integer");
+            modelBuilder.Entity("API.Entities.AppUserRole", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-						b.Property<int>("RoleId")
-											.HasColumnType("integer");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
 						b.HasKey("UserId", "RoleId");
 
@@ -137,13 +133,13 @@ namespace API.Migrations
 						b.ToTable("AspNetUserRoles");
 					});
 
-			modelBuilder.Entity("API.Entities.AppUserTeam", b =>
-					{
-						b.Property<int>("AppUserId")
-											.HasColumnType("integer");
+            modelBuilder.Entity("API.Entities.AppUserTeam", b =>
+                {
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("int");
 
-						b.Property<int>("TeamId")
-											.HasColumnType("integer");
+                    b.Property<string>("TeamId")
+                        .HasColumnType("varchar(255)");
 
 						b.HasKey("AppUserId", "TeamId");
 
@@ -152,13 +148,66 @@ namespace API.Migrations
 						b.ToTable("AppUserTeams");
 					});
 
-			modelBuilder.Entity("API.Entities.Building", b =>
-					{
-						b.Property<string>("Id")
-											.HasColumnType("text");
+            modelBuilder.Entity("API.Entities.Building", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
-						b.Property<string>("Address")
-											.HasColumnType("text");
+                    b.Property<string>("Address")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Buildings");
+                });
+
+            modelBuilder.Entity("API.Entities.Room", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("BuildingId")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Rooms");
+                });
+
+            modelBuilder.Entity("API.Entities.Team", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
 
 						b.Property<DateTime>("CreatedAt")
 											.HasColumnType("timestamp without time zone");
@@ -166,18 +215,20 @@ namespace API.Migrations
 						b.Property<string>("Name")
 											.HasColumnType("text");
 
-						b.Property<DateTime>("UpdatedAt")
-											.HasColumnType("timestamp without time zone");
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-						b.HasKey("Id");
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("longtext");
 
-						b.ToTable("Buildings");
-					});
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("longtext");
 
-			modelBuilder.Entity("API.Entities.Room", b =>
-					{
-						b.Property<string>("Id")
-											.HasColumnType("text");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
 						b.Property<string>("BuildingId")
 											.HasColumnType("text");
@@ -188,16 +239,20 @@ namespace API.Migrations
 						b.Property<DateTime>("CreatedAt")
 											.HasColumnType("timestamp without time zone");
 
-						b.Property<string>("Name")
-											.HasColumnType("text");
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-						b.Property<DateTime>("UpdatedAt")
-											.HasColumnType("timestamp without time zone");
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("longtext");
 
-						b.HasKey("Id");
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("longtext");
 
-						b.ToTable("Rooms");
-					});
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
 			modelBuilder.Entity("API.Entities.Team", b =>
 					{
@@ -211,21 +266,19 @@ namespace API.Migrations
 
 						b.HasKey("Id");
 
-						b.ToTable("Teams");
-					});
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("varchar(255)");
 
-			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
-					{
-						b.Property<int>("Id")
-											.ValueGeneratedOnAdd()
-											.HasColumnType("integer")
-											.HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("varchar(255)");
 
-						b.Property<string>("ClaimType")
-											.HasColumnType("text");
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("longtext");
 
-						b.Property<string>("ClaimValue")
-											.HasColumnType("text");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
 						b.Property<int>("RoleId")
 											.HasColumnType("integer");
@@ -234,21 +287,32 @@ namespace API.Migrations
 
 						b.HasIndex("RoleId");
 
-						b.ToTable("AspNetRoleClaims");
-					});
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
-					{
-						b.Property<int>("Id")
-											.ValueGeneratedOnAdd()
-											.HasColumnType("integer")
-											.HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("varchar(255)");
 
-						b.Property<string>("ClaimType")
-											.HasColumnType("text");
+                    b.Property<string>("Name")
+                        .HasColumnType("varchar(255)");
 
-						b.Property<string>("ClaimValue")
-											.HasColumnType("text");
+                    b.Property<string>("Value")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens");
+                });
+
+            modelBuilder.Entity("API.Entities.AppUserRole", b =>
+                {
+                    b.HasOne("API.Entities.AppRole", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
 						b.Property<int>("UserId")
 											.HasColumnType("integer");

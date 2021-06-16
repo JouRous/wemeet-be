@@ -7,6 +7,7 @@ using API.Entities;
 using API.Interfaces;
 using API.Models;
 using API.Types;
+using API.Utils;
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -19,185 +20,151 @@ using Microsoft.AspNetCore.Authentication;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Cryptography;
+using API.Errors;
+using System.Text;
 
 namespace API.Controllers
 {
-	public class AuthController : BaseApiController
-	{
-		private readonly ITokenService _tokenService;
-		private readonly IMapper _mapper;
-		private readonly UserManager<AppUser> _userManager;
-		private readonly SignInManager<AppUser> _signInManager;
-		private readonly RoleManager<AppRole> _roleManager;
-		private readonly IWebHostEnvironment _hostEnvironment;
-		private readonly IUnitOfWork _unitOfWork;
-		private readonly IEmailService _emailService;
+  public class AuthController : BaseApiController
+  {
+    private readonly ITokenService _tokenService;
+    private readonly IMapper _mapper;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly SignInManager<AppUser> _signInManager;
+    private readonly RoleManager<AppRole> _roleManager;
+    private readonly IWebHostEnvironment _hostEnvironment;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IEmailService _emailService;
 
-		public AuthController(
-		  UserManager<AppUser> userManager,
-		  SignInManager<AppUser> signInManager,
-		  RoleManager<AppRole> roleManager,
-		  ITokenService tokenService,
-		  IUnitOfWork unitOfWork,
-		  IMapper mapper,
-		  IWebHostEnvironment hostEnvironment,
-		  IEmailService emailService
-		)
-		{
-			_tokenService = tokenService;
-			_mapper = mapper;
-			_userManager = userManager;
-			_signInManager = signInManager;
-			_roleManager = roleManager;
-			_hostEnvironment = hostEnvironment;
-			_unitOfWork = unitOfWork;
-			_emailService = emailService;
-		}
+    public AuthController(
+      UserManager<AppUser> userManager,
+      SignInManager<AppUser> signInManager,
+      RoleManager<AppRole> roleManager,
+      ITokenService tokenService,
+      IUnitOfWork unitOfWork,
+      IMapper mapper,
+      IWebHostEnvironment hostEnvironment,
+      IEmailService emailService
+    )
+    {
+      _tokenService = tokenService;
+      _mapper = mapper;
+      _userManager = userManager;
+      _signInManager = signInManager;
+      _roleManager = roleManager;
+      _hostEnvironment = hostEnvironment;
+      _unitOfWork = unitOfWork;
+      _emailService = emailService;
+    }
 
-		private async Task<bool> CheckUserExist(string email)
-		{
-			return await _userManager.Users.AnyAsync(user => user.Email == email);
-		}
+    [HttpPost("login")]
+    public async Task<ActionResult<Response<AuthModel>>> Login(LoginModel loginModel)
+    {
+      var user = await _userManager.Users.SingleOrDefaultAsync(x => x.Email == loginModel.Email.ToLower());
 
-		[HttpPost("register")]
-		public async Task<ActionResult<Response<AuthModel>>> Register([FromForm] RegisterModel registerModel)
-		{
-			if (await CheckUserExist(registerModel.Email))
-			{
-				return BadRequest("User already taken");
-			}
+      if (user == null)
+      {
+        return Unauthorized("Invalid User");
+      }
 
-			var transaction = await DbContext.Database.BeginTransactionAsync();
-			var user = _mapper.Map<AppUser>(registerModel);
+      var result = await _signInManager.CheckPasswordSignInAsync(user, loginModel.Password, false);
 
-			user.UserName = user.Email;
-			user.Avatar = registerModel.AvatarFile != null ? await SaveImage(registerModel.AvatarFile) : null;
-			user.AppUserTeams = new List<AppUserTeam>();
+      if (!result.Succeeded)
+      {
+        return Unauthorized();
+      }
 
-			var createStatus = await _userManager.CreateAsync(user, registerModel.Password);
+      var authDTO = new AuthModel
+      {
+        User = _mapper.Map<UserDTO>(user),
+        token = await _tokenService.CreateToken(user),
+        Role = await _userManager.GetRolesAsync(user)
+      };
 
-			if (!createStatus.Succeeded)
-			{
-				await transaction.RollbackAsync();
-				return BadRequest(createStatus.Errors);
-			}
+      return new Response<AuthModel>
+      {
+        Data = authDTO,
+        success = true,
+        status = 200
+      };
+    }
 
-			var addRoleStatus = await _userManager.AddToRoleAsync(user, "Staff");
+    [HttpPost("forget-request")]
+    public async Task<ActionResult> ForgetRequest(ForgetRequest forgetRequest)
+    {
+      var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Email == forgetRequest.email);
 
-			if (!addRoleStatus.Succeeded)
-			{
-				await transaction.RollbackAsync();
-				return BadRequest(addRoleStatus.Errors);
-			}
+      if (user == null)
+      {
+        return Ok(new
+        {
+          status = 404,
+          success = true,
+          message = "User not found!"
+        });
+      }
 
-			if (registerModel.TeamId != 0)
-			{
-				var appUserTeam = new AppUserTeam
-				{
-					AppUserId = user.Id,
-					TeamId = registerModel.TeamId
-				};
+      var resetPasswordToken = Utils.Utils.RandomString(128);
 
-				user.AppUserTeams.Add(appUserTeam);
-				var addTeamResult = await _userManager.UpdateAsync(user);
+      var resetPasswordLink = $"{forgetRequest.domain}?token={resetPasswordToken}&email={forgetRequest.email}";
 
-				if (!addTeamResult.Succeeded)
-				{
-					await transaction.RollbackAsync();
-					return BadRequest();
-				}
-			}
+      await _unitOfWork.USerRepository.SaveResetPasswordToken(user.Email, resetPasswordToken);
 
-			transaction.Commit();
+      var saveChangeStatus = await _unitOfWork.Complete();
 
-			await _emailService.sendMailAsync(user.Email, "Dang ky thanh cong.", "Mat khau la 123123");
+      await _emailService.sendMailAsync(forgetRequest.email, "Forget password", $@"<a href=""http://{resetPasswordLink}"">http://{resetPasswordLink}</a>");
+      return Ok(new
+      {
+        status = 200,
+        success = true
+      });
+    }
 
-			var auth = new AuthModel
-			{
-				token = await _tokenService.CreateToken(user),
-				User = _mapper.Map<UserDTO>(user),
-				Role = await _userManager.GetRolesAsync(user)
-			};
+    [HttpGet("reset-password")]
+    public async Task<ActionResult> ResetPassword([FromQuery] ResetPasswordModel resetPasswordModel)
+    {
+      var email = resetPasswordModel.email;
+      var token = resetPasswordModel.resetPasswordToken;
 
-			return new Response<AuthModel>
-			{
-				status = 200,
-				success = true,
-				Data = auth
-			};
+      var user = await _userManager.Users.FirstOrDefaultAsync(user => user.Email == email.ToLower());
 
-		}
+      if (user == null)
+      {
+        return BadRequest();
+      }
 
-		[HttpPost("login")]
-		public async Task<ActionResult<Response<AuthModel>>> Login(LoginModel loginModel)
-		{
-			var user = await _userManager.Users.SingleOrDefaultAsync(x => x.Email == loginModel.Email.ToLower());
+      if (!user.ResetPasswordToken.Equals(token))
+      {
+        return BadRequest();
+      }
 
-			if (user == null)
-			{
-				return Unauthorized("Invalid User");
-			}
+      var randomPassword = Utils.Utils.RandomString(9);
 
-			var result = await _signInManager.CheckPasswordSignInAsync(user, loginModel.Password, false);
+      await _userManager.RemovePasswordAsync(user);
+      await _userManager.AddPasswordAsync(user, randomPassword);
 
-			if (!result.Succeeded)
-			{
-				return Unauthorized();
-			}
+      // var result = await _userManager.ResetPasswordAsync(user, token, randomPassword);
+      await _emailService.sendMailAsync(user.Email, "Reset Password", $"Mat khau la {randomPassword}");
 
-			var authDTO = new AuthModel
-			{
-				User = _mapper.Map<UserDTO>(user),
-				token = await _tokenService.CreateToken(user),
-				Role = await _userManager.GetRolesAsync(user)
-			};
+      return Ok(new
+      {
+        status = 200,
+        success = true
+      });
+    }
 
-			return new Response<AuthModel>
-			{
-				Data = authDTO,
-				success = true,
-				status = 200
-			};
-		}
+    private async Task<string> SaveImage(IFormFile imageFile)
+    {
+      string imageName = DateTime.Now.ToString("yyyymmssfff") + "_" + Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
 
-		[HttpPost("forget-request")]
-		public async Task<ActionResult> ForgetRequest(ForgetRequest forgetRequest)
-		{
-			var token = await HttpContext.GetTokenAsync("access_token");
-			var handler = new JwtSecurityTokenHandler();
+      var uploadPath = Path.Combine(_hostEnvironment.ContentRootPath, "Uploads", "Avatars", imageName);
 
-			var email = handler.ReadJwtToken(token)
-							     .Claims.Where(c => c.Type.Equals("email")).Select(c => c.Value).SingleOrDefault();
+      using (var fileStream = new FileStream(uploadPath, FileMode.Create))
+      {
+        await imageFile.CopyToAsync(fileStream);
+      }
 
-			byte[] bytes = new byte[128];
-			var rng = new RNGCryptoServiceProvider();
-			rng.GetBytes(bytes);
-
-			var forgetToken = Convert.ToBase64String(bytes);
-
-			var forgetLink = $"{forgetRequest.domain}{forgetToken}";
-
-			await _emailService.sendMailAsync(forgetRequest.email, "Forget password", $@"<a href=""http://{forgetLink}"">http://{forgetLink}</a>");
-
-			return Ok(new
-			{
-				status = 200,
-				success = true
-			});
-		}
-
-		private async Task<string> SaveImage(IFormFile imageFile)
-		{
-			string imageName = DateTime.Now.ToString("yyyymmssfff") + "_" + Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-
-			var uploadPath = Path.Combine(_hostEnvironment.ContentRootPath, "Uploads", "Avatars", imageName);
-
-			using (var fileStream = new FileStream(uploadPath, FileMode.Create))
-			{
-				await imageFile.CopyToAsync(fileStream);
-			}
-
-			return imageName;
-		}
-	}
+      return imageName;
+    }
+  }
 }

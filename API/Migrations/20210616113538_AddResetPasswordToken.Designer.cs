@@ -9,26 +9,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-<<<<<<< HEAD:API/Migrations/20210616035044_initBb.Designer.cs
-    [Migration("20210616035044_initBb")]
-    partial class initBb
-=======
-    [Migration("20210616052832_InitialSchema")]
-    partial class InitialSchema
->>>>>>> 674ac610fd5904d0111ac8270c14450b1d11eaae:API/Migrations/20210616052832_InitialSchema.Designer.cs
+    [Migration("20210616113538_AddResetPasswordToken")]
+    partial class AddResetPasswordToken
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-<<<<<<< HEAD:API/Migrations/20210616035044_initBb.Designer.cs
-                .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.6")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-=======
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
                 .HasAnnotation("ProductVersion", "6.0.0-preview.4.21253.1");
->>>>>>> 674ac610fd5904d0111ac8270c14450b1d11eaae:API/Migrations/20210616052832_InitialSchema.Designer.cs
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -83,9 +72,6 @@ namespace API.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("ForgetToken")
-                        .HasColumnType("longtext");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("tinyint(1)");
 
@@ -108,6 +94,9 @@ namespace API.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("ResetPasswordToken")
+                        .HasColumnType("longtext");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
@@ -164,21 +153,6 @@ namespace API.Migrations
             modelBuilder.Entity("API.Entities.Building", b =>
                 {
                     b.Property<string>("Id")
-<<<<<<< HEAD:API/Migrations/20210616035044_initBb.Designer.cs
-                        .HasColumnType("text");
-
-                    b.Property<string>("Address")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
-=======
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("Address")
@@ -192,7 +166,6 @@ namespace API.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
->>>>>>> 674ac610fd5904d0111ac8270c14450b1d11eaae:API/Migrations/20210616052832_InitialSchema.Designer.cs
 
                     b.HasKey("Id");
 
@@ -202,24 +175,6 @@ namespace API.Migrations
             modelBuilder.Entity("API.Entities.Room", b =>
                 {
                     b.Property<string>("Id")
-<<<<<<< HEAD:API/Migrations/20210616035044_initBb.Designer.cs
-                        .HasColumnType("text");
-
-                    b.Property<string>("BuildingId")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Capacity")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
-=======
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("BuildingId")
@@ -236,7 +191,6 @@ namespace API.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
->>>>>>> 674ac610fd5904d0111ac8270c14450b1d11eaae:API/Migrations/20210616052832_InitialSchema.Designer.cs
 
                     b.HasKey("Id");
 

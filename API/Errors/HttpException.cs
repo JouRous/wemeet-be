@@ -1,6 +1,8 @@
+using System;
+
 namespace API.Errors
 {
-  public class HttpException
+  public class HttpException : Exception
   {
     public HttpException(int statusCode, string message = "Internal Server Error", string details = null)
     {
