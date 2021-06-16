@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API.Migrations
 {
-	[DbContext(typeof(AppDbContext))]
-	partial class AppDbContextModelSnapshot : ModelSnapshot
-	{
-		protected override void BuildModel(ModelBuilder modelBuilder)
-		{
+    [DbContext(typeof(AppDbContext))]
+    partial class AppDbContextModelSnapshot : ModelSnapshot
+    {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+        {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
@@ -35,14 +35,14 @@ namespace API.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
-						b.HasKey("Id");
+                    b.HasKey("Id");
 
-						b.HasIndex("NormalizedName")
-											.IsUnique()
-											.HasDatabaseName("RoleNameIndex");
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex");
 
-						b.ToTable("AspNetRoles");
-					});
+                    b.ToTable("AspNetRoles");
+                });
 
             modelBuilder.Entity("API.Entities.AppUser", b =>
                 {
@@ -106,17 +106,17 @@ namespace API.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
-						b.HasKey("Id");
+                    b.HasKey("Id");
 
-						b.HasIndex("NormalizedEmail")
-											.HasDatabaseName("EmailIndex");
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
 
-						b.HasIndex("NormalizedUserName")
-											.IsUnique()
-											.HasDatabaseName("UserNameIndex");
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex");
 
-						b.ToTable("AspNetUsers");
-					});
+                    b.ToTable("AspNetUsers");
+                });
 
             modelBuilder.Entity("API.Entities.AppUserRole", b =>
                 {
@@ -126,12 +126,12 @@ namespace API.Migrations
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
 
-						b.HasKey("UserId", "RoleId");
+                    b.HasKey("UserId", "RoleId");
 
-						b.HasIndex("RoleId");
+                    b.HasIndex("RoleId");
 
-						b.ToTable("AspNetUserRoles");
-					});
+                    b.ToTable("AspNetUserRoles");
+                });
 
             modelBuilder.Entity("API.Entities.AppUserTeam", b =>
                 {
@@ -141,12 +141,12 @@ namespace API.Migrations
                     b.Property<string>("TeamId")
                         .HasColumnType("varchar(255)");
 
-						b.HasKey("AppUserId", "TeamId");
+                    b.HasKey("AppUserId", "TeamId");
 
-						b.HasIndex("TeamId");
+                    b.HasIndex("TeamId");
 
-						b.ToTable("AppUserTeams");
-					});
+                    b.ToTable("AppUserTeams");
+                });
 
             modelBuilder.Entity("API.Entities.Building", b =>
                 {
@@ -209,11 +209,10 @@ namespace API.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
-						b.Property<DateTime>("CreatedAt")
-											.HasColumnType("timestamp without time zone");
+                    b.HasKey("Id");
 
-						b.Property<string>("Name")
-											.HasColumnType("text");
+                    b.ToTable("Teams");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
@@ -230,14 +229,12 @@ namespace API.Migrations
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
 
-						b.Property<string>("BuildingId")
-											.HasColumnType("text");
+                    b.HasKey("Id");
 
-						b.Property<int>("Capacity")
-											.HasColumnType("integer");
+                    b.HasIndex("RoleId");
 
-						b.Property<DateTime>("CreatedAt")
-											.HasColumnType("timestamp without time zone");
+                    b.ToTable("AspNetRoleClaims");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
@@ -254,17 +251,12 @@ namespace API.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-			modelBuilder.Entity("API.Entities.Team", b =>
-					{
-						b.Property<int>("Id")
-											.ValueGeneratedOnAdd()
-											.HasColumnType("integer")
-											.HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                    b.HasKey("Id");
 
-						b.Property<string>("Name")
-											.HasColumnType("text");
+                    b.HasIndex("UserId");
 
-						b.HasKey("Id");
+                    b.ToTable("AspNetUserClaims");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
@@ -280,12 +272,12 @@ namespace API.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-						b.Property<int>("RoleId")
-											.HasColumnType("integer");
+                    b.HasKey("LoginProvider", "ProviderKey");
 
-						b.HasKey("Id");
+                    b.HasIndex("UserId");
 
-						b.HasIndex("RoleId");
+                    b.ToTable("AspNetUserLogins");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
@@ -314,147 +306,89 @@ namespace API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-						b.Property<int>("UserId")
-											.HasColumnType("integer");
+                    b.HasOne("API.Entities.AppUser", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-						b.HasKey("Id");
+                    b.Navigation("Role");
 
-						b.HasIndex("UserId");
+                    b.Navigation("User");
+                });
 
-						b.ToTable("AspNetUserClaims");
-					});
+            modelBuilder.Entity("API.Entities.AppUserTeam", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "User")
+                        .WithMany("AppUserTeams")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
-					{
-						b.Property<string>("LoginProvider")
-											.HasColumnType("text");
+                    b.HasOne("API.Entities.Team", "Team")
+                        .WithMany("AppUserTeams")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-						b.Property<string>("ProviderKey")
-											.HasColumnType("text");
+                    b.Navigation("Team");
 
-						b.Property<string>("ProviderDisplayName")
-											.HasColumnType("text");
+                    b.Navigation("User");
+                });
 
-						b.Property<int>("UserId")
-											.HasColumnType("integer");
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+                {
+                    b.HasOne("API.Entities.AppRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-						b.HasKey("LoginProvider", "ProviderKey");
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-						b.HasIndex("UserId");
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-						b.ToTable("AspNetUserLogins");
-					});
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
-					{
-						b.Property<int>("UserId")
-											.HasColumnType("integer");
+            modelBuilder.Entity("API.Entities.AppRole", b =>
+                {
+                    b.Navigation("UserRoles");
+                });
 
-						b.Property<string>("LoginProvider")
-											.HasColumnType("text");
+            modelBuilder.Entity("API.Entities.AppUser", b =>
+                {
+                    b.Navigation("AppUserTeams");
 
-						b.Property<string>("Name")
-											.HasColumnType("text");
+                    b.Navigation("UserRoles");
+                });
 
-						b.Property<string>("Value")
-											.HasColumnType("text");
-
-						b.HasKey("UserId", "LoginProvider", "Name");
-
-						b.ToTable("AspNetUserTokens");
-					});
-
-			modelBuilder.Entity("API.Entities.AppUserRole", b =>
-					{
-						b.HasOne("API.Entities.AppRole", "Role")
-											.WithMany("UserRoles")
-											.HasForeignKey("RoleId")
-											.OnDelete(DeleteBehavior.Cascade)
-											.IsRequired();
-
-						b.HasOne("API.Entities.AppUser", "User")
-											.WithMany("UserRoles")
-											.HasForeignKey("UserId")
-											.OnDelete(DeleteBehavior.Cascade)
-											.IsRequired();
-
-						b.Navigation("Role");
-
-						b.Navigation("User");
-					});
-
-			modelBuilder.Entity("API.Entities.AppUserTeam", b =>
-					{
-						b.HasOne("API.Entities.AppUser", "User")
-											.WithMany("AppUserTeams")
-											.HasForeignKey("AppUserId")
-											.OnDelete(DeleteBehavior.Cascade)
-											.IsRequired();
-
-						b.HasOne("API.Entities.Team", "Team")
-											.WithMany("AppUserTeams")
-											.HasForeignKey("TeamId")
-											.OnDelete(DeleteBehavior.Cascade)
-											.IsRequired();
-
-						b.Navigation("Team");
-
-						b.Navigation("User");
-					});
-
-			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
-					{
-						b.HasOne("API.Entities.AppRole", null)
-											.WithMany()
-											.HasForeignKey("RoleId")
-											.OnDelete(DeleteBehavior.Cascade)
-											.IsRequired();
-					});
-
-			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
-					{
-						b.HasOne("API.Entities.AppUser", null)
-											.WithMany()
-											.HasForeignKey("UserId")
-											.OnDelete(DeleteBehavior.Cascade)
-											.IsRequired();
-					});
-
-			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
-					{
-						b.HasOne("API.Entities.AppUser", null)
-											.WithMany()
-											.HasForeignKey("UserId")
-											.OnDelete(DeleteBehavior.Cascade)
-											.IsRequired();
-					});
-
-			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
-					{
-						b.HasOne("API.Entities.AppUser", null)
-											.WithMany()
-											.HasForeignKey("UserId")
-											.OnDelete(DeleteBehavior.Cascade)
-											.IsRequired();
-					});
-
-			modelBuilder.Entity("API.Entities.AppRole", b =>
-					{
-						b.Navigation("UserRoles");
-					});
-
-			modelBuilder.Entity("API.Entities.AppUser", b =>
-					{
-						b.Navigation("AppUserTeams");
-
-						b.Navigation("UserRoles");
-					});
-
-			modelBuilder.Entity("API.Entities.Team", b =>
-					{
-						b.Navigation("AppUserTeams");
-					});
+            modelBuilder.Entity("API.Entities.Team", b =>
+                {
+                    b.Navigation("AppUserTeams");
+                });
 #pragma warning restore 612, 618
-		}
-	}
+        }
+    }
 }
