@@ -24,7 +24,8 @@ namespace API.Extensions
       .AddRoleManager<RoleManager<AppRole>>()
       .AddSignInManager<SignInManager<AppUser>>()
       .AddRoleValidator<RoleValidator<AppRole>>()
-      .AddEntityFrameworkStores<AppDbContext>();
+      .AddEntityFrameworkStores<AppDbContext>()
+      .AddDefaultTokenProviders();
 
 
       services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
