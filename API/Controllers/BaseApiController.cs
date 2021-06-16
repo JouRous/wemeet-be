@@ -8,5 +8,6 @@ namespace API.Controllers
   public class BaseApiController : ControllerBase
   {
     protected AppDbContext DbContext => (AppDbContext)HttpContext.RequestServices.GetService(typeof(AppDbContext));
+    
   }
 }

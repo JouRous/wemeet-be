@@ -1,8 +1,9 @@
 
 namespace API.Models
 {
-	public class TeamModel
+	public class BuildingModel
 	{
 		public string Name { get; set; }
+		public string Address { get; set; }
 	}
 }

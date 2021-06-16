@@ -451,3 +451,4 @@ $RECYCLE.BIN/
 bin
 obj
 API/appsettings.json
+API/Migrations

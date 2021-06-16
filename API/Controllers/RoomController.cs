@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.DTO;
@@ -46,5 +47,53 @@ namespace API.Controllers
 			var RoomInfo = await _unitOfWork.RoomRepository.GetOneAsync(RoomId);
 			return new ResponseBuilder<RoomDTO>().AddData(RoomInfo).Build();
 		}
+
+		[HttpPost]
+		public async Task<ActionResult<Response<RoomDTO>>> AddRoom([FromBody] RoomModel body)
+		{
+			var roomMapper = _mapper.Map<RoomDTO>(body);
+
+			roomMapper.Id = Guid.NewGuid().ToString();
+
+			_unitOfWork.RoomRepository.AddOne(roomMapper);
+
+			var isCompleted = await _unitOfWork.Complete();
+
+			if (!isCompleted) return BadRequest();
+
+			var res = new ResponseBuilder<RoomDTO>().AddData(roomMapper).Build();
+
+			return res;
+
+		}
+
+		[HttpPut("{roomId}")]
+		public async Task<ActionResult<Response<RoomDTO>>> EditInfoRoom(string roomId, [FromBody] RoomModel body)
+		{
+			var roomMapper = _mapper.Map<RoomDTO>(body);
+			roomMapper.Id = roomId;
+
+			_unitOfWork.RoomRepository.UpdatingOne(roomMapper);
+
+			var isCompleted = await _unitOfWork.Complete();
+
+			if (!isCompleted) return BadRequest();
+
+			var res = new ResponseBuilder<RoomDTO>().AddData(roomMapper).Build();
+
+			return res;
+		}
+
+		[HttpDelete("{roomId}")]
+		public async Task<ActionResult<Response<string>>> RemoveRoom(string roomId)
+		{
+			_unitOfWork.RoomRepository.DeletingOne(roomId);
+			var isCompleted = await _unitOfWork.Complete();
+			if (!isCompleted) return BadRequest();
+			var res = new ResponseBuilder<string>().AddData("deleted").Build();
+
+			return res;
+		}
+
 	}
 }

@@ -14,11 +14,6 @@ namespace API.Data
 		public DbSet<Building> Buildings { get; set; }
 		public DbSet<AppUserTeam> AppUserTeams { get; set; }
 		public DbSet<Room> Rooms { get; set; }
-
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-		{
-
-		}
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
 			base.OnModelCreating(builder);

@@ -10,6 +10,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Linq;
+using System;
 
 namespace API.Repsitotries
 {
@@ -23,9 +24,10 @@ namespace API.Repsitotries
 			_mapper = map;
 		}
 
-		public void AddOne(Room roomInfo)
+		public void AddOne(RoomDTO roomInfo)
 		{
-			_context.Rooms.Add(roomInfo);
+			var room = _mapper.Map<Room>(roomInfo);
+			_context.Rooms.Add(room);
 		}
 
 		public async Task<Pagination<RoomDTO>> GetAllByPaginationAsync(PaginationParams pageQuery)
@@ -42,6 +44,26 @@ namespace API.Repsitotries
 									.ProjectTo<RoomDTO>(_mapper.ConfigurationProvider)
 									.SingleOrDefaultAsync();
 			return result;
+		}
+
+		public int GetSizeOfEntity(Func<Room, bool> query)
+		{
+			var count = _context.Rooms.Where(query).Count();
+			return count;
+		}
+
+		public void UpdatingOne(RoomDTO data)
+		{
+			var entity = _mapper.Map<Room>(data);
+			_context.Rooms.Update(entity);
+			_context.SaveChanges();
+		}
+
+		public void DeletingOne(string Id)
+		{
+			var entity = _context.Rooms.Find(Id);
+			_context.Rooms.Remove(entity);
+			_context.SaveChanges();
 		}
 
 	}

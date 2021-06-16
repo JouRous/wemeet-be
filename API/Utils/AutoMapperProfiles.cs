@@ -19,7 +19,9 @@ namespace API.Utils
 			CreateMap<TeamModel, Team>();
 
 			CreateMap<Building, BuildingDTO>();
+			CreateMap<NewBuildingModel, Building>();
 			CreateMap<Room, RoomDTO>();
+			CreateMap<NewRoomModel, Room>();
 
 		}
 	}

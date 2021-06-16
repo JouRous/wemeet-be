@@ -11,5 +11,7 @@ namespace API.Interfaces
 		void AddOne(Building buildingInfo);
 		Task<Pagination<BuildingDTO>> GetAllByPaginationAsync(PaginationParams paginationQuery);
 		Task<BuildingDTO> GetOneAsync(string Id);
+		void ModifyOne(BuildingDTO building);
+		void DeletingOne(string id);
 	}
 }
