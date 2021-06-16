@@ -6,6 +6,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: "123123"
       MYSQL_DATABASE: "wemeet"
+    command: --init-file /data/application/init.sql
     ports:
       - 3306:3306
     restart: always
@@ -13,6 +14,7 @@ services:
       - 3306
     volumes:
       - app-data:/var/lib/mysql/data
+      - ./init.sql:/data/application/init.sql
   api:
     build: .
     ports:
