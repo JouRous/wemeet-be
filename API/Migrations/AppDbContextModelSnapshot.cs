@@ -8,342 +8,389 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace API.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
-    {
-        protected override void BuildModel(ModelBuilder modelBuilder)
-        {
+	[DbContext(typeof(AppDbContext))]
+	partial class AppDbContextModelSnapshot : ModelSnapshot
+	{
+		protected override void BuildModel(ModelBuilder modelBuilder)
+		{
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.5")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+			modelBuilder
+					.HasAnnotation("Relational:MaxIdentifierLength", 63)
+					.HasAnnotation("ProductVersion", "5.0.6")
+					.HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-            modelBuilder.Entity("API.Entities.AppRole", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+			modelBuilder.Entity("API.Entities.AppRole", b =>
+					{
+						b.Property<int>("Id")
+											.ValueGeneratedOnAdd()
+											.HasColumnType("integer")
+											.HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("text");
+						b.Property<string>("ConcurrencyStamp")
+											.IsConcurrencyToken()
+											.HasColumnType("text");
 
-                    b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+						b.Property<string>("Name")
+											.HasMaxLength(256)
+											.HasColumnType("character varying(256)");
 
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+						b.Property<string>("NormalizedName")
+											.HasMaxLength(256)
+											.HasColumnType("character varying(256)");
 
-                    b.HasKey("Id");
+						b.HasKey("Id");
 
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasDatabaseName("RoleNameIndex");
+						b.HasIndex("NormalizedName")
+											.IsUnique()
+											.HasDatabaseName("RoleNameIndex");
 
-                    b.ToTable("AspNetRoles");
-                });
+						b.ToTable("AspNetRoles");
+					});
 
-            modelBuilder.Entity("API.Entities.AppUser", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+			modelBuilder.Entity("API.Entities.AppUser", b =>
+					{
+						b.Property<int>("Id")
+											.ValueGeneratedOnAdd()
+											.HasColumnType("integer")
+											.HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("integer");
+						b.Property<int>("AccessFailedCount")
+											.HasColumnType("integer");
 
-                    b.Property<string>("Avatar")
-                        .HasColumnType("text");
+						b.Property<string>("Avatar")
+											.HasColumnType("text");
 
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("text");
+						b.Property<string>("ConcurrencyStamp")
+											.IsConcurrencyToken()
+											.HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+						b.Property<DateTime>("CreatedAt")
+											.HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+						b.Property<string>("Email")
+											.HasMaxLength(256)
+											.HasColumnType("character varying(256)");
 
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("boolean");
+						b.Property<bool>("EmailConfirmed")
+											.HasColumnType("boolean");
 
-                    b.Property<string>("ForgetToken")
-                        .HasColumnType("text");
+						b.Property<string>("ForgetToken")
+											.HasColumnType("text");
 
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("boolean");
+						b.Property<bool>("LockoutEnabled")
+											.HasColumnType("boolean");
 
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("timestamp with time zone");
+						b.Property<DateTimeOffset?>("LockoutEnd")
+											.HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+						b.Property<string>("NormalizedEmail")
+											.HasMaxLength(256)
+											.HasColumnType("character varying(256)");
 
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+						b.Property<string>("NormalizedUserName")
+											.HasMaxLength(256)
+											.HasColumnType("character varying(256)");
 
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("text");
+						b.Property<string>("PasswordHash")
+											.HasColumnType("text");
 
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
+						b.Property<string>("PhoneNumber")
+											.HasColumnType("text");
 
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("boolean");
+						b.Property<bool>("PhoneNumberConfirmed")
+											.HasColumnType("boolean");
 
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("text");
+						b.Property<string>("SecurityStamp")
+											.HasColumnType("text");
 
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("boolean");
+						b.Property<bool>("TwoFactorEnabled")
+											.HasColumnType("boolean");
 
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+						b.Property<string>("UserName")
+											.HasMaxLength(256)
+											.HasColumnType("character varying(256)");
 
-                    b.HasKey("Id");
+						b.HasKey("Id");
 
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
+						b.HasIndex("NormalizedEmail")
+											.HasDatabaseName("EmailIndex");
 
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex");
+						b.HasIndex("NormalizedUserName")
+											.IsUnique()
+											.HasDatabaseName("UserNameIndex");
 
-                    b.ToTable("AspNetUsers");
-                });
+						b.ToTable("AspNetUsers");
+					});
 
-            modelBuilder.Entity("API.Entities.AppUserRole", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+			modelBuilder.Entity("API.Entities.AppUserRole", b =>
+					{
+						b.Property<int>("UserId")
+											.HasColumnType("integer");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
+						b.Property<int>("RoleId")
+											.HasColumnType("integer");
 
-                    b.HasKey("UserId", "RoleId");
+						b.HasKey("UserId", "RoleId");
 
-                    b.HasIndex("RoleId");
+						b.HasIndex("RoleId");
 
-                    b.ToTable("AspNetUserRoles");
-                });
+						b.ToTable("AspNetUserRoles");
+					});
 
-            modelBuilder.Entity("API.Entities.AppUserTeam", b =>
-                {
-                    b.Property<int>("AppUserId")
-                        .HasColumnType("integer");
+			modelBuilder.Entity("API.Entities.AppUserTeam", b =>
+					{
+						b.Property<int>("AppUserId")
+											.HasColumnType("integer");
 
-                    b.Property<int>("TeamId")
-                        .HasColumnType("integer");
+						b.Property<int>("TeamId")
+											.HasColumnType("integer");
 
-                    b.HasKey("AppUserId", "TeamId");
+						b.HasKey("AppUserId", "TeamId");
 
-                    b.HasIndex("TeamId");
+						b.HasIndex("TeamId");
 
-                    b.ToTable("AppUserTeams");
-                });
+						b.ToTable("AppUserTeams");
+					});
 
-            modelBuilder.Entity("API.Entities.Team", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+			modelBuilder.Entity("API.Entities.Building", b =>
+					{
+						b.Property<string>("Id")
+											.HasColumnType("text");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
+						b.Property<string>("Address")
+											.HasColumnType("text");
 
-                    b.HasKey("Id");
+						b.Property<DateTime>("CreatedAt")
+											.HasColumnType("timestamp without time zone");
 
-                    b.ToTable("Teams");
-                });
+						b.Property<string>("Name")
+											.HasColumnType("text");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+						b.Property<DateTime>("UpdatedAt")
+											.HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("text");
+						b.HasKey("Id");
 
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("text");
+						b.ToTable("Buildings");
+					});
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
+			modelBuilder.Entity("API.Entities.Room", b =>
+					{
+						b.Property<string>("Id")
+											.HasColumnType("text");
 
-                    b.HasKey("Id");
+						b.Property<string>("BuildingId")
+											.HasColumnType("text");
 
-                    b.HasIndex("RoleId");
+						b.Property<int>("Capacity")
+											.HasColumnType("integer");
 
-                    b.ToTable("AspNetRoleClaims");
-                });
+						b.Property<DateTime>("CreatedAt")
+											.HasColumnType("timestamp without time zone");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+						b.Property<string>("Name")
+											.HasColumnType("text");
 
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("text");
+						b.Property<DateTime>("UpdatedAt")
+											.HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("text");
+						b.HasKey("Id");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+						b.ToTable("Rooms");
+					});
 
-                    b.HasKey("Id");
+			modelBuilder.Entity("API.Entities.Team", b =>
+					{
+						b.Property<int>("Id")
+											.ValueGeneratedOnAdd()
+											.HasColumnType("integer")
+											.HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.HasIndex("UserId");
+						b.Property<string>("Name")
+											.HasColumnType("text");
 
-                    b.ToTable("AspNetUserClaims");
-                });
+						b.HasKey("Id");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
-                {
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("text");
+						b.ToTable("Teams");
+					});
 
-                    b.Property<string>("ProviderKey")
-                        .HasColumnType("text");
+			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+					{
+						b.Property<int>("Id")
+											.ValueGeneratedOnAdd()
+											.HasColumnType("integer")
+											.HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("text");
+						b.Property<string>("ClaimType")
+											.HasColumnType("text");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+						b.Property<string>("ClaimValue")
+											.HasColumnType("text");
 
-                    b.HasKey("LoginProvider", "ProviderKey");
+						b.Property<int>("RoleId")
+											.HasColumnType("integer");
 
-                    b.HasIndex("UserId");
+						b.HasKey("Id");
 
-                    b.ToTable("AspNetUserLogins");
-                });
+						b.HasIndex("RoleId");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+						b.ToTable("AspNetRoleClaims");
+					});
 
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("text");
+			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+					{
+						b.Property<int>("Id")
+											.ValueGeneratedOnAdd()
+											.HasColumnType("integer")
+											.HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
+						b.Property<string>("ClaimType")
+											.HasColumnType("text");
 
-                    b.Property<string>("Value")
-                        .HasColumnType("text");
+						b.Property<string>("ClaimValue")
+											.HasColumnType("text");
 
-                    b.HasKey("UserId", "LoginProvider", "Name");
+						b.Property<int>("UserId")
+											.HasColumnType("integer");
 
-                    b.ToTable("AspNetUserTokens");
-                });
+						b.HasKey("Id");
 
-            modelBuilder.Entity("API.Entities.AppUserRole", b =>
-                {
-                    b.HasOne("API.Entities.AppRole", "Role")
-                        .WithMany("UserRoles")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+						b.HasIndex("UserId");
 
-                    b.HasOne("API.Entities.AppUser", "User")
-                        .WithMany("UserRoles")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+						b.ToTable("AspNetUserClaims");
+					});
 
-                    b.Navigation("Role");
+			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+					{
+						b.Property<string>("LoginProvider")
+											.HasColumnType("text");
 
-                    b.Navigation("User");
-                });
+						b.Property<string>("ProviderKey")
+											.HasColumnType("text");
 
-            modelBuilder.Entity("API.Entities.AppUserTeam", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", "User")
-                        .WithMany("AppUserTeams")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+						b.Property<string>("ProviderDisplayName")
+											.HasColumnType("text");
 
-                    b.HasOne("API.Entities.Team", "Team")
-                        .WithMany("AppUserTeams")
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+						b.Property<int>("UserId")
+											.HasColumnType("integer");
 
-                    b.Navigation("Team");
+						b.HasKey("LoginProvider", "ProviderKey");
 
-                    b.Navigation("User");
-                });
+						b.HasIndex("UserId");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
-                {
-                    b.HasOne("API.Entities.AppRole", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+						b.ToTable("AspNetUserLogins");
+					});
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+					{
+						b.Property<int>("UserId")
+											.HasColumnType("integer");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+						b.Property<string>("LoginProvider")
+											.HasColumnType("text");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
-                {
-                    b.HasOne("API.Entities.AppUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+						b.Property<string>("Name")
+											.HasColumnType("text");
 
-            modelBuilder.Entity("API.Entities.AppRole", b =>
-                {
-                    b.Navigation("UserRoles");
-                });
+						b.Property<string>("Value")
+											.HasColumnType("text");
 
-            modelBuilder.Entity("API.Entities.AppUser", b =>
-                {
-                    b.Navigation("AppUserTeams");
+						b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.Navigation("UserRoles");
-                });
+						b.ToTable("AspNetUserTokens");
+					});
 
-            modelBuilder.Entity("API.Entities.Team", b =>
-                {
-                    b.Navigation("AppUserTeams");
-                });
+			modelBuilder.Entity("API.Entities.AppUserRole", b =>
+					{
+						b.HasOne("API.Entities.AppRole", "Role")
+											.WithMany("UserRoles")
+											.HasForeignKey("RoleId")
+											.OnDelete(DeleteBehavior.Cascade)
+											.IsRequired();
+
+						b.HasOne("API.Entities.AppUser", "User")
+											.WithMany("UserRoles")
+											.HasForeignKey("UserId")
+											.OnDelete(DeleteBehavior.Cascade)
+											.IsRequired();
+
+						b.Navigation("Role");
+
+						b.Navigation("User");
+					});
+
+			modelBuilder.Entity("API.Entities.AppUserTeam", b =>
+					{
+						b.HasOne("API.Entities.AppUser", "User")
+											.WithMany("AppUserTeams")
+											.HasForeignKey("AppUserId")
+											.OnDelete(DeleteBehavior.Cascade)
+											.IsRequired();
+
+						b.HasOne("API.Entities.Team", "Team")
+											.WithMany("AppUserTeams")
+											.HasForeignKey("TeamId")
+											.OnDelete(DeleteBehavior.Cascade)
+											.IsRequired();
+
+						b.Navigation("Team");
+
+						b.Navigation("User");
+					});
+
+			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+					{
+						b.HasOne("API.Entities.AppRole", null)
+											.WithMany()
+											.HasForeignKey("RoleId")
+											.OnDelete(DeleteBehavior.Cascade)
+											.IsRequired();
+					});
+
+			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+					{
+						b.HasOne("API.Entities.AppUser", null)
+											.WithMany()
+											.HasForeignKey("UserId")
+											.OnDelete(DeleteBehavior.Cascade)
+											.IsRequired();
+					});
+
+			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+					{
+						b.HasOne("API.Entities.AppUser", null)
+											.WithMany()
+											.HasForeignKey("UserId")
+											.OnDelete(DeleteBehavior.Cascade)
+											.IsRequired();
+					});
+
+			modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+					{
+						b.HasOne("API.Entities.AppUser", null)
+											.WithMany()
+											.HasForeignKey("UserId")
+											.OnDelete(DeleteBehavior.Cascade)
+											.IsRequired();
+					});
+
+			modelBuilder.Entity("API.Entities.AppRole", b =>
+					{
+						b.Navigation("UserRoles");
+					});
+
+			modelBuilder.Entity("API.Entities.AppUser", b =>
+					{
+						b.Navigation("AppUserTeams");
+
+						b.Navigation("UserRoles");
+					});
+
+			modelBuilder.Entity("API.Entities.Team", b =>
+					{
+						b.Navigation("AppUserTeams");
+					});
 #pragma warning restore 612, 618
-        }
-    }
+		}
+	}
 }

@@ -30,8 +30,8 @@ namespace API.Extensions
 					connStr = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 				}
 				options.UseNpgsql(connStr);
-	      // options.UseSqlite(connStr);
-      });
+				// options.UseSqlite(connStr);
+			});
 
 			return services;
 		}
