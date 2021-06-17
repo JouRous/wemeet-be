@@ -19,6 +19,8 @@ services:
     environment:
       DB_CONNECTION_STRING: "server=db;user=root;password=12345678;database=wemeet;"
       BUILD_ENV: "docker"
+    command:
+      - "dotnet ef database update"
     ports:
       - 5000:5000
     depends_on:

@@ -30,7 +30,7 @@ namespace API.Extensions
           connStr = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
         }
 
-        var serverVersion = new MySqlServerVersion(new Version(5, 7));
+        var serverVersion = new MySqlServerVersion(new Version(8, 0));
         options.UseMySql(connStr, serverVersion);
       });
 
