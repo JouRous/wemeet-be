@@ -1,29 +1,28 @@
-version: "3.1"
+version: "3.7"
 
 services:
   db:
-    image: mysql
-    command: --default-authentication-plugin=mysql_native_password
+    image: postgres
     environment:
-      MYSQL_DATABASE: "wemeet"
-      MYSQL_ROOT_PASSWORD: "12345678"
+      POSTGRES_DB: "wemeet"
+      POSTGRES_PASSWORD: "123123"
+      PGDATA: "/var/lib/postgresql/data"
     ports:
-      - 3306:3306
+      - 5432:5432
     restart: always
+    expose:
+      - 5432
     volumes:
-      - dbdata:/var/lib/mysql
-      - ./_MySQL_Init_Script:/docker-entrypoint-initdb.d
+      - app-data:/var/lib/postgresql/data
   api:
-    build:
-      context: .
-    environment:
-      DB_CONNECTION_STRING: "server=db;user=root;password=12345678;database=wemeet;"
-      BUILD_ENV: "docker"
-    command:
-      - "dotnet ef database update"
+    build: .
     ports:
       - 5000:5000
+    restart: always
+    environment:
+      DB_CONNECTION_STRING: "Server=db; Port=5432; User Id=postgres; Password=123123; Database=wemeet"
+      BUILD_ENV: "docker"
     depends_on:
       - db
 volumes:
-  dbdata:
+  app-data:
