@@ -19,7 +19,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-  [Authorize]
   public class UsersController : BaseApiController
   {
     private readonly UserManager<AppUser> _userManager;
@@ -124,9 +123,10 @@ namespace API.Controllers
       return await _unitOfWork.USerRepository.GetUserAsync(username);
     }
 
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<Response<IEnumerable<UserDTO>>>> GetUsers(
-      [FromQuery] PaginationParams paginationParams)
+    [FromQuery] PaginationParams paginationParams)
     {
       var token = await HttpContext.GetTokenAsync("access_token");
       var handler = new JwtSecurityTokenHandler();
