@@ -1,0 +1,27 @@
+version: "3.1"
+
+services:
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: "wemeet"
+      MYSQL_ROOT_PASSWORD: "12345678"
+    ports:
+      - 3306:3306
+    restart: always
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./_MySQL_Init_Script:/docker-entrypoint-initdb.d
+  api:
+    build:
+      context: .
+    environment:
+      DB_CONNECTION_STRING: "server=db;user=root;password=12345678;database=wemeet;"
+      BUILD_ENV: "docker"
+    ports:
+      - 5000:5000
+    depends_on:
+      - db
+volumes:
+  dbdata:
