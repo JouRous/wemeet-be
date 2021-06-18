@@ -29,8 +29,8 @@ namespace API.Extensions
         {
           connStr = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
         }
-        var serverVersion = new MySqlServerVersion(new Version(8, 0, 25));
-        options.UseMySql(connStr, serverVersion);
+
+        options.UseNpgsql(connStr);
       });
 
       return services;
