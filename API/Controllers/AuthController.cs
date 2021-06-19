@@ -114,13 +114,13 @@ namespace API.Controllers
         });
       }
 
-      var resetPasswordToken = Utils.Utils.RandomString(128);
+      var resetPasswordToken = _tokenService.CreateResetPasswordToken(user.Email);
 
-      var resetPasswordLink = $"{forgetRequest.domain}?token={resetPasswordToken}&email={forgetRequest.email}";
+      var resetPasswordLink = $"{forgetRequest.domain}?token={resetPasswordToken}";
 
-      await _unitOfWork.USerRepository.SaveResetPasswordToken(user.Email, resetPasswordToken);
+      // await _unitOfWork.USerRepository.SaveResetPasswordToken(user.Email, resetPasswordToken);
 
-      var saveChangeStatus = await _unitOfWork.Complete();
+      // var saveChangeStatus = await _unitOfWork.Complete();
 
       await _emailService.sendMailAsync(forgetRequest.email, "Forget password", $@"<a href=""http://{resetPasswordLink}"">http://{resetPasswordLink}</a>");
       return Ok(new
@@ -131,35 +131,34 @@ namespace API.Controllers
     }
 
     [HttpGet("reset-password")]
-    public async Task<ActionResult> ResetPassword([FromQuery] ResetPasswordModel resetPasswordModel)
+    public async Task<ActionResult> ResetPassword([FromQuery] string token, [FromBody] LoginModel model)
     {
-      var email = resetPasswordModel.email;
-      var token = resetPasswordModel.resetPasswordToken;
+      var handler = new JwtSecurityTokenHandler();
+      var email = handler.ReadJwtToken(token)
+             .Claims.Where(c => c.Type.Equals("email")).Select(c => c.Value).SingleOrDefault();
 
       var user = await _userManager.Users.FirstOrDefaultAsync(user => user.Email == email.ToLower());
 
       if (user == null)
       {
-        return BadRequest();
-      }
-
-      if (!user.ResetPasswordToken.Equals(token))
-      {
-        return BadRequest();
+        return NotFound(new
+        {
+          status = 404,
+          success = true,
+          message = "User not found"
+        });
       }
 
       var randomPassword = Utils.Utils.RandomString(9);
 
       await _userManager.RemovePasswordAsync(user);
-      await _userManager.AddPasswordAsync(user, randomPassword);
-
-      // var result = await _userManager.ResetPasswordAsync(user, token, randomPassword);
-      await _emailService.sendMailAsync(user.Email, "Reset Password", $"Mat khau la {randomPassword}");
+      await _userManager.AddPasswordAsync(user, model.Password);
 
       return Ok(new
       {
         status = 200,
-        success = true
+        success = true,
+        message = "Reset password success"
       });
     }
 

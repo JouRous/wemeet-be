@@ -56,12 +56,6 @@ namespace API.Repositories
       user.DeletedAt = null;
     }
 
-    public async Task SaveResetPasswordToken(string email, string token)
-    {
-      var user = await _context.Users.FirstOrDefaultAsync(user => user.Email == email.ToLower());
-      user.ResetPasswordToken = token;
-    }
-
     public async Task<AppUser> UpdateUserAsync(AppUser user)
     {
       var _user = await _context.Users.Include(x => x.UserRoles).ThenInclude(x => x.Role).FirstOrDefaultAsync(x => x.Email == user.Email);
@@ -75,16 +69,5 @@ namespace API.Repositories
       return _user;
     }
 
-    public async Task<bool> VerifyResetPasswordToken(AppUser user, string token)
-    {
-      if (user.ResetPasswordToken == token)
-      {
-        user.ResetPasswordToken = null;
-        await _context.SaveChangesAsync();
-        return true;
-      }
-
-      return false;
-    }
   }
 }
