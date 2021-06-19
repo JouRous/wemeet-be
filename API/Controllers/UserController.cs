@@ -13,6 +13,7 @@ using API.Utils;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -48,15 +49,15 @@ namespace API.Controllers
     }
 
     [HttpPost("create-user")]
-    public async Task<ActionResult<Response<AuthModel>>> CreateUser([FromBody] RegisterModel registerModel)
+    public async Task<ActionResult<Response<AuthModel>>> CreateUser([FromBody] UserActionModel userActionModel)
     {
-      if (await CheckUserExist(registerModel.Email))
+      if (await CheckUserExist(userActionModel.Email))
       {
         return BadRequest("User already taken");
       }
 
       var transaction = await DbContext.Database.BeginTransactionAsync();
-      var user = _mapper.Map<AppUser>(registerModel);
+      var user = _mapper.Map<AppUser>(userActionModel);
 
       user.UserName = user.Email;
       user.AppUserTeams = new List<AppUserTeam>();
@@ -71,7 +72,7 @@ namespace API.Controllers
         return BadRequest(createStatus.Errors);
       }
 
-      var addRoleStatus = await _userManager.AddToRoleAsync(user, "Staff");
+      var addRoleStatus = await _userManager.AddToRoleAsync(user, userActionModel.Role);
 
       if (!addRoleStatus.Succeeded)
       {
@@ -79,23 +80,23 @@ namespace API.Controllers
         return BadRequest(addRoleStatus.Errors);
       }
 
-      if (!String.IsNullOrEmpty(registerModel.TeamId))
-      {
-        var appUserTeam = new AppUserTeam
-        {
-          AppUserId = user.Id,
-          TeamId = registerModel.TeamId
-        };
+      // if (!String.IsNullOrEmpty(userActionModel.TeamId))
+      // {
+      //   var appUserTeam = new AppUserTeam
+      //   {
+      //     AppUserId = user.Id,
+      //     TeamId = userActionModel.TeamId
+      //   };
 
-        user.AppUserTeams.Add(appUserTeam);
-        var addTeamResult = await _userManager.UpdateAsync(user);
+      //   user.AppUserTeams.Add(appUserTeam);
+      //   var addTeamResult = await _userManager.UpdateAsync(user);
 
-        if (!addTeamResult.Succeeded)
-        {
-          await transaction.RollbackAsync();
-          return BadRequest();
-        }
-      }
+      //   if (!addTeamResult.Succeeded)
+      //   {
+      //     await transaction.RollbackAsync();
+      //     return BadRequest();
+      //   }
+      // }
 
       transaction.Commit();
 
@@ -155,6 +156,28 @@ namespace API.Controllers
       return response;
     }
 
+    // [Authorize]
+    [HttpPut]
+    public async Task<ActionResult> UpdateUser([FromBody] UserActionModel userActionModel)
+    {
+      var user = _mapper.Map<AppUser>(userActionModel);
+      var _user = await _unitOfWork.USerRepository.UpdateUserAsync(user);
+
+      await _unitOfWork.Complete();
+
+      var roles = _user.UserRoles.ToList().Select(x => x.Role.Name).ToList();
+      await _userManager.RemoveFromRolesAsync(_user, roles);
+      await _userManager.AddToRoleAsync(_user, userActionModel.Role);
+
+      return Accepted(new
+      {
+        status = 204,
+        success = true,
+        message = "User had been updated"
+      });
+
+    }
+
     [HttpGet("me")]
     public async Task<ActionResult> GetProfile()
     {
@@ -173,7 +196,79 @@ namespace API.Controllers
         Roles = roles
       };
 
-      return Ok(profile);
+      return Ok(new Response<object>
+      {
+        success = true,
+        status = 200,
+        Data = profile
+      });
+    }
+
+    [HttpDelete("deactivate/{email}")]
+    public async Task<ActionResult> DeactivateUser(string email)
+    {
+      var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Email == email);
+
+      if (user == null)
+      {
+        return NotFound(new
+        {
+          status = 404,
+          susscess = true
+        });
+      }
+
+      _unitOfWork.USerRepository.DeactivateUser(user);
+      if (!(await _unitOfWork.Complete()))
+      {
+        return StatusCode(StatusCodes.Status500InternalServerError, new
+        {
+          status = 500,
+          sussess = false,
+          message = "Internal Server Error"
+        });
+      }
+
+      return Accepted(new
+      {
+        status = 204,
+        success = true,
+        message = "User had been deactivate"
+      });
+    }
+
+    [HttpGet("retrieve/{email}")]
+    public async Task<ActionResult> RetrieveUser(string email)
+    {
+      var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Email == email);
+
+      if (user == null)
+      {
+        return NotFound(new
+        {
+          status = 404,
+          susscess = true
+        });
+      }
+
+      _unitOfWork.USerRepository.RetrieveUser(user);
+      if (!(await _unitOfWork.Complete()))
+      {
+        return StatusCode(StatusCodes.Status500InternalServerError, new
+        {
+          status = 500,
+          sussess = false,
+          message = "Internal Server Error"
+        });
+      }
+
+      return Accepted(new
+      {
+        status = 204,
+        success = true,
+        message = "User had been retrieve"
+      });
+
     }
 
   }

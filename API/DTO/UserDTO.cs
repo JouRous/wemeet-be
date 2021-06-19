@@ -4,11 +4,14 @@ using API.Entities;
 
 namespace API.DTO
 {
-    public class UserDTO
-    {
-        public string Email { get; set; }
-        public string Avatar { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public ICollection<Team> Teams { get; set; }
-    }
+  public class UserDTO
+  {
+    public string Fullname { get; set; }
+    public string Email { get; set; }
+    public string Avatar { get; set; }
+    public string Nickname { get; set; }
+    public string Position { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public ICollection<Team> Teams { get; set; }
+  }
 }

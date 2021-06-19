@@ -67,6 +67,16 @@ namespace API.Controllers
         return Unauthorized("Invalid User");
       }
 
+      if (user.isDeactivated)
+      {
+        return StatusCode(StatusCodes.Status403Forbidden, new
+        {
+          status = 403,
+          success = true,
+          message = "User had been deactivated"
+        });
+      }
+
       var result = await _signInManager.CheckPasswordSignInAsync(user, loginModel.Password, false);
 
       if (!result.Succeeded)

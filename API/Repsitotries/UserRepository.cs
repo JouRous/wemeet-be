@@ -29,6 +29,12 @@ namespace API.Repositories
       _context = context;
     }
 
+    public void DeactivateUser(AppUser user)
+    {
+      user.DeletedAt = DateTime.Now;
+      user.isDeactivated = true;
+    }
+
     public async Task<UserDTO> GetUserAsync(string username)
     {
       return await _context.Users.Where(user => user.UserName == username)
@@ -44,20 +50,29 @@ namespace API.Repositories
 
     }
 
+    public void RetrieveUser(AppUser user)
+    {
+      user.isDeactivated = false;
+      user.DeletedAt = null;
+    }
+
     public async Task SaveResetPasswordToken(string email, string token)
     {
       var user = await _context.Users.FirstOrDefaultAsync(user => user.Email == email.ToLower());
       user.ResetPasswordToken = token;
     }
 
-    public async Task UpdateUserAsync(AppUser user)
+    public async Task<AppUser> UpdateUserAsync(AppUser user)
     {
-      var _user = await _context.Users.FirstOrDefaultAsync(x => x.Email == user.Email);
-
+      var _user = await _context.Users.Include(x => x.UserRoles).ThenInclude(x => x.Role).FirstOrDefaultAsync(x => x.Email == user.Email);
       if (_user != null)
       {
-        _user = user;
+        _user.Nickname = user.Nickname;
+        _user.Fullname = user.Fullname;
+        _user.Position = user.Position;
       }
+
+      return _user;
     }
 
     public async Task<bool> VerifyResetPasswordToken(AppUser user, string token)
