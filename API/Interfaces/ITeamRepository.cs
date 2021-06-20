@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.DTO;
 using API.Entities;
@@ -8,8 +9,11 @@ namespace API.Interfaces
 {
   public interface ITeamRepository
   {
-    Task<TeamDTO> GetTeamAsync(string teamId);
+    Task<TeamDTO> GetTeamAsync(int teamId);
     Task<Pagination<TeamDTO>> GetAllAsync(PaginationParams paginationParams);
     void AddTeam(Team team);
+    Task UpdateTeamAsync(Team team);
+    Task AddUserToTeamAsync(int teamId, ICollection<int> userIds);
+    Task RemoveUserFromTeam(int teamId, ICollection<int> userIds);
   }
 }
