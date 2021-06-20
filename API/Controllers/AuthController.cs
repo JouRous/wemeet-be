@@ -209,7 +209,7 @@ namespace API.Controllers
 
       return Accepted(new
       {
-        status = 204,
+        status = 202,
         success = true,
         message = "Password had changed"
       });

@@ -15,7 +15,8 @@ namespace API.Utils
         .ForAllMembers(options => options.Condition((src, dest, srcMembers) => srcMembers != null));
       CreateMap<UserActionModel, AppUser>();
 
-      CreateMap<Team, TeamDTO>();
+      CreateMap<Team, TeamDTO>()
+        .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.AppUserTeams.Select(x => x.User).ToList()));
       CreateMap<TeamModel, Team>();
 
       CreateMap<Building, BuildingDTO>();

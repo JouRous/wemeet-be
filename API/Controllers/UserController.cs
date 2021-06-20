@@ -152,7 +152,7 @@ namespace API.Controllers
 
       return Accepted(new
       {
-        status = 204,
+        status = 202,
         success = true,
         message = "User had been updated"
       });
@@ -187,7 +187,7 @@ namespace API.Controllers
 
       return Accepted(new
       {
-        status = 204,
+        status = 202,
         success = true,
         message = "User had been deactivate"
       });
@@ -220,7 +220,7 @@ namespace API.Controllers
 
       return Accepted(new
       {
-        status = 204,
+        status = 202,
         success = true,
         message = "User had been retrieve"
       });

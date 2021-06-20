@@ -38,11 +38,22 @@ namespace API.Repositories
     }
 
 
-    public async Task<TeamDTO> GetTeamAsync(string teamId)
+    public async Task<TeamDTO> GetTeamAsync(int teamId)
     {
       return await _context.Teams.Where(team => team.Id == teamId)
                                  .ProjectTo<TeamDTO>(_mapper.ConfigurationProvider)
                                  .SingleOrDefaultAsync();
+    }
+
+    public async Task UpdateTeamAsync(Team team)
+    {
+      var _team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == team.Id);
+
+      if (_team != null)
+      {
+        _team.Name = team.Name;
+        _team.Description = team.Description;
+      }
     }
   }
 }

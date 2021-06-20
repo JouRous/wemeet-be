@@ -8,8 +8,9 @@ namespace API.Interfaces
 {
   public interface ITeamRepository
   {
-    Task<TeamDTO> GetTeamAsync(string teamId);
+    Task<TeamDTO> GetTeamAsync(int teamId);
     Task<Pagination<TeamDTO>> GetAllAsync(PaginationParams paginationParams);
     void AddTeam(Team team);
+    Task UpdateTeamAsync(Team team);
   }
 }

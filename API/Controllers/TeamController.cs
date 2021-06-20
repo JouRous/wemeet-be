@@ -41,7 +41,7 @@ namespace API.Controllers
     }
 
     [HttpGet("{teamId}")]
-    public async Task<ActionResult<Response<TeamDTO>>> GetTeam(string teamId)
+    public async Task<ActionResult<Response<TeamDTO>>> GetTeam(int teamId)
     {
       var team = await _unitOfWork.TeamRepository.GetTeamAsync(teamId);
 
@@ -70,6 +70,23 @@ namespace API.Controllers
                           .Build();
 
       return response;
+    }
+
+    [HttpPut]
+    public async Task<ActionResult> UpdateTeam(TeamModel teamModel)
+    {
+      var team = _mapper.Map<Team>(teamModel);
+
+      await _unitOfWork.TeamRepository.UpdateTeamAsync(team);
+
+      await _unitOfWork.Complete();
+
+      return Accepted(new
+      {
+        status = 202,
+        success = true,
+        message = "Team had been updated"
+      });
     }
 
   }
