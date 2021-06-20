@@ -10,7 +10,7 @@ namespace API.Entities
     public string Nickname { get; set; }
     public string Position { get; set; }
     public string Avatar { get; set; }
-    public bool isConfirmPassword { get; set; }
+    public bool isFirstLogin { get; set; }
     public bool isDeactivated { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime? DeletedAt { get; set; }

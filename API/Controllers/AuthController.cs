@@ -22,6 +22,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using API.Errors;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -159,6 +160,58 @@ namespace API.Controllers
         status = 200,
         success = true,
         message = "Reset password success"
+      });
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<ActionResult> GetProfile()
+    {
+      var token = await HttpContext.GetTokenAsync("access_token");
+      var handler = new JwtSecurityTokenHandler();
+
+      var email = handler.ReadJwtToken(token)
+             .Claims.Where(c => c.Type.Equals("email")).Select(c => c.Value).SingleOrDefault();
+      var roles = handler.ReadJwtToken(token)
+             .Claims.Where(c => c.Type.Equals("role")).Select(c => c.Value).ToList();
+
+      var User = await _unitOfWork.USerRepository.GetUserAsync(email);
+      var profile = new
+      {
+        User = User,
+        Roles = roles
+      };
+
+      return Ok(new Response<object>
+      {
+        success = true,
+        status = 200,
+        Data = profile
+      });
+    }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<ActionResult> ChangePassword([FromBody] LoginModel model)
+    {
+      var token = await HttpContext.GetTokenAsync("access_token");
+      var handler = new JwtSecurityTokenHandler();
+
+      var email = handler.ReadJwtToken(token)
+             .Claims.Where(c => c.Type.Equals("email")).Select(c => c.Value).SingleOrDefault();
+      var user = await _userManager.Users.FirstOrDefaultAsync(user => user.Email == email);
+
+      await _userManager.RemovePasswordAsync(user);
+      await _userManager.AddPasswordAsync(user, model.Password);
+
+      user.isFirstLogin = false;
+      await _userManager.UpdateAsync(user);
+
+      return Accepted(new
+      {
+        status = 204,
+        success = true,
+        message = "Password had changed"
       });
     }
 

@@ -53,13 +53,19 @@ namespace API.Controllers
     {
       if (await CheckUserExist(userActionModel.Email))
       {
-        return BadRequest("User already taken");
+        return StatusCode(StatusCodes.Status409Conflict, new
+        {
+          status = 409,
+          success = false,
+          message = "User already exist"
+        });
       }
 
       var transaction = await DbContext.Database.BeginTransactionAsync();
       var user = _mapper.Map<AppUser>(userActionModel);
 
       user.UserName = user.Email;
+      user.isFirstLogin = true;
       user.AppUserTeams = new List<AppUserTeam>();
 
       var randomPassword = Utils.Utils.RandomString(9);
@@ -80,41 +86,16 @@ namespace API.Controllers
         return BadRequest(addRoleStatus.Errors);
       }
 
-      // if (!String.IsNullOrEmpty(userActionModel.TeamId))
-      // {
-      //   var appUserTeam = new AppUserTeam
-      //   {
-      //     AppUserId = user.Id,
-      //     TeamId = userActionModel.TeamId
-      //   };
-
-      //   user.AppUserTeams.Add(appUserTeam);
-      //   var addTeamResult = await _userManager.UpdateAsync(user);
-
-      //   if (!addTeamResult.Succeeded)
-      //   {
-      //     await transaction.RollbackAsync();
-      //     return BadRequest();
-      //   }
-      // }
-
       transaction.Commit();
 
       await _emailService.sendMailAsync(user.Email, "Dang ky thanh cong.", $"Mat khau la {randomPassword}");
 
-      var auth = new AuthModel
+      return Ok(new
       {
-        token = await _tokenService.CreateToken(user),
-        User = _mapper.Map<UserDTO>(user),
-        Role = await _userManager.GetRolesAsync(user)
-      };
-
-      return new Response<AuthModel>
-      {
-        status = 200,
         success = true,
-        Data = auth
-      };
+        status = 200,
+        message = "Create user success"
+      });
 
     }
 
@@ -178,31 +159,6 @@ namespace API.Controllers
 
     }
 
-    [HttpGet("me")]
-    public async Task<ActionResult> GetProfile()
-    {
-      var token = await HttpContext.GetTokenAsync("access_token");
-      var handler = new JwtSecurityTokenHandler();
-
-      var email = handler.ReadJwtToken(token)
-             .Claims.Where(c => c.Type.Equals("email")).Select(c => c.Value).SingleOrDefault();
-      var roles = handler.ReadJwtToken(token)
-             .Claims.Where(c => c.Type.Equals("role")).Select(c => c.Value).ToList();
-
-      var User = await _unitOfWork.USerRepository.GetUserAsync(email);
-      var profile = new
-      {
-        User = User,
-        Roles = roles
-      };
-
-      return Ok(new Response<object>
-      {
-        success = true,
-        status = 200,
-        Data = profile
-      });
-    }
 
     [HttpDelete("deactivate/{email}")]
     public async Task<ActionResult> DeactivateUser(string email)
