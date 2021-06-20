@@ -55,6 +55,7 @@ namespace API.Controllers
     public async Task<ActionResult<Response<TeamDTO>>> CreateTeam(TeamModel teamModel)
     {
       var team = _mapper.Map<Team>(teamModel);
+      team.Users = new List<AppUser>();
 
       _unitOfWork.TeamRepository.AddTeam(team);
 
@@ -86,6 +87,35 @@ namespace API.Controllers
         status = 202,
         success = true,
         message = "Team had been updated"
+      });
+    }
+
+    [HttpPost("add-user")]
+    public async Task<ActionResult> AddUserToTeam([FromBody] UserTeamActionModel userTeamActionModel)
+    {
+      await _unitOfWork.TeamRepository.AddUserToTeamAsync(userTeamActionModel.TeamId, userTeamActionModel.UserIds);
+
+      await _unitOfWork.Complete();
+
+      return Ok(new
+      {
+        success = true,
+        status = 200,
+        message = "Users had beed add to team"
+      });
+    }
+
+    [HttpPost("remove-user")]
+    public async Task<ActionResult> RemoveUserFromTeam([FromBody] UserTeamActionModel userTeamActionModel)
+    {
+      await _unitOfWork.TeamRepository.RemoveUserFromTeam(userTeamActionModel.TeamId, userTeamActionModel.UserIds);
+      await _unitOfWork.Complete();
+
+      return Ok(new
+      {
+        success = true,
+        status = 200,
+        message = "Users had beed removed to team"
       });
     }
 

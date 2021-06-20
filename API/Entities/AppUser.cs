@@ -14,6 +14,7 @@ namespace API.Entities
     public bool isDeactivated { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime? DeletedAt { get; set; }
+    public ICollection<Team> Teams { get; set; }
     public ICollection<AppUserRole> UserRoles { get; set; }
     public ICollection<AppUserTeam> AppUserTeams { get; set; }
   }

@@ -10,5 +10,6 @@ namespace API.Entities
     public string Description { get; set; }
     public string Avatar { get; set; }
     public ICollection<AppUserTeam> AppUserTeams { get; set; }
+    public ICollection<AppUser> Users { get; set; }
   }
 }

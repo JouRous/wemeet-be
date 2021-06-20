@@ -55,5 +55,39 @@ namespace API.Repositories
         _team.Description = team.Description;
       }
     }
+
+    public async Task AddUserToTeamAsync(int teamId, ICollection<int> userIds)
+    {
+      var team = await _context.Teams.Include(t => t.AppUserTeams).FirstOrDefaultAsync(t => t.Id == teamId);
+
+      team.AppUserTeams.Clear();
+      foreach (var userId in userIds)
+      {
+        if (userIds.Count > 0)
+        {
+          team.AppUserTeams.Add(new AppUserTeam
+          {
+            AppUserId = userId,
+            TeamId = team.Id
+          });
+        }
+      }
+    }
+
+    public async Task RemoveUserFromTeam(int teamId, ICollection<int> userIds)
+    {
+      var team = await _context.Teams.Include(t => t.AppUserTeams).FirstOrDefaultAsync(t => t.Id == teamId);
+
+
+      foreach (var userId in userIds)
+      {
+        if (userIds.Count > 0)
+        {
+          var relationUserTeam = await _context.AppUserTeams
+                                  .FirstOrDefaultAsync(x => x.TeamId == team.Id && x.AppUserId == userId);
+          _context.Remove(relationUserTeam);
+        }
+      }
+    }
   }
 }
