@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text.Json.Serialization;
 using API.Extensions;
@@ -10,69 +11,82 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using API.Services;
+
 
 namespace API
 {
-  public class Startup
-  {
-    private readonly IConfiguration _config;
-    public Startup(IConfiguration configuration)
-    {
-      _config = configuration;
-    }
+	public class Startup
+	{
+		private readonly IConfiguration _config;
+		public Startup(IConfiguration configuration)
+		{
+			_config = configuration;
+		}
 
-    public void ConfigureServices(IServiceCollection services)
-    {
-      services.AddAppServices(_config);
-      services.AddIdentityServices(_config);
-      services.AddControllers();
-      services.AddCors();
+		public void ConfigureServices(IServiceCollection services)
+		{
+			services.AddAppServices(_config);
+			services.AddIdentityServices(_config);
+			services.AddControllers();
+			services.AddCors(options =>
+									{
+										options.AddPolicy("CorsPolicy", builder => builder
+											.WithOrigins(_config["FE_URL"])
+												.AllowAnyMethod()
+												.AllowAnyHeader()
+												.AllowCredentials());
+									});
+			services.AddSignalR();
+			services.AddMvcCore();
+			/* .AddJsonOptions(opt => opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull); */
+			services.AddSwaggerGen(c =>
+			{
+				c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+			});
+		}
 
-      services.AddMvcCore();
-              /* .AddJsonOptions(opt => opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull); */
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+		{
+			if (env.IsDevelopment())
+			{
+				// app.UseDeveloperExceptionPage();
+				app.UseSwagger();
+				app.UseSwaggerUI(c =>
+				{
+					c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
+					c.RoutePrefix = string.Empty;
+				});
+			}
 
-      services.AddSwaggerGen(c =>
-      {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
-      });
-    }
+			app.UseMiddleware<ExceptionHandler>();
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-    {
-      if (env.IsDevelopment())
-      {
-        // app.UseDeveloperExceptionPage();
-        app.UseSwagger();
-        app.UseSwaggerUI(c =>
-        {
-          c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
-          c.RoutePrefix = string.Empty;
-        });
-      }
+			app.UseHttpsRedirection();
 
-      app.UseMiddleware<ExceptionHandler>();
+			app.UseStaticFiles(new StaticFileOptions()
+			{
+				FileProvider = new PhysicalFileProvider(
+					Path.Combine(Directory.GetCurrentDirectory(), @"Uploads/Avatars")
+				),
+				RequestPath = new PathString("/uploads/avatar")
+			});
 
-      app.UseHttpsRedirection();
+			app.UseRouting();
 
-      app.UseStaticFiles(new StaticFileOptions()
-      {
-        FileProvider = new PhysicalFileProvider(
-          Path.Combine(Directory.GetCurrentDirectory(), @"Uploads/Avatars")
-        ),
-        RequestPath = new PathString("/uploads/avatar")
-      });
+			app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("*"));
+			app.UseCors("CorsPolicy");
+			app.UseEndpoints(endpoints =>
+					{
+						endpoints.MapControllers();
+						endpoints.MapHub<NotificationService>("/notification");
+					});
+			app.UseAuthentication();
+			app.UseAuthorization();
 
-      app.UseRouting();
-
-      app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("*"));
-
-      app.UseAuthentication();
-      app.UseAuthorization();
-
-      app.UseEndpoints(endpoints =>
-      {
-        endpoints.MapControllers();
-      });
-    }
-  }
+			app.UseEndpoints(endpoints =>
+			{
+				endpoints.MapControllers();
+			});
+		}
+	}
 }

@@ -11,66 +11,66 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-  public class TeamController : BaseApiController
-  {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
+	public class TeamController : BaseApiController
+	{
+		private readonly IUnitOfWork _unitOfWork;
+		private readonly IMapper _mapper;
 
-    public TeamController(IUnitOfWork unitOfWork, IMapper mapper)
-    {
-      _unitOfWork = unitOfWork;
-      _mapper = mapper;
-    }
+		public TeamController(IUnitOfWork unitOfWork, IMapper mapper)
+		{
+			_unitOfWork = unitOfWork;
+			_mapper = mapper;
+		}
 
-    [HttpGet]
-    public async Task<ActionResult<Response<IEnumerable<TeamDTO>>>> GetTeams([FromQuery] PaginationParams paginationParams)
-    {
-      var result = await _unitOfWork.TeamRepository.GetAllAsync(paginationParams);
+		[HttpGet]
+		public async Task<ActionResult<Response<IEnumerable<TeamDTO>>>> GetTeams([FromQuery] PaginationParams paginationParams)
+		{
+			var result = await _unitOfWork.TeamRepository.GetAllAsync(paginationParams);
 
-      var response = new ResponseBuilder<IEnumerable<TeamDTO>>()
-                          .AddData(result.Items)
-                          .AddPagination(new PaginationDTO
-                          {
-                            CurrentPage = result.CurrentPage,
-                            PageSize = result.PageSize,
-                            TotalItems = result.TotalItems
-                          })
-                          .Build();
+			var response = new ResponseBuilder<IEnumerable<TeamDTO>>()
+													.AddData(result.Items)
+													.AddPagination(new PaginationDTO
+													{
+														CurrentPage = result.CurrentPage,
+														PageSize = result.PageSize,
+														TotalItems = result.TotalItems
+													})
+													.Build();
 
-      return response;
-    }
+			return response;
+		}
 
-    [HttpGet("{teamId}")]
-    public async Task<ActionResult<Response<TeamDTO>>> GetTeam(string teamId)
-    {
-      var team = await _unitOfWork.TeamRepository.GetTeamAsync(teamId);
+		[HttpGet("{teamId}")]
+		public async Task<ActionResult<Response<TeamDTO>>> GetTeam(string teamId)
+		{
+			var team = await _unitOfWork.TeamRepository.GetTeamAsync(teamId);
 
-      return new ResponseBuilder<TeamDTO>()
-                  .AddData(team)
-                  .Build();
-    }
+			return new ResponseBuilder<TeamDTO>()
+									.AddData(team)
+									.Build();
+		}
 
 
-    [HttpPost]
-    public async Task<ActionResult<Response<TeamDTO>>> CreateTeam(TeamModel teamModel)
-    {
-      var team = _mapper.Map<Team>(teamModel);
+		[HttpPost]
+		public async Task<ActionResult<Response<TeamDTO>>> CreateTeam(TeamModel teamModel)
+		{
+			var team = _mapper.Map<Team>(teamModel);
 
-      _unitOfWork.TeamRepository.AddTeam(team);
+			_unitOfWork.TeamRepository.AddTeam(team);
 
-      bool saveStatus = await _unitOfWork.Complete();
+			bool saveStatus = await _unitOfWork.Complete();
 
-      if (!saveStatus)
-      {
-        return BadRequest();
-      }
+			if (!saveStatus)
+			{
+				return BadRequest();
+			}
 
-      var response = new ResponseBuilder<TeamDTO>()
-                          .AddData(_mapper.Map<TeamDTO>(team))
-                          .Build();
+			var response = new ResponseBuilder<TeamDTO>()
+													.AddData(_mapper.Map<TeamDTO>(team))
+													.Build();
 
-      return response;
-    }
+			return response;
+		}
 
-  }
+	}
 }
