@@ -42,10 +42,23 @@ namespace API.Repositories
                                  .SingleOrDefaultAsync();
     }
 
-    public async Task<Pagination<UserDTO>> GetUsersAsync(PaginationParams paginationParams)
+    public async Task<Pagination<UserDTO>> GetUsersAsync(PaginationParams paginationParams,
+                                                         string filterString,
+                                                         string sort)
     {
-      var query = _context.Users.ProjectTo<UserDTO>(_mapper.ConfigurationProvider).AsQueryable();
+      var stat = _context.Users.Where(u => u.Fullname.Contains(filterString) || u.Email.Contains(filterString))
+                                .ProjectTo<UserDTO>(_mapper.ConfigurationProvider);
 
+      switch (sort)
+      {
+        case "created_at":
+          stat = stat.OrderBy(s => s.CreatedAt);
+          break;
+        case "-created_at":
+          stat = stat.OrderByDescending(s => s.CreatedAt);
+          break;
+      }
+      var query = stat.AsQueryable();
       return await PaginationService.GetPagination<UserDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
 
     }

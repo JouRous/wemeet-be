@@ -23,9 +23,10 @@ namespace API.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<Response<IEnumerable<TeamDTO>>>> GetTeams([FromQuery] PaginationParams paginationParams)
+    public async Task<ActionResult<Response<IEnumerable<TeamDTO>>>> GetTeams(
+      [FromQuery] PaginationParams paginationParams, string filter = "", string sort = "created_at")
     {
-      var result = await _unitOfWork.TeamRepository.GetAllAsync(paginationParams);
+      var result = await _unitOfWork.TeamRepository.GetAllAsync(paginationParams, filter, sort);
 
       var response = new ResponseBuilder<IEnumerable<TeamDTO>>()
                           .AddData(result.Items)

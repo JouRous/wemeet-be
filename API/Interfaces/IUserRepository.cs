@@ -11,7 +11,7 @@ namespace API.Interfaces
   {
     Task<UserDTO> GetUserAsync(string username);
     Task<AppUser> UpdateUserAsync(AppUser user);
-    Task<Pagination<UserDTO>> GetUsersAsync(PaginationParams paginationParams);
+    Task<Pagination<UserDTO>> GetUsersAsync(PaginationParams paginationParams, string filterString, string sort);
     void DeactivateUser(AppUser user);
     void RetrieveUser(AppUser user);
   }
