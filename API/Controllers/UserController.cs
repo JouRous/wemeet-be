@@ -122,15 +122,17 @@ namespace API.Controllers
         return Unauthorized("Admin only! Permission denied");
       }
 
-      var res = await _unitOfWork.USerRepository.GetUsersAsync(paginationParams);
+      var result = await _unitOfWork.USerRepository.GetUsersAsync(paginationParams);
 
       var response = new ResponseBuilder<IEnumerable<UserDTO>>()
-             .AddData(res.Items)
+             .AddData(result.Items)
              .AddPagination(new PaginationDTO
              {
-               CurrentPage = res.CurrentPage,
-               PageSize = res.PageSize,
-               TotalItems = res.TotalItems
+               CurrentPage = result.CurrentPage,
+               PerPage = result.PerPage,
+               Total = result.Total,
+               Count = result.Count,
+               TotalPage = result.TotalPages
              })
              .Build();
 

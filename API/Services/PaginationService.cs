@@ -12,16 +12,21 @@ namespace API.Services
   {
     public static async Task<Pagination<T>> GetPagination<T>(IQueryable<T> query, int pageNumber, int pageSize) where T : class
     {
+      var totalPages = (double)query.Count() / (pageSize == 0 ? 10 : pageSize);
       Pagination<T> pagination = new Pagination<T>
       {
-        TotalItems = query.Count(),
-        PageSize = pageSize == 0 ? 10 : pageSize,
+        Total = query.Count(),
+        PerPage = pageSize == 0 ? 10 : pageSize,
         CurrentPage = pageNumber == 0 ? 1 : pageNumber,
+        TotalPages = Math.Ceiling(totalPages)
       };
 
-      int skip = (pagination.CurrentPage - 1) * pagination.PageSize;
 
-      pagination.Items = await query.Skip(skip).Take(pagination.PageSize).ToListAsync();
+      int skip = (pagination.CurrentPage - 1) * pagination.PerPage;
+
+      var items = await query.Skip(skip).Take(pagination.PerPage).ToListAsync();
+      pagination.Items = items;
+      pagination.Count = items.Count;
 
       return pagination;
     }

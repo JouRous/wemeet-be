@@ -13,36 +13,36 @@ using System.Linq;
 
 namespace API.Repsitotries
 {
-	public class RoomRepository : IRoomRepository
-	{
-		private readonly AppDbContext _context;
-		private readonly IMapper _mapper;
-		public RoomRepository(AppDbContext app, IMapper map)
-		{
-			_context = app;
-			_mapper = map;
-		}
+  public class RoomRepository : IRoomRepository
+  {
+    private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
+    public RoomRepository(AppDbContext app, IMapper map)
+    {
+      _context = app;
+      _mapper = map;
+    }
 
-		public void AddOne(Room roomInfo)
-		{
-			_context.Rooms.Add(roomInfo);
-		}
+    public void AddOne(Room roomInfo)
+    {
+      _context.Rooms.Add(roomInfo);
+    }
 
-		public async Task<Pagination<RoomDTO>> GetAllByPaginationAsync(PaginationParams pageQuery)
-		{
-			var query = _context.Rooms.ProjectTo<RoomDTO>(_mapper.ConfigurationProvider).AsQueryable();
-			var result = await PaginationService
-								.GetPagination<RoomDTO>(query, pageQuery.currentPage, pageQuery.pageSize);
-			return result;
-		}
+    public async Task<Pagination<RoomDTO>> GetAllByPaginationAsync(PaginationParams pageQuery)
+    {
+      var query = _context.Rooms.ProjectTo<RoomDTO>(_mapper.ConfigurationProvider).AsQueryable();
+      var result = await PaginationService
+                .GetPagination<RoomDTO>(query, pageQuery.pageNumber, pageQuery.pageSize);
+      return result;
+    }
 
-		public async Task<RoomDTO> GetOneAsync(string Id)
-		{
-			var result = await _context.Rooms.Where(room => room.Id == Id)
-									.ProjectTo<RoomDTO>(_mapper.ConfigurationProvider)
-									.SingleOrDefaultAsync();
-			return result;
-		}
+    public async Task<RoomDTO> GetOneAsync(string Id)
+    {
+      var result = await _context.Rooms.Where(room => room.Id == Id)
+                  .ProjectTo<RoomDTO>(_mapper.ConfigurationProvider)
+                  .SingleOrDefaultAsync();
+      return result;
+    }
 
-	}
+  }
 }

@@ -46,7 +46,7 @@ namespace API.Repositories
     {
       var query = _context.Users.ProjectTo<UserDTO>(_mapper.ConfigurationProvider).AsQueryable();
 
-      return await PaginationService.GetPagination<UserDTO>(query, paginationParams.currentPage, paginationParams.pageSize);
+      return await PaginationService.GetPagination<UserDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
 
     }
 
