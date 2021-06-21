@@ -27,6 +27,7 @@ namespace API.Repsitotries
 		public void AddOne(Building buildingInfo)
 		{
 			_context.Buildings.Add(buildingInfo);
+
 		}
 
 		public async Task<Pagination<BuildingDTO>> GetAllByPaginationAsync(PaginationParams paginationQuery)

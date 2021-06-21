@@ -63,6 +63,8 @@ namespace API.Controllers
 
 			var res = new ResponseBuilder<RoomDTO>().AddData(roomMapper).Build();
 
+
+
 			return res;
 
 		}

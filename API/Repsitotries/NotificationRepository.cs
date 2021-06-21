@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTO;
+using API.Enums;
 using API.Entities;
 using API.Models;
 using API.Services;
@@ -31,7 +32,9 @@ namespace API.Repsitotries
 
 		public async Task<Pagination<NotificationMessageDTO>> GetMessagesPagiantionAsync(PaginationParams paginationQuery)
 		{
-			var data = _context.Notifications.ProjectTo<NotificationMessageDTO>(_mapper.ConfigurationProvider).AsQueryable();
+			var data = _context.Notifications.ProjectTo<NotificationMessageDTO>(_mapper.ConfigurationProvider)
+								.OrderByDescending(e => e.CreatedAt)
+																.AsQueryable();
 			var res = await PaginationService.GetPagination<NotificationMessageDTO>(data, paginationQuery.currentPage, paginationQuery.pageSize);
 			return res;
 		}
@@ -39,8 +42,9 @@ namespace API.Repsitotries
 		public async Task<Pagination<NotificationMessageDTO>> GetMessagesUnreadPaginationAsync(PaginationParams paginationQuery)
 		{
 			var data = _context.Notifications.Where(notify => notify.IsRead == false)
-																	.ProjectTo<NotificationMessageDTO>(_mapper.ConfigurationProvider)
-																	.AsQueryable();
+						.OrderByDescending(e => e.CreatedAt)
+						.ProjectTo<NotificationMessageDTO>(_mapper.ConfigurationProvider)
+						.AsQueryable();
 			var res = await PaginationService.GetPagination<NotificationMessageDTO>(data, paginationQuery.currentPage, paginationQuery.pageSize);
 			return res;
 		}
