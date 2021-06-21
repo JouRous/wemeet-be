@@ -19,6 +19,7 @@ namespace API.Repsitotries
 	{
 		private readonly AppDbContext _context;
 		private readonly IMapper _mapper;
+
 		public BuildingRepository(AppDbContext app, IMapper map)
 		{
 			_context = app;
@@ -27,34 +28,64 @@ namespace API.Repsitotries
 		public void AddOne(Building buildingInfo)
 		{
 			_context.Buildings.Add(buildingInfo);
+
 		}
 
-		public async Task<Pagination<BuildingDTO>> GetAllByPaginationAsync(PaginationParams paginationQuery)
+		public async Task<Pagination<BuildingDTO>> GetAllByPaginationAsync(
+			PaginationParams paginationParams, string filter, string sort)
 		{
-			var data = _context.Buildings.ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider).AsQueryable();
+			var stat = _context.Buildings.Where(t => t.Name.Contains(filter))
+			.ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider);
 
-			return await PaginationService.GetPagination<BuildingDTO>(data, paginationQuery.currentPage, paginationQuery.pageSize);
+			switch (sort)
+			{
+				case "created_at":
+					stat = stat.OrderBy(t => t.CreatedAt);
+					break;
+				case "-created_at":
+					stat = stat.OrderByDescending(t => t.CreatedAt);
+					break;
+			}
+			var query = stat.AsQueryable();
+			return await PaginationService.GetPagination<BuildingDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
 		}
 
 		public void ModifyOne(BuildingDTO building)
 		{
-			var entity = _mapper.Map<Building>(building);
+			var entity = _context.Buildings.Find(building.Id);
+
+			if (entity != null)
+			{
+				entity.UpdatedAt = DateTime.Now;
+				entity.Address = building.Address == null ? entity.Address : building.Address;
+				entity.Name = building.Name == null ? entity.Name : building.Name;
+			}
+
 			_context.Buildings.Update(entity);
-			_context.SaveChanges();
+
 		}
 
-		public void DeletingOne(string Id)
+		public void DeletingOne(int Id)
 		{
-			var entity = _context.Buildings.Find(Id);
-			_context.Buildings.Remove(entity);
-			_context.SaveChanges();
+			try
+			{
+				var entity = _context.Buildings.Find(Id);
+				if (entity == null) throw new Exception("entity is not exist!");
+				_context.Buildings.Remove(entity);
+			}
+			catch (Exception ex)
+			{
+				throw ex;
+			}
+
 		}
 
-		public async Task<BuildingDTO> GetOneAsync(string Id)
+		public async Task<BuildingDTO> GetOneAsync(int Id)
 		{
-			return await _context.Buildings.Where(building => building.Id == Id)
+			var res = await _context.Buildings.Where(building => building.Id == Id)
 																 .ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider)
 																 .SingleOrDefaultAsync();
+			return res == null ? default : res;
 		}
 
 	}

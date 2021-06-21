@@ -15,6 +15,7 @@ namespace API.Repositories
 		public ITeamRepository TeamRepository => new TeamRepository(_context, _mapper);
 		public IBuildingRepository BuildingRepository => new BuildingRepository(_context, _mapper);
 		public IRoomRepository RoomRepository => new RoomRepository(_context, _mapper);
+		public INotificationRepo NotificationRepository => new NotificationRepository(_context, _mapper);
 
 
 		public UnitOfWork(AppDbContext context, IMapper mapper)
@@ -25,7 +26,9 @@ namespace API.Repositories
 
 		public async Task<bool> Complete()
 		{
-			return await _context.SaveChangesAsync() > 0;
+			var numChanges = await _context.SaveChangesAsync();
+
+			return numChanges > 0;
 		}
 
 		public bool HasChanges()

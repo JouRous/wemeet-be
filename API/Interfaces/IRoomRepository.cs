@@ -9,11 +9,11 @@ namespace API.Interfaces
 {
 	public interface IRoomRepository
 	{
-		void AddOne(RoomDTO info);
-		Task<Pagination<RoomDTO>> GetAllByPaginationAsync(PaginationParams paginationQuery);
-		Task<RoomDTO> GetOneAsync(string Id);
+		void AddOne(Room info);
+		Task<Pagination<RoomDTO>> GetAllByPaginationAsync(PaginationParams paginationQuery, string f, string s);
+		Task<RoomDTO> GetOneAsync(int Id);
 		int GetSizeOfEntity(Func<Room, bool> query);
-		void DeletingOne(string Id);
+		void DeletingOne(int Id);
 		void UpdatingOne(RoomDTO room);
 	}
 }

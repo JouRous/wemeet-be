@@ -29,6 +29,12 @@ namespace API.Repositories
       _context = context;
     }
 
+    public void DeactivateUser(AppUser user)
+    {
+      user.DeletedAt = DateTime.Now;
+      user.isDeactivated = true;
+    }
+
     public async Task<UserDTO> GetUserAsync(string username)
     {
       return await _context.Users.Where(user => user.UserName == username)
@@ -36,40 +42,45 @@ namespace API.Repositories
                                  .SingleOrDefaultAsync();
     }
 
-    public async Task<Pagination<UserDTO>> GetUsersAsync(PaginationParams paginationParams)
+    public async Task<Pagination<UserDTO>> GetUsersAsync(PaginationParams paginationParams,
+                                                         string filterString,
+                                                         string sort)
     {
-      var query = _context.Users.ProjectTo<UserDTO>(_mapper.ConfigurationProvider).AsQueryable();
+      var stat = _context.Users.Where(u => u.Fullname.Contains(filterString) || u.Email.Contains(filterString))
+                                .ProjectTo<UserDTO>(_mapper.ConfigurationProvider);
 
-      return await PaginationService.GetPagination<UserDTO>(query, paginationParams.currentPage, paginationParams.pageSize);
+      switch (sort)
+      {
+        case "created_at":
+          stat = stat.OrderBy(s => s.CreatedAt);
+          break;
+        case "-created_at":
+          stat = stat.OrderByDescending(s => s.CreatedAt);
+          break;
+      }
+      var query = stat.AsQueryable();
+      return await PaginationService.GetPagination<UserDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
 
     }
 
-    public async Task SaveResetPasswordToken(string email, string token)
+    public void RetrieveUser(AppUser user)
     {
-      var user = await _context.Users.FirstOrDefaultAsync(user => user.Email == email.ToLower());
-      user.ResetPasswordToken = token;
+      user.isDeactivated = false;
+      user.DeletedAt = null;
     }
 
-    public async Task UpdateUserAsync(AppUser user)
+    public async Task<AppUser> UpdateUserAsync(AppUser user)
     {
-      var _user = await _context.Users.FirstOrDefaultAsync(x => x.Email == user.Email);
-
+      var _user = await _context.Users.Include(x => x.UserRoles).ThenInclude(x => x.Role).FirstOrDefaultAsync(x => x.Email == user.Email);
       if (_user != null)
       {
-        _user = user;
-      }
-    }
-
-    public async Task<bool> VerifyResetPasswordToken(AppUser user, string token)
-    {
-      if (user.ResetPasswordToken == token)
-      {
-        user.ResetPasswordToken = null;
-        await _context.SaveChangesAsync();
-        return true;
+        _user.Nickname = user.Nickname;
+        _user.Fullname = user.Fullname;
+        _user.Position = user.Position;
       }
 
-      return false;
+      return _user;
     }
+
   }
 }
