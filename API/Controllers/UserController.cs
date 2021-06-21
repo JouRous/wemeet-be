@@ -108,7 +108,7 @@ namespace API.Controllers
     [Authorize]
     [HttpGet]
     public async Task<ActionResult<Response<IEnumerable<UserDTO>>>> GetUsers(
-    [FromQuery] PaginationParams paginationParams)
+    [FromQuery] PaginationParams paginationParams, string filter = "", string sort = "created_at")
     {
       var token = await HttpContext.GetTokenAsync("access_token");
       var handler = new JwtSecurityTokenHandler();
@@ -122,7 +122,7 @@ namespace API.Controllers
         return Unauthorized("Admin only! Permission denied");
       }
 
-      var result = await _unitOfWork.USerRepository.GetUsersAsync(paginationParams);
+      var result = await _unitOfWork.USerRepository.GetUsersAsync(paginationParams, filter, sort);
 
       var response = new ResponseBuilder<IEnumerable<UserDTO>>()
              .AddData(result.Items)
@@ -131,7 +131,7 @@ namespace API.Controllers
                CurrentPage = result.CurrentPage,
                PerPage = result.PerPage,
                Total = result.Total,
-               Count = result.Count,
+               Count = (int)result.Count,
                TotalPage = result.TotalPages
              })
              .Build();

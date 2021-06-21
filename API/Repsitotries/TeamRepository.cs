@@ -30,10 +30,20 @@ namespace API.Repositories
       _context.Teams.Add(team);
     }
 
-    public async Task<Pagination<TeamDTO>> GetAllAsync(PaginationParams paginationParams)
+    public async Task<Pagination<TeamDTO>> GetAllAsync(PaginationParams paginationParams, string filter, string sort)
     {
-      var query = _context.Teams.ProjectTo<TeamDTO>(_mapper.ConfigurationProvider).AsQueryable();
+      var stat = _context.Teams.Where(t => t.Name.Contains(filter)).ProjectTo<TeamDTO>(_mapper.ConfigurationProvider);
 
+      switch (sort)
+      {
+        case "created_at":
+          stat = stat.OrderBy(t => t.CreatedAt);
+          break;
+        case "-created_at":
+          stat = stat.OrderByDescending(t => t.CreatedAt);
+          break;
+      }
+      var query = stat.AsQueryable();
       return await PaginationService.GetPagination<TeamDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
     }
 
