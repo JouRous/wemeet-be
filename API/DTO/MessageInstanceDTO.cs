@@ -4,6 +4,7 @@ namespace API.Interfaces
 {
 	public class NotificationMessageDTO
 	{
+		public string Id { get; set; }
 		public EntityEnum EntityType { get; set; }
 		public string EntityId { get; set; }
 		public string EndpointDetails { get; set; }

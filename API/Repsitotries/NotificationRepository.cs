@@ -35,7 +35,7 @@ namespace API.Repsitotries
 			var data = _context.Notifications.ProjectTo<NotificationMessageDTO>(_mapper.ConfigurationProvider)
 								.OrderByDescending(e => e.CreatedAt)
 																.AsQueryable();
-			var res = await PaginationService.GetPagination<NotificationMessageDTO>(data, paginationQuery.currentPage, paginationQuery.pageSize);
+			var res = await PaginationService.GetPagination<NotificationMessageDTO>(data, paginationQuery.pageNumber, paginationQuery.pageSize);
 			return res;
 		}
 
@@ -45,7 +45,7 @@ namespace API.Repsitotries
 						.OrderByDescending(e => e.CreatedAt)
 						.ProjectTo<NotificationMessageDTO>(_mapper.ConfigurationProvider)
 						.AsQueryable();
-			var res = await PaginationService.GetPagination<NotificationMessageDTO>(data, paginationQuery.currentPage, paginationQuery.pageSize);
+			var res = await PaginationService.GetPagination<NotificationMessageDTO>(data, paginationQuery.pageNumber, paginationQuery.pageSize);
 			return res;
 		}
 

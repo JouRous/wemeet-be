@@ -89,7 +89,7 @@ namespace API.Controllers
 			{
 				status = 202,
 				success = true,
-				message = "Team had been updated"
+				message = "Team had been updated",
 			});
 		}
 

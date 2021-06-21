@@ -14,37 +14,51 @@ using System;
 
 namespace API.Repsitotries
 {
-  public class RoomRepository : IRoomRepository
-  {
-    private readonly AppDbContext _context;
-    private readonly IMapper _mapper;
-    public RoomRepository(AppDbContext app, IMapper map)
-    {
-      _context = app;
-      _mapper = map;
-    }
-
-		public void AddOne(RoomDTO roomInfo)
+	public class RoomRepository : IRoomRepository
+	{
+		private readonly AppDbContext _context;
+		private readonly IMapper _mapper;
+		public RoomRepository(AppDbContext app, IMapper map)
 		{
-			var room = _mapper.Map<Room>(roomInfo);
-			_context.Rooms.Add(room);
+			_context = app;
+			_mapper = map;
 		}
 
-    public async Task<Pagination<RoomDTO>> GetAllByPaginationAsync(PaginationParams pageQuery)
-    {
-      var query = _context.Rooms.ProjectTo<RoomDTO>(_mapper.ConfigurationProvider).AsQueryable();
-      var result = await PaginationService
-                .GetPagination<RoomDTO>(query, pageQuery.pageNumber, pageQuery.pageSize);
-      return result;
-    }
+		public void AddOne(Room roomInfo)
+		{
+			var e = _context.Buildings.Find(roomInfo.BuildingId);
 
-    public async Task<RoomDTO> GetOneAsync(string Id)
-    {
-      var result = await _context.Rooms.Where(room => room.Id == Id)
-                  .ProjectTo<RoomDTO>(_mapper.ConfigurationProvider)
-                  .SingleOrDefaultAsync();
-      return result;
-    }
+			if (e == null) throw new Exception("BuildingId not matching !");
+
+			_context.Rooms.Add(roomInfo);
+		}
+
+		public async Task<Pagination<RoomDTO>> GetAllByPaginationAsync(
+			PaginationParams paginationParams, string filter, string sort)
+		{
+			var stat = _context.Rooms.Where(t => t.Name.Contains(filter))
+			.ProjectTo<RoomDTO>(_mapper.ConfigurationProvider);
+
+			switch (sort)
+			{
+				case "created_at":
+					stat = stat.OrderBy(t => t.CreatedAt);
+					break;
+				case "-created_at":
+					stat = stat.OrderByDescending(t => t.CreatedAt);
+					break;
+			}
+			var query = stat.AsQueryable();
+			return await PaginationService.GetPagination<RoomDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
+		}
+
+		public async Task<RoomDTO> GetOneAsync(string Id)
+		{
+			var result = await _context.Rooms.Where(room => room.Id == Id)
+									.ProjectTo<RoomDTO>(_mapper.ConfigurationProvider)
+									.SingleOrDefaultAsync();
+			return result;
+		}
 
 		public int GetSizeOfEntity(Func<Room, bool> query)
 		{
@@ -54,16 +68,28 @@ namespace API.Repsitotries
 
 		public void UpdatingOne(RoomDTO data)
 		{
-			var entity = _mapper.Map<Room>(data);
+			var entity = _context.Rooms.Find(data.Id);
+			if (data != null)
+			{
+				if (data.BuildingId != null)
+				{
+					var e = _context.Buildings.Find(data.BuildingId);
+					entity.BuildingId = e.Id;
+				}
+				entity.Capacity = data.Capacity == 0 ? entity.Capacity : data.Capacity;
+				entity.Name = data.Name == null ? entity.Name : data.Name;
+				entity.UpdatedAt = DateTime.Now;
+			}
+
 			_context.Rooms.Update(entity);
-			_context.SaveChanges();
+
 		}
 
 		public void DeletingOne(string Id)
 		{
 			var entity = _context.Rooms.Find(Id);
 			_context.Rooms.Remove(entity);
-			_context.SaveChanges();
+
 		}
 
 	}

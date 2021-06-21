@@ -12,36 +12,37 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-  public class RoomController : BaseApiController
-  {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
+	public class RoomController : BaseApiController
+	{
+		private readonly IUnitOfWork _unitOfWork;
+		private readonly IMapper _mapper;
 
-    public RoomController(IUnitOfWork unitOfWork, IMapper mapper)
-    {
-      _unitOfWork = unitOfWork;
-      _mapper = mapper;
-    }
+		public RoomController(IUnitOfWork unitOfWork, IMapper mapper)
+		{
+			_unitOfWork = unitOfWork;
+			_mapper = mapper;
+		}
 
-    [HttpGet]
-    public async Task<ActionResult<Response<IEnumerable<RoomDTO>>>> GetTeams([FromQuery] PaginationParams paginationParams)
-    {
-      var result = await _unitOfWork.RoomRepository.GetAllByPaginationAsync(paginationParams);
+		[HttpGet]
+		public async Task<ActionResult<Response<IEnumerable<RoomDTO>>>> GetAlls(
+			[FromQuery] PaginationParams paginationParams, string filter = "", string sort = "-created_at")
+		{
+			var result = await _unitOfWork.RoomRepository.GetAllByPaginationAsync(paginationParams, filter, sort);
 
-      var response = new ResponseBuilder<IEnumerable<RoomDTO>>()
-                          .AddData(result.Items)
-                          .AddPagination(new PaginationDTO
-                          {
-                            CurrentPage = result.CurrentPage,
-                            PerPage = result.PerPage,
-                            Total = result.Total,
-                            Count = result.Count,
-                            TotalPage = result.TotalPages
-                          })
-                          .Build();
+			var response = new ResponseBuilder<IEnumerable<RoomDTO>>()
+													.AddData(result.Items)
+													.AddPagination(new PaginationDTO
+													{
+														CurrentPage = result.CurrentPage,
+														PerPage = result.PerPage,
+														Total = result.Total,
+														Count = result.Count,
+														TotalPage = result.TotalPages
+													})
+													.Build();
 
-      return response;
-    }
+			return response;
+		}
 
 		[HttpGet("{RoomId}")]
 		public async Task<ActionResult<Response<RoomDTO>>> GetRoomInfo(string RoomId)
@@ -53,7 +54,7 @@ namespace API.Controllers
 		[HttpPost]
 		public async Task<ActionResult<Response<RoomDTO>>> AddRoom([FromBody] RoomModel body)
 		{
-			var roomMapper = _mapper.Map<RoomDTO>(body);
+			var roomMapper = _mapper.Map<Room>(body);
 
 			roomMapper.Id = Guid.NewGuid().ToString();
 
@@ -63,16 +64,15 @@ namespace API.Controllers
 
 			if (!isCompleted) return BadRequest();
 
-			var res = new ResponseBuilder<RoomDTO>().AddData(roomMapper).Build();
-
-
+			var res = new ResponseBuilder<RoomDTO>().AddData(_mapper.Map<RoomDTO>(roomMapper)).Build();
 
 			return res;
 
 		}
 
-		[HttpPut("{roomId}")]
-		public async Task<ActionResult<Response<RoomDTO>>> EditInfoRoom(string roomId, [FromBody] RoomModel body)
+		[HttpPut]
+		[Route("{roomId}")]
+		public async Task<ActionResult<Response<RoomDTO>>> EditInfoRoom([FromRoute] string roomId, [FromBody] RoomModel body)
 		{
 			var roomMapper = _mapper.Map<RoomDTO>(body);
 			roomMapper.Id = roomId;
@@ -85,7 +85,7 @@ namespace API.Controllers
 
 			var res = new ResponseBuilder<RoomDTO>().AddData(roomMapper).Build();
 
-			return res;
+			return Accepted(res);
 		}
 
 		[HttpDelete("{roomId}")]

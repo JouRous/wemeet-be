@@ -75,17 +75,14 @@ namespace API
 
 			app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("*"));
 			app.UseCors("CorsPolicy");
-			app.UseEndpoints(endpoints =>
-					{
-						endpoints.MapControllers();
-						endpoints.MapHub<NotificationService>("/notification");
-					});
+
 			app.UseAuthentication();
 			app.UseAuthorization();
 
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllers();
+				endpoints.MapHub<NotificationService>("/notification");
 			});
 		}
 	}
