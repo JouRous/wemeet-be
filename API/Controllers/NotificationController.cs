@@ -59,7 +59,7 @@ namespace API.Controllers
 		}
 
 
-		[HttpGet]
+		[HttpPost]
 		[Route("unread")]
 		public async Task<ActionResult> GetUnReadNotify([FromQuery] PaginationParams paginationParams)
 		{
@@ -77,52 +77,6 @@ namespace API.Controllers
 													.Build();
 
 			return Accepted(response);
-		}
-
-		[HttpPut]
-		public async Task<ActionResult> UpdateTeam(TeamModel teamModel)
-		{
-			var team = _mapper.Map<Team>(teamModel);
-
-			await _unitOfWork.TeamRepository.UpdateTeamAsync(team);
-
-			await _unitOfWork.Complete();
-
-			return Accepted(new
-			{
-				status = 202,
-				success = true,
-				message = "Team had been updated",
-			});
-		}
-
-		[HttpPost("add-user")]
-		public async Task<ActionResult> AddUserToTeam([FromBody] UserTeamActionModel userTeamActionModel)
-		{
-			await _unitOfWork.TeamRepository.AddUserToTeamAsync(userTeamActionModel.TeamId, userTeamActionModel.UserIds);
-
-			await _unitOfWork.Complete();
-
-			return Ok(new
-			{
-				success = true,
-				status = 200,
-				message = "Users had beed add to team"
-			});
-		}
-
-		[HttpPost("remove-user")]
-		public async Task<ActionResult> RemoveUserFromTeam([FromBody] UserTeamActionModel userTeamActionModel)
-		{
-			await _unitOfWork.TeamRepository.RemoveUserFromTeam(userTeamActionModel.TeamId, userTeamActionModel.UserIds);
-			await _unitOfWork.Complete();
-
-			return Ok(new
-			{
-				success = true,
-				status = 200,
-				message = "Users had beed removed to team"
-			});
 		}
 
 	}
