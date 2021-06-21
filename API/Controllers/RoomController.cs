@@ -12,34 +12,36 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-	public class RoomController : BaseApiController
-	{
-		private readonly IUnitOfWork _unitOfWork;
-		private readonly IMapper _mapper;
+  public class RoomController : BaseApiController
+  {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
 
-		public RoomController(IUnitOfWork unitOfWork, IMapper mapper)
-		{
-			_unitOfWork = unitOfWork;
-			_mapper = mapper;
-		}
+    public RoomController(IUnitOfWork unitOfWork, IMapper mapper)
+    {
+      _unitOfWork = unitOfWork;
+      _mapper = mapper;
+    }
 
-		[HttpGet]
-		public async Task<ActionResult<Response<IEnumerable<RoomDTO>>>> GetTeams([FromQuery] PaginationParams paginationParams)
-		{
-			var result = await _unitOfWork.RoomRepository.GetAllByPaginationAsync(paginationParams);
+    [HttpGet]
+    public async Task<ActionResult<Response<IEnumerable<RoomDTO>>>> GetTeams([FromQuery] PaginationParams paginationParams)
+    {
+      var result = await _unitOfWork.RoomRepository.GetAllByPaginationAsync(paginationParams);
 
-			var response = new ResponseBuilder<IEnumerable<RoomDTO>>()
-													.AddData(result.Items)
-													.AddPagination(new PaginationDTO
-													{
-														CurrentPage = result.CurrentPage,
-														PageSize = result.PageSize,
-														TotalItems = result.TotalItems
-													})
-													.Build();
+      var response = new ResponseBuilder<IEnumerable<RoomDTO>>()
+                          .AddData(result.Items)
+                          .AddPagination(new PaginationDTO
+                          {
+                            CurrentPage = result.CurrentPage,
+                            PerPage = result.PerPage,
+                            Total = result.Total,
+                            Count = result.Count,
+                            TotalPage = result.TotalPages
+                          })
+                          .Build();
 
-			return response;
-		}
+      return response;
+    }
 
 		[HttpGet("{RoomId}")]
 		public async Task<ActionResult<Response<RoomDTO>>> GetRoomInfo(string RoomId)

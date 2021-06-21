@@ -12,16 +12,16 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-	public class BuildingController : BaseApiController
-	{
-		private readonly IUnitOfWork _unitOfWork;
-		private readonly IMapper _mapper;
+  public class BuildingController : BaseApiController
+  {
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
 
-		public BuildingController(IUnitOfWork unitOfWork, IMapper mapper)
-		{
-			_unitOfWork = unitOfWork;
-			_mapper = mapper;
-		}
+    public BuildingController(IUnitOfWork unitOfWork, IMapper mapper)
+    {
+      _unitOfWork = unitOfWork;
+      _mapper = mapper;
+    }
 
 		[HttpGet]
 		public async Task<ActionResult<Response<IEnumerable<BuildingDTO>>>> GetAllBuildings([FromQuery] PaginationParams paginationParams)
@@ -43,8 +43,8 @@ namespace API.Controllers
 													})
 													.Build();
 
-			return response;
-		}
+      return response;
+    }
 
 		[HttpGet("{buildingId}")]
 		public async Task<ActionResult<Response<BuildingDTO>>> GetBuildingInfo(string buildingId)

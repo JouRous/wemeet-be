@@ -30,19 +30,74 @@ namespace API.Repositories
       _context.Teams.Add(team);
     }
 
-    public async Task<Pagination<TeamDTO>> GetAllAsync(PaginationParams paginationParams)
+    public async Task<Pagination<TeamDTO>> GetAllAsync(PaginationParams paginationParams, string filter, string sort)
     {
-      var query = _context.Teams.ProjectTo<TeamDTO>(_mapper.ConfigurationProvider).AsQueryable();
+      var stat = _context.Teams.Where(t => t.Name.Contains(filter)).ProjectTo<TeamDTO>(_mapper.ConfigurationProvider);
 
-      return await PaginationService.GetPagination<TeamDTO>(query, paginationParams.currentPage, paginationParams.pageSize);
+      switch (sort)
+      {
+        case "created_at":
+          stat = stat.OrderBy(t => t.CreatedAt);
+          break;
+        case "-created_at":
+          stat = stat.OrderByDescending(t => t.CreatedAt);
+          break;
+      }
+      var query = stat.AsQueryable();
+      return await PaginationService.GetPagination<TeamDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
     }
 
 
-    public async Task<TeamDTO> GetTeamAsync(string teamId)
+    public async Task<TeamDTO> GetTeamAsync(int teamId)
     {
       return await _context.Teams.Where(team => team.Id == teamId)
                                  .ProjectTo<TeamDTO>(_mapper.ConfigurationProvider)
                                  .SingleOrDefaultAsync();
+    }
+
+    public async Task UpdateTeamAsync(Team team)
+    {
+      var _team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == team.Id);
+
+      if (_team != null)
+      {
+        _team.Name = team.Name;
+        _team.Description = team.Description;
+      }
+    }
+
+    public async Task AddUserToTeamAsync(int teamId, ICollection<int> userIds)
+    {
+      var team = await _context.Teams.Include(t => t.AppUserTeams).FirstOrDefaultAsync(t => t.Id == teamId);
+
+      team.AppUserTeams.Clear();
+      foreach (var userId in userIds)
+      {
+        if (userIds.Count > 0)
+        {
+          team.AppUserTeams.Add(new AppUserTeam
+          {
+            AppUserId = userId,
+            TeamId = team.Id
+          });
+        }
+      }
+    }
+
+    public async Task RemoveUserFromTeam(int teamId, ICollection<int> userIds)
+    {
+      var team = await _context.Teams.Include(t => t.AppUserTeams).FirstOrDefaultAsync(t => t.Id == teamId);
+
+
+      foreach (var userId in userIds)
+      {
+        if (userIds.Count > 0)
+        {
+          var relationUserTeam = await _context.AppUserTeams
+                                  .FirstOrDefaultAsync(x => x.TeamId == team.Id && x.AppUserId == userId);
+          _context.Remove(relationUserTeam);
+        }
+      }
     }
   }
 }
