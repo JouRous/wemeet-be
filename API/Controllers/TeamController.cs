@@ -32,8 +32,10 @@ namespace API.Controllers
                           .AddPagination(new PaginationDTO
                           {
                             CurrentPage = result.CurrentPage,
-                            PageSize = result.PageSize,
-                            TotalItems = result.TotalItems
+                            PerPage = result.PerPage,
+                            Total = result.Total,
+                            Count = result.Count,
+                            TotalPage = result.TotalPages
                           })
                           .Build();
 

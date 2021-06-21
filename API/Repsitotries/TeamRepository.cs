@@ -34,7 +34,7 @@ namespace API.Repositories
     {
       var query = _context.Teams.ProjectTo<TeamDTO>(_mapper.ConfigurationProvider).AsQueryable();
 
-      return await PaginationService.GetPagination<TeamDTO>(query, paginationParams.currentPage, paginationParams.pageSize);
+      return await PaginationService.GetPagination<TeamDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
     }
 
 
