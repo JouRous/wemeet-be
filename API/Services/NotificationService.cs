@@ -11,10 +11,7 @@ namespace API.Services
 {
 	public class NotificationService : Hub
 	{
-		private async Task PushNotification(Response<NotificationMessageDTO> msg)
-		{
-			await Clients.All.SendAsync("ReceiveNotify", msg);
-		}
+
 
 		public async Task CreateNotify(NotificationMessageDTO msg)
 		{
@@ -24,7 +21,7 @@ namespace API.Services
 								.AddData(msg)
 								.Build();
 
-				await PushNotification(res);
+				await Clients.All.SendAsync("ReceiveNotify", msg);
 			}
 			catch (Exception e)
 			{

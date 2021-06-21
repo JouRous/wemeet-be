@@ -12,8 +12,8 @@ namespace API.Interfaces
 		Task<Pagination<BuildingDTO>> GetAllByPaginationAsync(
 			PaginationParams paginationParams, string filter = "", string sort = "created_at"
 			);
-		Task<BuildingDTO> GetOneAsync(string Id);
+		Task<BuildingDTO> GetOneAsync(int Id);
 		void ModifyOne(BuildingDTO building);
-		void DeletingOne(string id);
+		void DeletingOne(int id);
 	}
 }

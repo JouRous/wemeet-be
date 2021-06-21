@@ -27,6 +27,8 @@ namespace API.Utils
 			CreateMap<RoomModel, Room>();
 			CreateMap<RoomModel, RoomDTO>();
 
+			CreateMap<Notification, NotificationMessageDTO>();
+
 		}
 	}
 }

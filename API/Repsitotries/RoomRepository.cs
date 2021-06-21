@@ -52,7 +52,7 @@ namespace API.Repsitotries
 			return await PaginationService.GetPagination<RoomDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
 		}
 
-		public async Task<RoomDTO> GetOneAsync(string Id)
+		public async Task<RoomDTO> GetOneAsync(int Id)
 		{
 			var result = await _context.Rooms.Where(room => room.Id == Id)
 									.ProjectTo<RoomDTO>(_mapper.ConfigurationProvider)
@@ -85,7 +85,7 @@ namespace API.Repsitotries
 
 		}
 
-		public void DeletingOne(string Id)
+		public void DeletingOne(int Id)
 		{
 			var entity = _context.Rooms.Find(Id);
 			_context.Rooms.Remove(entity);

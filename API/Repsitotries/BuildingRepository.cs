@@ -19,6 +19,7 @@ namespace API.Repsitotries
 	{
 		private readonly AppDbContext _context;
 		private readonly IMapper _mapper;
+
 		public BuildingRepository(AppDbContext app, IMapper map)
 		{
 			_context = app;
@@ -64,7 +65,7 @@ namespace API.Repsitotries
 
 		}
 
-		public void DeletingOne(string Id)
+		public void DeletingOne(int Id)
 		{
 			try
 			{
@@ -79,7 +80,7 @@ namespace API.Repsitotries
 
 		}
 
-		public async Task<BuildingDTO> GetOneAsync(string Id)
+		public async Task<BuildingDTO> GetOneAsync(int Id)
 		{
 			var res = await _context.Buildings.Where(building => building.Id == Id)
 																 .ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider)

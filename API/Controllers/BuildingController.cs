@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.DTO;
+using API.Services;
 using API.Entities;
 using API.Interfaces;
 using API.Models;
@@ -16,6 +17,7 @@ namespace API.Controllers
 	{
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly IMapper _mapper;
+		private NotificationService _notificationService = new NotificationService();
 
 		public BuildingController(IUnitOfWork unitOfWork, IMapper mapper)
 		{
@@ -47,7 +49,7 @@ namespace API.Controllers
 		}
 
 		[HttpGet("{buildingId}")]
-		public async Task<ActionResult<Response<BuildingDTO>>> GetBuildingInfo(string buildingId)
+		public async Task<ActionResult<Response<BuildingDTO>>> GetBuildingInfo(int buildingId)
 		{
 			var buildingInfo = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
 
@@ -57,29 +59,47 @@ namespace API.Controllers
 		[HttpPost]
 		public async Task<ActionResult<Response<BuildingDTO>>> AddBuilding([FromBody] BuildingModel buildingInfo)
 		{
-			var building = _mapper.Map<Building>(buildingInfo);
-
-			building.Id = Guid.NewGuid().ToString();
-
-			_unitOfWork.BuildingRepository.AddOne(building);
-
-			var isCreated = await _unitOfWork.Complete();
-
-			if (!isCreated)
+			try
 			{
-				return BadRequest();
+				var building = _mapper.Map<Building>(buildingInfo);
+
+				_unitOfWork.BuildingRepository.AddOne(building);
+
+				var isCreated = await _unitOfWork.Complete();
+
+				if (!isCreated)
+				{
+					return BadRequest();
+				}
+
+				var msg = new Notification()
+				{
+					EntityType = Enums.EntityEnum.Building,
+					EntityId = building.Id,
+					EndpointDetails = $"/api/building/{building.Id}",
+					Message = "New building has created !"
+				};
+
+				var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+
+				await _notificationService.CreateNotify(msgDto);
+
+				var res = new ResponseBuilder<BuildingDTO>()
+												.AddData(_mapper.Map<BuildingDTO>(building))
+												.Build();
+
+				return res;
 			}
+			catch (Exception e)
+			{
 
-			var res = new ResponseBuilder<BuildingDTO>()
-											.AddData(_mapper.Map<BuildingDTO>(building))
-											.Build();
-
-			return res;
+				throw e;
+			}
 		}
 
 		[HttpPut]
 		[Route("{buildingId}")]
-		public async Task<ActionResult> EditInfoBuilding([FromRoute] string buildingId, [FromBody] BuildingModel body)
+		public async Task<ActionResult> EditInfoBuilding([FromRoute] int buildingId, [FromBody] BuildingModel body)
 		{
 			var building = _mapper.Map<BuildingDTO>(body);
 
@@ -93,6 +113,18 @@ namespace API.Controllers
 				return BadRequest();
 			}
 
+			var msg = new Notification()
+			{
+				EntityType = Enums.EntityEnum.Building,
+				EntityId = building.Id,
+				EndpointDetails = $"/api/building/{building.Id}",
+				Message = "The building has updated !"
+			};
+
+			var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+
+			await _notificationService.CreateNotify(msgDto);
+
 			return Accepted(new
 			{
 				status = 202,
@@ -103,8 +135,10 @@ namespace API.Controllers
 		}
 
 		[HttpDelete("{buildingId}")]
-		public async Task<ActionResult<Response<string>>> RemoveBuilding(string buildingId)
+		public async Task<ActionResult<Response<string>>> RemoveBuilding(int buildingId)
 		{
+			BuildingDTO building = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
+
 			_unitOfWork.BuildingRepository.DeletingOne(buildingId);
 
 			var isCompleted = await _unitOfWork.Complete();
@@ -113,6 +147,18 @@ namespace API.Controllers
 			{
 				return BadRequest();
 			}
+
+			var msg = new Notification()
+			{
+				EntityType = Enums.EntityEnum.Building,
+				EntityId = building.Id,
+				EndpointDetails = $"/api/building/{building.Id}",
+				Message = "New building has deleted !"
+			};
+
+			var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+
+			await _notificationService.CreateNotify(msgDto);
 
 			var res = new ResponseBuilder<string>()
 											.AddData(_mapper.Map<string>("deleted"))

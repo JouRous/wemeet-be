@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTO;
+using API.Interfaces;
 using API.Enums;
 using API.Entities;
 using API.Models;
@@ -15,7 +16,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 namespace API.Repsitotries
 {
-	public class NotificationRepository
+	public class NotificationRepository : INotificationRepo
 	{
 		private readonly AppDbContext _context;
 		private readonly IMapper _mapper;
@@ -28,6 +29,7 @@ namespace API.Repsitotries
 		public void AddOne(Notification message)
 		{
 			_context.Notifications.Add(message);
+			_context.SaveChanges();
 		}
 
 		public async Task<Pagination<NotificationMessageDTO>> GetMessagesPagiantionAsync(PaginationParams paginationQuery)

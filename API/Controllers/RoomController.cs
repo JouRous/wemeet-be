@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.DTO;
+using API.Services;
 using API.Entities;
 using API.Interfaces;
 using API.Models;
@@ -16,6 +17,7 @@ namespace API.Controllers
 	{
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly IMapper _mapper;
+		private NotificationService _notificationService = new NotificationService();
 
 		public RoomController(IUnitOfWork unitOfWork, IMapper mapper)
 		{
@@ -45,7 +47,7 @@ namespace API.Controllers
 		}
 
 		[HttpGet("{RoomId}")]
-		public async Task<ActionResult<Response<RoomDTO>>> GetRoomInfo(string RoomId)
+		public async Task<ActionResult<Response<RoomDTO>>> GetRoomInfo(int RoomId)
 		{
 			var RoomInfo = await _unitOfWork.RoomRepository.GetOneAsync(RoomId);
 			return new ResponseBuilder<RoomDTO>().AddData(RoomInfo).Build();
@@ -56,13 +58,21 @@ namespace API.Controllers
 		{
 			var roomMapper = _mapper.Map<Room>(body);
 
-			roomMapper.Id = Guid.NewGuid().ToString();
-
 			_unitOfWork.RoomRepository.AddOne(roomMapper);
 
 			var isCompleted = await _unitOfWork.Complete();
 
 			if (!isCompleted) return BadRequest();
+
+			var msg = new Notification()
+			{
+				EntityType = Enums.EntityEnum.Building,
+				EntityId = roomMapper.Id,
+				EndpointDetails = $"/api/room/{roomMapper.Id}",
+				Message = "New Room has created !"
+			};
+			var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+			await _notificationService.CreateNotify(msgDto);
 
 			var res = new ResponseBuilder<RoomDTO>().AddData(_mapper.Map<RoomDTO>(roomMapper)).Build();
 
@@ -72,7 +82,7 @@ namespace API.Controllers
 
 		[HttpPut]
 		[Route("{roomId}")]
-		public async Task<ActionResult<Response<RoomDTO>>> EditInfoRoom([FromRoute] string roomId, [FromBody] RoomModel body)
+		public async Task<ActionResult<Response<RoomDTO>>> EditInfoRoom([FromRoute] int roomId, [FromBody] RoomModel body)
 		{
 			var roomMapper = _mapper.Map<RoomDTO>(body);
 			roomMapper.Id = roomId;
@@ -83,17 +93,38 @@ namespace API.Controllers
 
 			if (!isCompleted) return BadRequest();
 
+			var msg = new Notification()
+			{
+				EntityType = Enums.EntityEnum.Building,
+				EntityId = roomMapper.Id,
+				EndpointDetails = $"/api/room/{roomMapper.Id}",
+				Message = "New Room has updated !"
+			};
+			var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+			await _notificationService.CreateNotify(msgDto);
+
 			var res = new ResponseBuilder<RoomDTO>().AddData(roomMapper).Build();
 
 			return Accepted(res);
 		}
 
 		[HttpDelete("{roomId}")]
-		public async Task<ActionResult<Response<string>>> RemoveRoom(string roomId)
+		public async Task<ActionResult<Response<string>>> RemoveRoom(int roomId)
 		{
+			var room = await _unitOfWork.RoomRepository.GetOneAsync(roomId);
 			_unitOfWork.RoomRepository.DeletingOne(roomId);
 			var isCompleted = await _unitOfWork.Complete();
 			if (!isCompleted) return BadRequest();
+			var msg = new Notification()
+			{
+				EntityType = Enums.EntityEnum.Building,
+				EntityId = room.Id,
+				EndpointDetails = $"/api/room/{room.Id}",
+				Message = "New Room has deleted !"
+			};
+			var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+			await _notificationService.CreateNotify(msgDto);
+
 			var res = new ResponseBuilder<string>().AddData("deleted").Build();
 
 			return res;
