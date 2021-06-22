@@ -7,9 +7,17 @@ using System.Threading.Tasks;
 using API.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace API.Data
 {
+  class SeedUserModel
+  {
+    public string Email { get; set; }
+    public string Password { get; set; }
+    public string Fullname { get; set; }
+  }
+
   public class Seed
   {
     public static async Task SeedUsers(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
@@ -20,7 +28,7 @@ namespace API.Data
       }
 
       var userData = await System.IO.File.ReadAllTextAsync("Data/UserSeedData.json");
-      var users = JsonSerializer.Deserialize<List<AppUser>>(userData);
+      var users = JsonSerializer.Deserialize<List<SeedUserModel>>(userData);
 
       if (users == null)
       {
@@ -41,11 +49,23 @@ namespace API.Data
 
       foreach (var user in users)
       {
-        user.Email = user.Email.ToLower();
-        user.UserName = user.Email.ToLower();
+        var password = "123123";
+        var appUser = new AppUser
+        {
+          Email = user.Email.ToLower(),
+          UserName = user.Email.ToLower(),
+          Nickname = user.Email.Split("@")[0],
+          Fullname = user.Fullname,
+          isFirstLogin = true
+        };
 
-        await userManager.CreateAsync(user, "123123");
-        await userManager.AddToRoleAsync(user, "Staff");
+        if (!string.IsNullOrEmpty(user.Password))
+        {
+          password = user.Password;
+        }
+
+        await userManager.CreateAsync(appUser, password);
+        await userManager.AddToRoleAsync(appUser, "Staff");
       }
 
       var admin = new AppUser
