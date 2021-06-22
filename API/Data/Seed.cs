@@ -70,6 +70,8 @@ namespace API.Data
 
       var admin = new AppUser
       {
+        Fullname = "Admin",
+        Nickname = "Admin",
         UserName = "admin",
         Email = "admin"
       };
