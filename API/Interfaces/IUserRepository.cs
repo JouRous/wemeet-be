@@ -9,6 +9,7 @@ namespace API.Interfaces
 {
   public interface IUserRepository
   {
+    Task<AppUser> FindById(int id);
     Task<UserDTO> GetUserAsync(string username);
     Task<AppUser> UpdateUserAsync(AppUser user);
     Task<Pagination<UserDTO>> GetUsersAsync(PaginationParams paginationParams, Dictionary<string, string> filter, string sort);

@@ -37,6 +37,13 @@ namespace API.Repositories
       user.isDeactivated = true;
     }
 
+    public async Task<AppUser> FindById(int id)
+    {
+      var user = await _context.Users.Include(u => u.UserRoles).ThenInclude(u => u.Role).SingleOrDefaultAsync(u => u.Id == id);
+
+      return user;
+    }
+
     public async Task<UserDTO> GetUserAsync(string username)
     {
       return await _context.Users.Where(user => user.UserName == username)
