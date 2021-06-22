@@ -1,18 +1,13 @@
-using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTO;
 using API.Entities;
 using API.Interfaces;
 using API.Models;
-using API.Services;
 using API.Types;
 using API.Utils;
 using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -105,23 +100,10 @@ namespace API.Controllers
       return await _unitOfWork.USerRepository.GetUserAsync(username);
     }
 
-    [Authorize]
     [HttpGet]
     public async Task<ActionResult<Response<IEnumerable<UserDTO>>>> GetUsers(
-    [FromQuery] PaginationParams paginationParams, string filter = "", string sort = "created_at")
+    [FromQuery] PaginationParams paginationParams, [FromQuery] Dictionary<string, string> filter, string sort)
     {
-      var token = await HttpContext.GetTokenAsync("access_token");
-      var handler = new JwtSecurityTokenHandler();
-      var roles = handler.ReadJwtToken(token)
-             .Claims.Where(c => c.Type.Equals("role")).Select(c => c.Value).ToList();
-
-      var checkRole = roles.Any(role => role.Equals("Admin"));
-
-      if (!checkRole)
-      {
-        return Unauthorized("Admin only! Permission denied");
-      }
-
       var result = await _unitOfWork.USerRepository.GetUsersAsync(paginationParams, filter, sort);
 
       var response = new ResponseBuilder<IEnumerable<UserDTO>>()

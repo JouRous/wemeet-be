@@ -1,10 +1,10 @@
 using System;
+using Microsoft.AspNetCore.Identity;
 namespace API.Entities
 {
-	public class Bases
+	public class Bases : IdentityUser<int>
 	{
-		public string Id { get; set; }
-		public DateTime CreatedAt { get; set; }
-		public DateTime UpdatedAt { get; set; }
+		public virtual DateTime CreatedAt { get; set; } = DateTime.Now;
+		public virtual DateTime UpdatedAt { get; set; } = DateTime.Now;
 	}
 }

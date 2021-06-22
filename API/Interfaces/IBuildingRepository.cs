@@ -9,7 +9,11 @@ namespace API.Interfaces
 	public interface IBuildingRepository
 	{
 		void AddOne(Building buildingInfo);
-		Task<Pagination<BuildingDTO>> GetAllByPaginationAsync(PaginationParams paginationQuery);
-		Task<BuildingDTO> GetOneAsync(string Id);
+		Task<Pagination<BuildingDTO>> GetAllByPaginationAsync(
+			PaginationParams paginationParams, string filter = "", string sort = "created_at"
+			);
+		Task<BuildingDTO> GetOneAsync(int Id);
+		void ModifyOne(BuildingDTO building);
+		void DeletingOne(int id);
 	}
 }
