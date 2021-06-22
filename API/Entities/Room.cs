@@ -2,9 +2,9 @@ namespace API.Entities
 {
 	public class Room : Bases
 	{
-		public string Name { get; set; }
-		public string BuildingId { get; set; }
-		public int Capacity { get; set; }
+		public virtual string Name { get; set; }
+		public virtual int BuildingId { get; set; }
+		public virtual int Capacity { get; set; }
 
 	}
 }
