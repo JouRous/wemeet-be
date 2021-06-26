@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTO;
@@ -13,6 +14,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace API.Repositories
 {
@@ -43,10 +45,13 @@ namespace API.Repositories
     }
 
     public async Task<Pagination<UserDTO>> GetUsersAsync(PaginationParams paginationParams,
-                                                         string filterString,
+                                                         Dictionary<string, string> filter,
                                                          string sort)
     {
-      var stat = _context.Users.Where(u => u.Fullname.Contains(filterString) || u.Email.Contains(filterString))
+      var serializer = JsonConvert.SerializeObject(filter);
+      var _filter = JsonConvert.DeserializeObject<UserFilterModel>(serializer);
+
+      var stat = _context.Users.Where(u => u.Fullname.Contains(_filter.fullname) || u.Email.Contains(_filter.fullname))
                                 .ProjectTo<UserDTO>(_mapper.ConfigurationProvider);
 
       switch (sort)
