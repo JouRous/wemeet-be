@@ -29,6 +29,8 @@ namespace API.Utils
 
 			CreateMap<Notification, NotificationMessageDTO>();
 
+			CreateMap<Meeting, MeetingDTO>();
+
 		}
 	}
 }
