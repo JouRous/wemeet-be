@@ -51,12 +51,14 @@ namespace API.Repositories
                                  .SingleOrDefaultAsync();
     }
 
-    public async Task<Pagination<UserDTO>> GetUsersAsync(PaginationParams paginationParams,
+    public async Task<Pagination<UserDTO>> GetUsersAsync(Dictionary<string, int> page,
                                                          Dictionary<string, string> filter,
                                                          string sort)
     {
-      var serializer = JsonConvert.SerializeObject(filter);
-      var _filter = JsonConvert.DeserializeObject<UserFilterModel>(serializer);
+      var filterSerializer = JsonConvert.SerializeObject(filter);
+      var pageSerializer = JsonConvert.SerializeObject(page);
+      var _filter = JsonConvert.DeserializeObject<UserFilterModel>(filterSerializer);
+      var paginationParams = JsonConvert.DeserializeObject<PaginationParams>(pageSerializer);
 
       var stat = _context.Users.Where(u => u.Fullname.Contains(_filter.fullname) || u.Email.Contains(_filter.fullname))
                                 .ProjectTo<UserDTO>(_mapper.ConfigurationProvider);
@@ -71,7 +73,7 @@ namespace API.Repositories
           break;
       }
       var query = stat.AsQueryable();
-      return await PaginationService.GetPagination<UserDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
+      return await PaginationService.GetPagination<UserDTO>(query, paginationParams.number, paginationParams.size);
 
     }
 

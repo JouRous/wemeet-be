@@ -44,7 +44,7 @@ namespace API.Repositories
           break;
       }
       var query = stat.AsQueryable();
-      return await PaginationService.GetPagination<TeamDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
+      return await PaginationService.GetPagination<TeamDTO>(query, paginationParams.number, paginationParams.size);
     }
 
 
