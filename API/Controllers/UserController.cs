@@ -63,7 +63,7 @@ namespace API.Controllers
       user.isFirstLogin = true;
       user.AppUserTeams = new List<AppUserTeam>();
       user.UnsignedName = Utils.Utils.RemoveAccentedString(user.Fullname);
-
+      user.Role = userActionModel.Role;
       var randomPassword = Utils.Utils.RandomString(9);
 
       var createStatus = await _userManager.CreateAsync(user, randomPassword);
@@ -72,14 +72,6 @@ namespace API.Controllers
       {
         await transaction.RollbackAsync();
         return BadRequest(createStatus.Errors);
-      }
-
-      var addRoleStatus = await _userManager.AddToRoleAsync(user, userActionModel.Role);
-
-      if (!addRoleStatus.Succeeded)
-      {
-        await transaction.RollbackAsync();
-        return BadRequest(addRoleStatus.Errors);
       }
 
       transaction.Commit();
@@ -148,9 +140,6 @@ namespace API.Controllers
 
       await _unitOfWork.Complete();
 
-      var roles = _user.UserRoles.ToList().Select(x => x.Role.Name).ToList();
-      await _userManager.RemoveFromRolesAsync(_user, roles);
-      await _userManager.AddToRoleAsync(_user, userActionModel.Role);
 
       return Accepted(new
       {

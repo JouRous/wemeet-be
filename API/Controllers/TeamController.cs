@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTO;
 using API.Entities;
+using API.Enums;
 using API.Interfaces;
 using API.Models;
 using API.Types;
@@ -74,9 +75,9 @@ namespace API.Controllers
           message = "Leader not found"
         });
       }
-      var isLeaderRole = leader.UserRoles.ToList()
-                            .Select(x => x.Role.Name).ToList()
-                            .Any(role => role.Equals("Lead"));
+
+      var isLeaderRole = leader.Role.Equals(UserRoles.LEAD);
+
       if (!isLeaderRole)
       {
         return BadRequest(new

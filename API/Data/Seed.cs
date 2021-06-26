@@ -8,6 +8,7 @@ using API.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using API.Types;
 
 namespace API.Data
 {
@@ -16,6 +17,7 @@ namespace API.Data
     public string Email { get; set; }
     public string Password { get; set; }
     public string Fullname { get; set; }
+    public string Role { get; set; }
   }
 
   public class Seed
@@ -35,18 +37,6 @@ namespace API.Data
         return;
       }
 
-      var roles = new List<AppRole>
-      {
-        new AppRole{Name = "Staff"},
-        new AppRole{Name = "Lead"},
-        new AppRole{Name = "Admin"}
-      };
-
-      foreach (var role in roles)
-      {
-        await roleManager.CreateAsync(role);
-      }
-
       foreach (var user in users)
       {
         var password = "123123";
@@ -57,7 +47,8 @@ namespace API.Data
           Nickname = user.Email.Split("@")[0],
           Fullname = user.Fullname,
           isFirstLogin = true,
-          UnsignedName = Utils.Utils.RemoveAccentedString(user.Fullname)
+          UnsignedName = Utils.Utils.RemoveAccentedString(user.Fullname),
+          Role = UserRoles.STAFF
         };
 
         if (!string.IsNullOrEmpty(user.Password))
@@ -65,8 +56,12 @@ namespace API.Data
           password = user.Password;
         }
 
+        if (!string.IsNullOrEmpty(user.Role))
+        {
+          appUser.Role = user.Role;
+        }
+
         await userManager.CreateAsync(appUser, password);
-        await userManager.AddToRoleAsync(appUser, "Staff");
       }
 
       var admin = new AppUser
@@ -74,11 +69,11 @@ namespace API.Data
         Fullname = "Admin",
         Nickname = "Admin",
         UserName = "admin",
-        Email = "admin"
+        Email = "admin",
+        Role = UserRoles.ADMIN
       };
 
       await userManager.CreateAsync(admin, "123123");
-      await userManager.AddToRolesAsync(admin, new[] { "Admin", "Lead" });
     }
   }
 }

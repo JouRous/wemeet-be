@@ -39,7 +39,7 @@ namespace API.Repositories
 
     public async Task<AppUser> FindById(int id)
     {
-      var user = await _context.Users.Include(u => u.UserRoles).ThenInclude(u => u.Role).SingleOrDefaultAsync(u => u.Id == id);
+      var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
 
       return user;
     }
@@ -97,12 +97,13 @@ namespace API.Repositories
 
     public async Task<AppUser> UpdateUserAsync(AppUser user)
     {
-      var _user = await _context.Users.Include(x => x.UserRoles).ThenInclude(x => x.Role).FirstOrDefaultAsync(x => x.Email == user.Email);
+      var _user = await _context.Users.FirstOrDefaultAsync(x => x.Email == user.Email);
       if (_user != null)
       {
         _user.Nickname = user.Nickname;
         _user.Fullname = user.Fullname;
         _user.Position = user.Position;
+        _user.Role = user.Role;
       }
 
       return _user;

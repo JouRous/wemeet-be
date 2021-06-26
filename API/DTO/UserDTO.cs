@@ -12,6 +12,7 @@ namespace API.DTO
     public string Avatar { get; set; }
     public string Nickname { get; set; }
     public string Position { get; set; }
+    public string Role { get; set; }
     public bool isFirstLogin { get; set; }
     public string isDeactivated { get; set; }
     public DateTime CreatedAt { get; set; }
