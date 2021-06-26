@@ -72,17 +72,17 @@ namespace API.Controllers
 					return BadRequest();
 				}
 
-				var msg = new Notification()
-				{
-					EntityType = Enums.EntityEnum.Building,
-					EntityId = building.Id,
-					EndpointDetails = $"/api/building/{building.Id}",
-					Message = "New building has created !"
-				};
+				// var msg = new Notification()
+				// {
+				// 	EntityType = Enums.EntityEnum.Building,
+				// 	EntityId = building.Id,
+				// 	EndpointDetails = $"/api/building/{building.Id}",
+				// 	Message = "New building has created !"
+				// };
 
-				var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+				// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
 
-				await _notificationService.CreateNotify(msgDto);
+				// await _notificationService.CreateNotify(msgDto);
 
 				var res = new ResponseBuilder<BuildingDTO>()
 												.AddData(_mapper.Map<BuildingDTO>(building))
@@ -113,17 +113,17 @@ namespace API.Controllers
 				return BadRequest();
 			}
 
-			var msg = new Notification()
-			{
-				EntityType = Enums.EntityEnum.Building,
-				EntityId = building.Id,
-				EndpointDetails = $"/api/building/{building.Id}",
-				Message = "The building has updated !"
-			};
+			// var msg = new Notification()
+			// {
+			// 	EntityType = Enums.EntityEnum.Building,
+			// 	EntityId = building.Id,
+			// 	EndpointDetails = $"/api/building/{building.Id}",
+			// 	Message = "The building has updated !"
+			// };
 
-			var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+			// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
 
-			await _notificationService.CreateNotify(msgDto);
+			// await _notificationService.CreateNotify(msgDto);
 
 			return Accepted(new
 			{
@@ -148,17 +148,17 @@ namespace API.Controllers
 				return BadRequest();
 			}
 
-			var msg = new Notification()
-			{
-				EntityType = Enums.EntityEnum.Building,
-				EntityId = building.Id,
-				EndpointDetails = $"/api/building/{building.Id}",
-				Message = "New building has deleted !"
-			};
+			// var msg = new Notification()
+			// {
+			// 	EntityType = Enums.EntityEnum.Building,
+			// 	EntityId = building.Id,
+			// 	EndpointDetails = $"/api/building/{building.Id}",
+			// 	Message = "New building has deleted !"
+			// };
 
-			var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+			// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
 
-			await _notificationService.CreateNotify(msgDto);
+			// await _notificationService.CreateNotify(msgDto);
 
 			var res = new ResponseBuilder<string>()
 											.AddData(_mapper.Map<string>("deleted"))
