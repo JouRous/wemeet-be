@@ -37,6 +37,13 @@ namespace API.Repositories
       user.isDeactivated = true;
     }
 
+    public async Task<AppUser> FindById(int id)
+    {
+      var user = await _context.Users.Include(u => u.UserRoles).ThenInclude(u => u.Role).SingleOrDefaultAsync(u => u.Id == id);
+
+      return user;
+    }
+
     public async Task<UserDTO> GetUserAsync(string username)
     {
       return await _context.Users.Where(user => user.UserName == username)
@@ -44,17 +51,24 @@ namespace API.Repositories
                                  .SingleOrDefaultAsync();
     }
 
-    public async Task<Pagination<UserDTO>> GetUsersAsync(PaginationParams paginationParams,
+    public async Task<Pagination<UserDTO>> GetUsersAsync(Dictionary<string, int> page,
                                                          Dictionary<string, string> filter,
-                                                         string sort)
+                                                         Dictionary<string, string> sort)
     {
-      var serializer = JsonConvert.SerializeObject(filter);
-      var _filter = JsonConvert.DeserializeObject<UserFilterModel>(serializer);
+      var filterSerializer = JsonConvert.SerializeObject(filter);
+      var pageSerializer = JsonConvert.SerializeObject(page);
+      var _filter = JsonConvert.DeserializeObject<UserFilterModel>(filterSerializer);
+      var paginationParams = JsonConvert.DeserializeObject<PaginationParams>(pageSerializer);
+      var _sort = sort.GetValueOrDefault("sort");
 
-      var stat = _context.Users.Where(u => u.Fullname.Contains(_filter.fullname) || u.Email.Contains(_filter.fullname))
+      var fullname = Utils.Utils.RemoveAccentedString(_filter.fullname).ToLower();
+
+      var stat = _context.Users.Where(u =>
+                            u.UnsignedName.ToLower().Contains(fullname) ||
+                            u.Email.Contains(fullname))
                                 .ProjectTo<UserDTO>(_mapper.ConfigurationProvider);
 
-      switch (sort)
+      switch (_sort)
       {
         case "created_at":
           stat = stat.OrderBy(s => s.CreatedAt);
@@ -64,7 +78,7 @@ namespace API.Repositories
           break;
       }
       var query = stat.AsQueryable();
-      return await PaginationService.GetPagination<UserDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
+      return await PaginationService.GetPagination<UserDTO>(query, paginationParams.number, paginationParams.size);
 
     }
 

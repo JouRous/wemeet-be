@@ -62,6 +62,7 @@ namespace API.Controllers
       user.UserName = user.Email;
       user.isFirstLogin = true;
       user.AppUserTeams = new List<AppUserTeam>();
+      user.UnsignedName = Utils.Utils.RemoveAccentedString(user.Fullname);
 
       var randomPassword = Utils.Utils.RandomString(9);
 
@@ -102,9 +103,11 @@ namespace API.Controllers
 
     [HttpGet]
     public async Task<ActionResult<Response<IEnumerable<UserDTO>>>> GetUsers(
-    [FromQuery] PaginationParams paginationParams, [FromQuery] Dictionary<string, string> filter, string sort)
+    [FromQuery] Dictionary<string, int> page,
+    [FromQuery] Dictionary<string, string> filter,
+    [FromQuery] Dictionary<string, string> sort)
     {
-      var result = await _unitOfWork.USerRepository.GetUsersAsync(paginationParams, filter, sort);
+      var result = await _unitOfWork.USerRepository.GetUsersAsync(page, filter, sort);
 
       var response = new ResponseBuilder<IEnumerable<UserDTO>>()
              .AddData(result.Items)

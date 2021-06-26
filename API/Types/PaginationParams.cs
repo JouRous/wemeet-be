@@ -2,7 +2,7 @@ namespace API.Types
 {
   public class PaginationParams
   {
-    public int pageNumber { get; set; }
-    public int pageSize { get; set; }
+    public int number { get; set; }
+    public int size { get; set; } = 20;
   }
 }
