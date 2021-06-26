@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-
 using API.Enums;
-using API.Entities;
-using API.Models;
+using API.DTO;
 
-namespace API.DTO
+namespace API.Models
 {
-	public class MeetingDTO
+	public class MeetingModel
 	{
 		public int? Id { get; set; } = null;
 		public DateTime? CreatedAt { get; set; } = null;

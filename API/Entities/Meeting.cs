@@ -9,8 +9,8 @@ namespace API.Entities
 		public virtual string Name { get; set; }
 		public virtual string Description { get; set; }
 		public virtual string Note { get; set; }
-		public virtual AppUser Creator { get; set; }
-		public virtual ICollection<AppUser> UsersInMeeting { get; set; } = new List<AppUser>();
+		public virtual int Creator { get; set; }
+		public virtual ICollection<int> UsersInMeeting { get; set; } = new List<int>();
 		public virtual Team Team { get; set; }
 		public virtual Room Room { get; set; }
 		public virtual StatusMeeting Status { get; set; }

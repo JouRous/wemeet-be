@@ -29,7 +29,7 @@ namespace API.Utils
 
 			CreateMap<Notification, NotificationMessageDTO>();
 
-			CreateMap<Meeting, MeetingDTO>();
+			CreateMap<MeetingModel, MeetingDTO>();
 
 		}
 	}

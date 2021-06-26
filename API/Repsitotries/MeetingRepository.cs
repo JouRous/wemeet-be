@@ -12,10 +12,11 @@ using API.Entities;
 using API.Models;
 using API.Types;
 using API.Services;
+using API.Interfaces;
 
 namespace API.Repsitotries
 {
-	public class MeetingRepository
+	public class MeetingRepository : IMeetingRepo
 	{
 		private readonly AppDbContext _context;
 		private readonly IMapper _mapper;
@@ -28,27 +29,39 @@ namespace API.Repsitotries
 		private Meeting MappingFromDTO(Meeting newMeeting, MeetingDTO dto)
 		{
 
-			var creator = _context.Users.Where(user => user.UserName == dto.Creator.Email).FirstOrDefault();
-			if (creator != null) newMeeting.Creator = creator;
-			var team = _context.Teams.Find(dto.Team.id);
-			if (team != null) newMeeting.Team = team;
-			var room = _context.Rooms.Find(dto.Room.Id);
-			if (room != null) newMeeting.Room = room;
+			if (dto.Creator != null)
+			{
+				var creator = _context.Users.Where(user => user.UserName == dto.Creator.Email).FirstOrDefault();
+				if (creator != null) newMeeting.Creator = creator;
+			}
+			if (dto.Team != null)
+			{
+				var team = _context.Teams.Find(dto.Team.Id);
+				if (team != null) newMeeting.Team = team;
+			}
+			if (dto.Room != null)
+			{
+				var room = _context.Rooms.Find(dto.Room.Id);
+				if (room != null) newMeeting.Room = room;
+			}
 			foreach (var user in dto.UserInMeeting)
 			{
 				var u = _context.Users.Where(o => o.UserName == user.Email).FirstOrDefault();
 				if (u != null) newMeeting.UsersInMeeting.Add(u);
 			}
-			var conflict = _context.Meetings.Find(dto.ConflictWith.Id);
-			if (conflict != null) newMeeting.ConflictWith = conflict;
+			if (dto.ConflictWith != null)
+			{
+				var conflict = _context.Meetings.Find(dto.ConflictWith.Id);
+				if (conflict != null) newMeeting.ConflictWith = conflict;
+			}
 			if (dto.Description != null) newMeeting.Description = dto.Description;
 			if (dto.Note != null) newMeeting.Note = dto.Note;
 			if (dto.StartTime != null) newMeeting.StartTime = (DateTime)dto.StartTime;
 			if (dto.EndTime != null) newMeeting.EndTime = (DateTime)dto.EndTime;
-			if (dto.Priority != null) newMeeting.Priority = (PriorityMeeting)dto.Priority;
-			if (dto.Status != null) newMeeting.Status = (StatusMeeting)dto.Status;
 			if (dto.Target != null) newMeeting.Target = dto.Target;
-			if (dto.Method != null) newMeeting.Method = (MethodMeeting)dto.Method;
+			newMeeting.Priority = (PriorityMeeting)dto.Priority;
+			newMeeting.Status = (StatusMeeting)dto.Status;
+			newMeeting.Method = (MethodMeeting)dto.Method;
 
 			return newMeeting;
 		}
@@ -80,6 +93,12 @@ namespace API.Repsitotries
 			return newMeeting;
 		}
 
+		public MeetingDTO GetOneAsync(int Id)
+		{
+			var e = _context.Meetings.Where(met => met.Id == Id).SingleOrDefault;
+			var res = ExportDTO(e, new MeetingDTO());
+			return res;
+		}
 		public void AddOne(MeetingDTO meeting)
 		{
 			var meet = MappingFromDTO(new Meeting(), meeting);
@@ -99,29 +118,25 @@ namespace API.Repsitotries
 					stat = stat.OrderByDescending(t => t.CreatedAt);
 					break;
 			}
-			var queries = stat.ToList();
+			var query = stat.AsQueryable();
 
-			var formater = new List<MeetingDTO>();
+			var page = await PaginationService.GetPagination<Meeting>(query, paginationParams.pageNumber, paginationParams.pageSize);
+			var res = new Pagination<MeetingDTO>();
 
-			foreach (var item in queries)
+			var dto = new List<MeetingDTO>();
+
+			foreach (var item in page.Items)
 			{
-				var dto = ExportDTO(item, new MeetingDTO());
-				dto.ConflictWith = ExportDTO(item.ConflictWith, new MeetingDTO());
-
-				formater.Add(dto);
+				var met = ExportDTO(item, new MeetingDTO());
+				met.ConflictWith = ExportDTO(item.ConflictWith, new MeetingDTO());
+				dto.Add(met);
 			}
 
-			var page = await PaginationService.GetPagination<MeetingDTO>(formater.AsQueryable(), paginationParams.pageNumber, paginationParams.pageSize);
+			res.Items = dto;
 
-			return page;
+			return res;
 		}
 
-		public async Task<MeetingDTO> GetOneAsync(int Id)
-		{
-			var result = await _context.Meetings.Where(room => room.Id == Id)
-									.SingleOrDefaultAsync();
-			return ExportDTO(result, new MeetingDTO());
-		}
 
 		public void UpdatingOne(MeetingDTO data)
 		{
