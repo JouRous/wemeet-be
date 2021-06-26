@@ -56,7 +56,8 @@ namespace API.Data
           UserName = user.Email.ToLower(),
           Nickname = user.Email.Split("@")[0],
           Fullname = user.Fullname,
-          isFirstLogin = true
+          isFirstLogin = true,
+          UnsignedName = Utils.Utils.RemoveAccentedString(user.Fullname)
         };
 
         if (!string.IsNullOrEmpty(user.Password))

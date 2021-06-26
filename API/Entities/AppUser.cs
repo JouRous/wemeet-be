@@ -7,6 +7,7 @@ namespace API.Entities
   public class AppUser : IdentityUser<int>
   {
     public string Fullname { get; set; }
+    public string UnsignedName { get; set; }
     public string Nickname { get; set; }
     public string Position { get; set; }
     public string Avatar { get; set; }

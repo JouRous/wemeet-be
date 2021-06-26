@@ -62,6 +62,7 @@ namespace API.Controllers
       user.UserName = user.Email;
       user.isFirstLogin = true;
       user.AppUserTeams = new List<AppUserTeam>();
+      user.UnsignedName = Utils.Utils.RemoveAccentedString(user.Fullname);
 
       var randomPassword = Utils.Utils.RandomString(9);
 
@@ -106,8 +107,7 @@ namespace API.Controllers
     [FromQuery] Dictionary<string, string> filter,
     [FromQuery] Dictionary<string, string> sort)
     {
-      var _sort = sort.GetValueOrDefault("");
-      var result = await _unitOfWork.USerRepository.GetUsersAsync(page, filter, _sort);
+      var result = await _unitOfWork.USerRepository.GetUsersAsync(page, filter, sort);
 
       var response = new ResponseBuilder<IEnumerable<UserDTO>>()
              .AddData(result.Items)
