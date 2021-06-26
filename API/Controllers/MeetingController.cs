@@ -41,6 +41,27 @@ namespace API.Controllers
 
 			return response;
 		}
+		[HttpGet]
+		[Route("waiting")]
+		public async Task<ActionResult<Response<IEnumerable<MeetingDTO>>>> GetWaitingMeeting(
+			[FromQuery] PaginationParams paginationParams, string filter = "", string sort = "-created_at")
+		{
+			var result = await _unitOfWork.MeetingRepository.GetWaitMeetingByPaginationAsync(paginationParams, filter, sort);
+
+			var response = new ResponseBuilder<IEnumerable<MeetingDTO>>()
+													.AddData(result.Items)
+													.AddPagination(new PaginationDTO
+													{
+														CurrentPage = result.CurrentPage,
+														PerPage = result.PerPage,
+														Total = result.Total,
+														Count = result.Count,
+														TotalPage = result.TotalPages
+													})
+													.Build();
+
+			return response;
+		}
 
 		[HttpGet("{MeetingId}")]
 		public ActionResult<Response<MeetingDTO>> GetMeetingInfo(int MeetingId)

@@ -129,6 +129,26 @@ namespace API.Repsitotries
 
 			return res;
 		}
+		public async Task<Pagination<MeetingDTO>> GetWaitMeetingByPaginationAsync(
+						PaginationParams paginationParams, string filter, string sort)
+		{
+			var stat = _context.Meetings.Where(t => t.Name.Contains(filter) && t.Status == StatusMeeting.Waiting)
+				.ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider);
+			switch (sort)
+			{
+				case "created_at":
+					stat = stat.OrderBy(t => t.CreatedAt);
+					break;
+				case "-created_at":
+					stat = stat.OrderByDescending(t => t.CreatedAt);
+					break;
+			}
+			var query = stat.AsQueryable();
+
+			var res = await PaginationService.GetPagination<MeetingDTO>(query, paginationParams.number, paginationParams.size);
+
+			return res;
+		}
 
 
 		public void UpdatingOne(MeetingDTO data)
