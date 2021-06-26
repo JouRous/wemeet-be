@@ -45,6 +45,10 @@ namespace API.Data
 			.HasOne<Team>(ut => ut.Team)
 			.WithMany(t => t.AppUserTeams)
 			.HasForeignKey(ut => ut.TeamId);
+
+			builder.Entity<AppUser>()
+			.HasMany(u => u.LeadTeams)
+			.WithOne(t => t.Leader);
 		}
 	}
 }
