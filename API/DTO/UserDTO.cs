@@ -6,6 +6,7 @@ namespace API.DTO
 {
 	public class UserDTO
 	{
+		public int? Id { get; set; } = null;
 		public string Fullname { get; set; } = null;
 		public string Email { get; set; }
 		public string Avatar { get; set; } = null;

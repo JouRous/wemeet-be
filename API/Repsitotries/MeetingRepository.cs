@@ -31,7 +31,7 @@ namespace API.Repsitotries
 
 			if (dto.Creator != null)
 			{
-				var creator = _context.Users.Where(user => user.UserName == dto.Creator.Email).FirstOrDefault();
+				var creator = _context.Users.Where(user => (user.Id == dto.Creator.Id)).FirstOrDefault();
 				if (creator != null) newMeeting.Creator = creator;
 			}
 			if (dto.Team != null)
@@ -44,9 +44,10 @@ namespace API.Repsitotries
 				var room = _context.Rooms.Find(dto.Room.Id);
 				if (room != null) newMeeting.Room = room;
 			}
+			newMeeting.UsersInMeeting = new List<AppUser>();
 			foreach (var user in dto.UserInMeeting)
 			{
-				var u = _context.Users.Where(o => o.UserName == user.Email).FirstOrDefault();
+				var u = _context.Users.Where(o => o.Id == user.Id).FirstOrDefault();
 				if (u != null) newMeeting.UsersInMeeting.Add(u);
 			}
 			if (dto.ConflictWith != null)
@@ -55,6 +56,7 @@ namespace API.Repsitotries
 				if (conflict != null) newMeeting.ConflictWith = conflict;
 			}
 			if (dto.Description != null) newMeeting.Description = dto.Description;
+			if (dto.Name != null) newMeeting.Name = dto.Name;
 			if (dto.Note != null) newMeeting.Note = dto.Note;
 			if (dto.StartTime != null) newMeeting.StartTime = (DateTime)dto.StartTime;
 			if (dto.EndTime != null) newMeeting.EndTime = (DateTime)dto.EndTime;
@@ -95,9 +97,11 @@ namespace API.Repsitotries
 
 		public MeetingDTO GetOneAsync(int Id)
 		{
-			var e = _context.Meetings.Where(met => met.Id == Id).SingleOrDefault();
-			var res = ExportDTO(e, new MeetingDTO());
-			return res;
+			var e = _context.Meetings.Where(met => met.Id == Id)
+							.ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider)
+							.SingleOrDefault();
+
+			return e;
 		}
 		public void AddOne(MeetingDTO meeting)
 		{
@@ -108,7 +112,8 @@ namespace API.Repsitotries
 		public async Task<Pagination<MeetingDTO>> GetAllByPaginationAsync(
 						PaginationParams paginationParams, string filter, string sort)
 		{
-			var stat = _context.Meetings.Where(t => t.Name.Contains(filter));
+			var stat = _context.Meetings.Where(t => t.Name.Contains(filter))
+				.ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider);
 			switch (sort)
 			{
 				case "created_at":
@@ -120,19 +125,7 @@ namespace API.Repsitotries
 			}
 			var query = stat.AsQueryable();
 
-			var page = await PaginationService.GetPagination<Meeting>(query, paginationParams.pageNumber, paginationParams.pageSize);
-			var res = new Pagination<MeetingDTO>();
-
-			var dto = new List<MeetingDTO>();
-
-			foreach (var item in page.Items)
-			{
-				var met = ExportDTO(item, new MeetingDTO());
-				met.ConflictWith = ExportDTO(item.ConflictWith, new MeetingDTO());
-				dto.Add(met);
-			}
-
-			res.Items = dto;
+			var res = await PaginationService.GetPagination<MeetingDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
 
 			return res;
 		}
@@ -140,7 +133,8 @@ namespace API.Repsitotries
 
 		public void UpdatingOne(MeetingDTO data)
 		{
-			var entity = _context.Meetings.Find(data.Id);
+			var entity = _context.Meetings.Where(X => X.Id == data.Id)
+			.ProjectTo<Meeting>(_mapper.ConfigurationProvider).SingleOrDefault();
 
 			if (data != null)
 			{
