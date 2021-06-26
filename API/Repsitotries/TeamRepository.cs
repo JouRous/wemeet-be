@@ -11,6 +11,7 @@ using API.Types;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace API.Repositories
 {
@@ -30,9 +31,16 @@ namespace API.Repositories
       _context.Teams.Add(team);
     }
 
-    public async Task<Pagination<TeamDTO>> GetAllAsync(PaginationParams paginationParams, string filter, string sort)
+    public async Task<Pagination<TeamDTO>> GetAllAsync(Dictionary<string, int> page,
+                                                       Dictionary<string, string> filter,
+                                                       string sort = "created_at")
     {
-      var stat = _context.Teams.Where(t => t.Name.Contains(filter)).ProjectTo<TeamDTO>(_mapper.ConfigurationProvider);
+      var filterSerializer = JsonConvert.SerializeObject(filter);
+      var pageSerializer = JsonConvert.SerializeObject(page);
+      var _filter = JsonConvert.DeserializeObject<FilterTeamModel>(filterSerializer);
+      var paginationParams = JsonConvert.DeserializeObject<PaginationParams>(pageSerializer);
+
+      var stat = _context.Teams.Where(t => t.Name.Contains(_filter.Name)).ProjectTo<TeamDTO>(_mapper.ConfigurationProvider);
 
       switch (sort)
       {

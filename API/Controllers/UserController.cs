@@ -102,9 +102,12 @@ namespace API.Controllers
 
     [HttpGet]
     public async Task<ActionResult<Response<IEnumerable<UserDTO>>>> GetUsers(
-    [FromQuery] Dictionary<string, int> page, [FromQuery] Dictionary<string, string> filter, string sort)
+    [FromQuery] Dictionary<string, int> page,
+    [FromQuery] Dictionary<string, string> filter,
+    [FromQuery] Dictionary<string, string> sort)
     {
-      var result = await _unitOfWork.USerRepository.GetUsersAsync(page, filter, sort);
+      var _sort = sort.GetValueOrDefault("");
+      var result = await _unitOfWork.USerRepository.GetUsersAsync(page, filter, _sort);
 
       var response = new ResponseBuilder<IEnumerable<UserDTO>>()
              .AddData(result.Items)
