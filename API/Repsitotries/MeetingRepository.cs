@@ -95,7 +95,7 @@ namespace API.Repsitotries
 
 		public MeetingDTO GetOneAsync(int Id)
 		{
-			var e = _context.Meetings.Where(met => met.Id == Id).SingleOrDefault;
+			var e = _context.Meetings.Where(met => met.Id == Id).SingleOrDefault();
 			var res = ExportDTO(e, new MeetingDTO());
 			return res;
 		}
