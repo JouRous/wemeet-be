@@ -9,6 +9,7 @@ namespace API.Interfaces
 		IBuildingRepository BuildingRepository { get; }
 		IRoomRepository RoomRepository { get; }
 		INotificationRepo NotificationRepository { get; }
+		IMeetingRepo MeetingRepository { get; }
 		Task<bool> Complete();
 		bool HasChanges();
 	}

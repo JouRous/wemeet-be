@@ -16,6 +16,7 @@ namespace API.Repositories
 		public IBuildingRepository BuildingRepository => new BuildingRepository(_context, _mapper);
 		public IRoomRepository RoomRepository => new RoomRepository(_context, _mapper);
 		public INotificationRepo NotificationRepository => new NotificationRepository(_context, _mapper);
+		public IMeetingRepo MeetingRepository => new MeetingRepository(_context, _mapper);
 
 
 		public UnitOfWork(AppDbContext context, IMapper mapper)
