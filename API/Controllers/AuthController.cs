@@ -131,11 +131,11 @@ namespace API.Controllers
       });
     }
 
-    [HttpGet("reset-password")]
-    public async Task<ActionResult> ResetPassword([FromQuery] string token, [FromBody] LoginModel model)
+    [HttpPost("reset-password")]
+    public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordModel model)
     {
       var handler = new JwtSecurityTokenHandler();
-      var email = handler.ReadJwtToken(token)
+      var email = handler.ReadJwtToken(model.token)
              .Claims.Where(c => c.Type.Equals("email")).Select(c => c.Value).SingleOrDefault();
 
       var user = await _userManager.Users.FirstOrDefaultAsync(user => user.Email == email.ToLower());
@@ -153,7 +153,7 @@ namespace API.Controllers
       var randomPassword = Utils.Utils.RandomString(9);
 
       await _userManager.RemovePasswordAsync(user);
-      await _userManager.AddPasswordAsync(user, model.Password);
+      await _userManager.AddPasswordAsync(user, model.password);
 
       return Ok(new
       {
