@@ -104,6 +104,7 @@ namespace API.Repositories
         _user.Fullname = user.Fullname;
         _user.Position = user.Position;
         _user.Role = user.Role;
+        _user.isDeactivated = user.isDeactivated;
       }
 
       return _user;

@@ -109,6 +109,28 @@ namespace API.Controllers
       });
     }
 
+    [HttpGet("get-by-email/{email}")]
+    public async Task<ActionResult<UserDTO>> GetUserByEmail(string email)
+    {
+      var user = await _unitOfWork.USerRepository.FindByEmail(email);
+
+      if (user == null)
+      {
+        return StatusCode(StatusCodes.Status404NotFound, new
+        {
+          status = 404,
+          success = false
+        });
+      }
+
+      return Ok(new
+      {
+        data = user,
+        status = 200,
+        success = true
+      });
+    }
+
     [HttpGet]
     public async Task<ActionResult<Response<IEnumerable<UserDTO>>>> GetUsers(
     [FromQuery] Dictionary<string, int> page,
@@ -151,7 +173,7 @@ namespace API.Controllers
     }
 
 
-    [HttpDelete("deactivate/{id}")]
+    [HttpDelete("{id}")]
     public async Task<ActionResult> DeactivateUser(int id)
     {
       var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Id == id);
