@@ -10,7 +10,8 @@ namespace API.Interfaces
   public interface IUserRepository
   {
     Task<AppUser> FindById(int id);
-    Task<UserDTO> GetUserAsync(string username);
+    Task<UserDTO> GetUserAsync(int id);
+    Task<UserDTO> FindByEmail(string email);
     Task<AppUser> UpdateUserAsync(AppUser user);
     Task<Pagination<UserDTO>> GetUsersAsync(Dictionary<string, int> page, Dictionary<string, string> filter, Dictionary<string, string> sort);
     void DeactivateUser(AppUser user);

@@ -95,10 +95,26 @@ namespace API.Controllers
 
     }
 
-    [HttpGet("{username}")]
-    public async Task<ActionResult<UserDTO>> GetUser(string username)
+    [HttpGet("{id}")]
+    public async Task<ActionResult<UserDTO>> GetUser(int id)
     {
-      return await _unitOfWork.USerRepository.GetUserAsync(username);
+      var user = await _unitOfWork.USerRepository.GetUserAsync(id);
+
+      if (user == null)
+      {
+        return StatusCode(StatusCodes.Status404NotFound, new
+        {
+          status = 404,
+          success = false
+        });
+      }
+
+      return Ok(new
+      {
+        data = user,
+        status = 200,
+        success = true
+      });
     }
 
     [HttpGet]
@@ -124,7 +140,6 @@ namespace API.Controllers
       return response;
     }
 
-    // [Authorize]
     [HttpPut]
     public async Task<ActionResult> UpdateUser([FromBody] UserActionModel userActionModel)
     {
@@ -147,10 +162,10 @@ namespace API.Controllers
     }
 
 
-    [HttpDelete("deactivate/{email}")]
-    public async Task<ActionResult> DeactivateUser(string email)
+    [HttpDelete("deactivate/{id}")]
+    public async Task<ActionResult> DeactivateUser(int id)
     {
-      var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Email == email);
+      var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Id == id);
 
       if (user == null)
       {
@@ -180,10 +195,10 @@ namespace API.Controllers
       });
     }
 
-    [HttpGet("retrieve/{email}")]
-    public async Task<ActionResult> RetrieveUser(string email)
+    [HttpGet("retrieve/{id}")]
+    public async Task<ActionResult> RetrieveUser(int id)
     {
-      var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Email == email);
+      var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Id == id);
 
       if (user == null)
       {

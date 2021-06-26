@@ -44,9 +44,16 @@ namespace API.Repositories
       return user;
     }
 
-    public async Task<UserDTO> GetUserAsync(string username)
+    public async Task<UserDTO> GetUserAsync(int id)
     {
-      return await _context.Users.Where(user => user.UserName == username)
+      return await _context.Users.Where(user => user.Id == id)
+                                 .ProjectTo<UserDTO>(_mapper.ConfigurationProvider)
+                                 .SingleOrDefaultAsync();
+    }
+
+    public async Task<UserDTO> FindByEmail(string email)
+    {
+      return await _context.Users.Where(user => user.Email == email)
                                  .ProjectTo<UserDTO>(_mapper.ConfigurationProvider)
                                  .SingleOrDefaultAsync();
     }

@@ -175,7 +175,7 @@ namespace API.Controllers
       var roles = handler.ReadJwtToken(token)
              .Claims.Where(c => c.Type.Equals("role")).Select(c => c.Value).ToList();
 
-      var User = await _unitOfWork.USerRepository.GetUserAsync(email);
+      var User = await _unitOfWork.USerRepository.FindByEmail(email);
       var profile = new
       {
         User = User,
