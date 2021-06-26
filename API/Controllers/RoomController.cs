@@ -64,15 +64,15 @@ namespace API.Controllers
 
 			if (!isCompleted) return BadRequest();
 
-			var msg = new Notification()
-			{
-				EntityType = Enums.EntityEnum.Building,
-				EntityId = roomMapper.Id,
-				EndpointDetails = $"/api/room/{roomMapper.Id}",
-				Message = "New Room has created !"
-			};
-			var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
-			await _notificationService.CreateNotify(msgDto);
+			// var msg = new Notification()
+			// {
+			// 	EntityType = Enums.EntityEnum.Building,
+			// 	EntityId = roomMapper.Id,
+			// 	EndpointDetails = $"/api/room/{roomMapper.Id}",
+			// 	Message = "New Room has created !"
+			// };
+			// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+			// await _notificationService.CreateNotify(msgDto);
 
 			var res = new ResponseBuilder<RoomDTO>().AddData(_mapper.Map<RoomDTO>(roomMapper)).Build();
 
@@ -93,15 +93,15 @@ namespace API.Controllers
 
 			if (!isCompleted) return BadRequest();
 
-			var msg = new Notification()
-			{
-				EntityType = Enums.EntityEnum.Building,
-				EntityId = roomMapper.Id,
-				EndpointDetails = $"/api/room/{roomMapper.Id}",
-				Message = "New Room has updated !"
-			};
-			var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
-			await _notificationService.CreateNotify(msgDto);
+			// var msg = new Notification()
+			// {
+			// 	EntityType = Enums.EntityEnum.Building,
+			// 	EntityId = roomMapper.Id,
+			// 	EndpointDetails = $"/api/room/{roomMapper.Id}",
+			// 	Message = "New Room has updated !"
+			// };
+			// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+			// await _notificationService.CreateNotify(msgDto);
 
 			var res = new ResponseBuilder<RoomDTO>().AddData(roomMapper).Build();
 
@@ -115,15 +115,15 @@ namespace API.Controllers
 			_unitOfWork.RoomRepository.DeletingOne(roomId);
 			var isCompleted = await _unitOfWork.Complete();
 			if (!isCompleted) return BadRequest();
-			var msg = new Notification()
-			{
-				EntityType = Enums.EntityEnum.Building,
-				EntityId = room.Id,
-				EndpointDetails = $"/api/room/{room.Id}",
-				Message = "New Room has deleted !"
-			};
-			var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
-			await _notificationService.CreateNotify(msgDto);
+			// var msg = new Notification()
+			// {
+			// 	EntityType = Enums.EntityEnum.Building,
+			// 	EntityId = room.Id,
+			// 	EndpointDetails = $"/api/room/{room.Id}",
+			// 	Message = "New Room has deleted !"
+			// };
+			// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+			// await _notificationService.CreateNotify(msgDto);
 
 			var res = new ResponseBuilder<string>().AddData("deleted").Build();
 
