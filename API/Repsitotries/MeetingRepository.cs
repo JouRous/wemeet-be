@@ -125,7 +125,7 @@ namespace API.Repsitotries
 			}
 			var query = stat.AsQueryable();
 
-			var res = await PaginationService.GetPagination<MeetingDTO>(query, paginationParams.pageNumber, paginationParams.pageSize);
+			var res = await PaginationService.GetPagination<MeetingDTO>(query, paginationParams.number, paginationParams.size);
 
 			return res;
 		}
