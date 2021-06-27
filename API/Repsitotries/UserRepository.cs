@@ -58,7 +58,7 @@ namespace API.Repositories
                                  .SingleOrDefaultAsync();
     }
 
-    public async Task<Pagination<UserDTO>> GetUsersAsync(Dictionary<string, int> page,
+    public async Task<Pagination<UserWithTeamDTO>> GetUsersAsync(Dictionary<string, int> page,
                                                          Dictionary<string, string> filter,
                                                          Dictionary<string, string> sort)
     {
@@ -73,7 +73,9 @@ namespace API.Repositories
       var stat = _context.Users.Where(u =>
                             u.UnsignedName.ToLower().Contains(fullname) ||
                             u.Email.Contains(fullname))
-                                .ProjectTo<UserDTO>(_mapper.ConfigurationProvider);
+                                .Include(u => u.AppUserTeams)
+                                .ThenInclude(u => u.Team)
+                                .ProjectTo<UserWithTeamDTO>(_mapper.ConfigurationProvider);
 
       switch (_sort)
       {
@@ -85,7 +87,7 @@ namespace API.Repositories
           break;
       }
       var query = stat.AsQueryable();
-      return await PaginationService.GetPagination<UserDTO>(query, paginationParams.number, paginationParams.size);
+      return await PaginationService.GetPagination<UserWithTeamDTO>(query, paginationParams.number, paginationParams.size);
 
     }
 
@@ -95,9 +97,9 @@ namespace API.Repositories
       user.DeletedAt = null;
     }
 
-    public async Task<AppUser> UpdateUserAsync(AppUser user)
+    public async Task<AppUser> UpdateUserAsync(AppUser user, int id)
     {
-      var _user = await _context.Users.FirstOrDefaultAsync(x => x.Email == user.Email);
+      var _user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
       if (_user != null)
       {
         _user.Nickname = user.Nickname;

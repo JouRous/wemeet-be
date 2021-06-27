@@ -4,7 +4,7 @@ namespace API.Models
 {
   public class UserTeamActionModel
   {
-    public int TeamId { get; set; }
-    public ICollection<int> UserIds { get; set; }
+    public int Team_Id { get; set; }
+    public ICollection<int> User_Ids { get; set; }
   }
 }

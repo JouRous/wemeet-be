@@ -25,7 +25,7 @@ namespace API.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<Response<IEnumerable<TeamDTO>>>> GetTeams(
+    public async Task<ActionResult<Response<IEnumerable<TeamWithUserDTO>>>> GetTeams(
       [FromQuery] Dictionary<string, int> page,
       [FromQuery] Dictionary<string, string> filter,
       [FromQuery] Dictionary<string, string> sort)
@@ -33,7 +33,7 @@ namespace API.Controllers
       var _sort = sort.GetValueOrDefault("");
       var result = await _unitOfWork.TeamRepository.GetAllAsync(page, filter, _sort);
 
-      var response = new ResponseBuilder<IEnumerable<TeamDTO>>()
+      var response = new ResponseBuilder<IEnumerable<TeamWithUserDTO>>()
                           .AddData(result.Items)
                           .AddPagination(new PaginationDTO
                           {
@@ -127,7 +127,7 @@ namespace API.Controllers
     [HttpPost("add-user")]
     public async Task<ActionResult> AddUserToTeam([FromBody] UserTeamActionModel userTeamActionModel)
     {
-      await _unitOfWork.TeamRepository.AddUserToTeamAsync(userTeamActionModel.TeamId, userTeamActionModel.UserIds);
+      await _unitOfWork.TeamRepository.AddUserToTeamAsync(userTeamActionModel.Team_Id, userTeamActionModel.User_Ids);
 
       await _unitOfWork.Complete();
 
@@ -142,7 +142,7 @@ namespace API.Controllers
     [HttpPost("remove-user")]
     public async Task<ActionResult> RemoveUserFromTeam([FromBody] UserTeamActionModel userTeamActionModel)
     {
-      await _unitOfWork.TeamRepository.RemoveUserFromTeam(userTeamActionModel.TeamId, userTeamActionModel.UserIds);
+      await _unitOfWork.TeamRepository.RemoveUserFromTeam(userTeamActionModel.Team_Id, userTeamActionModel.User_Ids);
       await _unitOfWork.Complete();
 
       return Ok(new

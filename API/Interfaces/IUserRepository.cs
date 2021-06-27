@@ -12,8 +12,8 @@ namespace API.Interfaces
     Task<AppUser> FindById(int id);
     Task<UserDTO> GetUserAsync(int id);
     Task<UserDTO> FindByEmail(string email);
-    Task<AppUser> UpdateUserAsync(AppUser user);
-    Task<Pagination<UserDTO>> GetUsersAsync(Dictionary<string, int> page, Dictionary<string, string> filter, Dictionary<string, string> sort);
+    Task<AppUser> UpdateUserAsync(AppUser user, int id);
+    Task<Pagination<UserWithTeamDTO>> GetUsersAsync(Dictionary<string, int> page, Dictionary<string, string> filter, Dictionary<string, string> sort);
     void DeactivateUser(AppUser user);
     void RetrieveUser(AppUser user);
   }

@@ -43,7 +43,7 @@ namespace API.Controllers
       return await _userManager.Users.AnyAsync(user => user.Email == email);
     }
 
-    [HttpPost("create-user")]
+    [HttpPost()]
     public async Task<ActionResult<Response<AuthModel>>> CreateUser([FromBody] UserActionModel userActionModel)
     {
       if (await CheckUserExist(userActionModel.Email))
@@ -132,14 +132,14 @@ namespace API.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<Response<IEnumerable<UserDTO>>>> GetUsers(
+    public async Task<ActionResult<Response<IEnumerable<UserWithTeamDTO>>>> GetUsers(
     [FromQuery] Dictionary<string, int> page,
     [FromQuery] Dictionary<string, string> filter,
     [FromQuery] Dictionary<string, string> sort)
     {
       var result = await _unitOfWork.USerRepository.GetUsersAsync(page, filter, sort);
 
-      var response = new ResponseBuilder<IEnumerable<UserDTO>>()
+      var response = new ResponseBuilder<IEnumerable<UserWithTeamDTO>>()
              .AddData(result.Items)
              .AddPagination(new PaginationDTO
              {
@@ -154,11 +154,11 @@ namespace API.Controllers
       return response;
     }
 
-    [HttpPut]
-    public async Task<ActionResult> UpdateUser([FromBody] UserActionModel userActionModel)
+    [HttpPut("{id}")]
+    public async Task<ActionResult> UpdateUser([FromBody] UserActionModel userActionModel, int id)
     {
       var user = _mapper.Map<AppUser>(userActionModel);
-      var _user = await _unitOfWork.USerRepository.UpdateUserAsync(user);
+      var _user = await _unitOfWork.USerRepository.UpdateUserAsync(user, id);
 
       await _unitOfWork.Complete();
 

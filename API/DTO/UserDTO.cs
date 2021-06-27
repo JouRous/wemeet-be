@@ -16,6 +16,5 @@ namespace API.DTO
     public bool isFirstLogin { get; set; }
     public bool isActive { get; set; }
     public DateTime CreatedAt { get; set; }
-    public ICollection<Team> Teams { get; set; }
   }
 }
