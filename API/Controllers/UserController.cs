@@ -88,7 +88,7 @@ namespace API.Controllers
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<UserDTO>> GetUser(int id)
+    public async Task<ActionResult<UserWithTeamDTO>> GetUser(int id)
     {
       var user = await _unitOfWork.USerRepository.GetUserAsync(id);
 
@@ -159,6 +159,7 @@ namespace API.Controllers
     {
       var user = _mapper.Map<AppUser>(userActionModel);
       var _user = await _unitOfWork.USerRepository.UpdateUserAsync(user, id);
+      _user.isActive = userActionModel.is_active;
 
       await _unitOfWork.Complete();
 

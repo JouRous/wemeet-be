@@ -44,10 +44,12 @@ namespace API.Repositories
       return user;
     }
 
-    public async Task<UserDTO> GetUserAsync(int id)
+    public async Task<UserWithTeamDTO> GetUserAsync(int id)
     {
       return await _context.Users.Where(user => user.Id == id)
-                                 .ProjectTo<UserDTO>(_mapper.ConfigurationProvider)
+                                 .Include(u => u.AppUserTeams)
+                                 .ThenInclude(t => t.Team)
+                                 .ProjectTo<UserWithTeamDTO>(_mapper.ConfigurationProvider)
                                  .SingleOrDefaultAsync();
     }
 
@@ -72,10 +74,12 @@ namespace API.Repositories
 
       var stat = _context.Users.Where(u =>
                             u.UnsignedName.ToLower().Contains(fullname) ||
-                            u.Email.Contains(fullname))
-                                .Include(u => u.AppUserTeams)
-                                .ThenInclude(u => u.Team)
-                                .ProjectTo<UserWithTeamDTO>(_mapper.ConfigurationProvider);
+                            u.Email.Contains(fullname));
+
+      if (!string.IsNullOrEmpty(_filter.role))
+      {
+        stat = stat.Where(u => u.Role.Equals(_filter.role));
+      }
 
       switch (_sort)
       {
@@ -86,7 +90,9 @@ namespace API.Repositories
           stat = stat.OrderByDescending(s => s.CreatedAt);
           break;
       }
-      var query = stat.AsQueryable();
+      var query = stat.Include(u => u.AppUserTeams)
+                                .ThenInclude(u => u.Team)
+                                .ProjectTo<UserWithTeamDTO>(_mapper.ConfigurationProvider).AsQueryable();
       return await PaginationService.GetPagination<UserWithTeamDTO>(query, paginationParams.number, paginationParams.size);
 
     }

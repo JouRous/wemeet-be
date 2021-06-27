@@ -9,6 +9,6 @@ namespace API.Models
     public string Nickname { get; set; }
     public string Position { get; set; }
     public string Role { get; set; }
-    public bool isDeactivated { get; set; }
+    public bool is_active { get; set; }
   }
 }

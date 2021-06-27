@@ -100,6 +100,14 @@ namespace API.Controllers
         return BadRequest();
       }
 
+      team.AppUserTeams.Add(new AppUserTeam
+      {
+        AppUserId = team.LeaderId,
+        TeamId = team.Id
+      });
+
+      await _unitOfWork.Complete();
+
       var response = new ResponseBuilder<TeamDTO>()
                           .AddData(_mapper.Map<TeamDTO>(team))
                           .Build();
