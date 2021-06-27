@@ -28,6 +28,7 @@ namespace API.Repositories
 
     public void AddTeam(Team team)
     {
+      team.AppUserTeams = new List<AppUserTeam>();
       _context.Teams.Add(team);
     }
 
