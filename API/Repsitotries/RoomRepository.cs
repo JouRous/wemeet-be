@@ -65,7 +65,7 @@ namespace API.Repsitotries
 			var result = await _context.Rooms.Where(room => room.Id == Id)
 									.ProjectTo<RoomDTO>(_mapper.ConfigurationProvider)
 									.SingleOrDefaultAsync();
-			
+			result.Building = _context.Buildings.Where(o => o.Id == result.Building.Id).ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider).FirstOrDefault();
 			return result;
 		}
 

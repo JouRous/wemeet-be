@@ -24,7 +24,8 @@ namespace API.Utils
 			CreateMap<BuildingModel, Building>();
 			CreateMap<BuildingModel, BuildingDTO>();
 
-			CreateMap<Room, RoomDTO>();
+			CreateMap<Room, RoomDTO>()
+			.ForMember(room => room.Building, opt => opt.MapFrom(src => new BuildingDTO() { Id = src.BuildingId }));
 			CreateMap<RoomModel, Room>();
 			CreateMap<RoomModel, RoomDTO>();
 
@@ -37,6 +38,7 @@ namespace API.Utils
 				.ForMember(dest => dest.UserInMeeting, opt => opt.MapFrom(src => src.UsersInMeeting))
 				.ForMember(dest => dest.Team, opt => opt.MapFrom(src => src.Team))
 				.ForMember(dest => dest.ConflictWith, opt => opt.MapFrom(src => src.ConflictWith));
+
 			CreateMap<MeetingModel, MeetingDTO>();
 			CreateMap<Meeting, Meeting>();
 

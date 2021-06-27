@@ -7,6 +7,6 @@ namespace API.DTO
 		public DateTime? CreatedAt { get; set; } = null;
 		public string Address { get; set; }
 		public string Name { get; set; }
-
+		public int RoomNumber { get; set; } = 0;
 	}
 }
