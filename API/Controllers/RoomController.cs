@@ -27,10 +27,16 @@ namespace API.Controllers
 
 		[HttpGet]
 		public async Task<ActionResult<Response<IEnumerable<RoomDTO>>>> GetAlls(
-			[FromQuery] PaginationParams paginationParams, string filter = "", string sort = "-created_at")
+			[FromQuery] Dictionary<string, int> page,
+			[FromQuery] Dictionary<string, string> filter,
+			[FromQuery] Dictionary<string, string> sort)
 		{
-			var result = await _unitOfWork.RoomRepository.GetAllByPaginationAsync(paginationParams, filter, sort);
-
+			var _sort = sort.GetValueOrDefault("");
+			var result = await _unitOfWork.RoomRepository.GetAllByPaginationAsync(page, filter, _sort);
+			for (var i = 0; i < result.Items.Count; i++)
+			{
+				result.Items[i].Building = await _unitOfWork.BuildingRepository.GetOneAsync(result.Items[i].Building.Id);
+			}
 			var response = new ResponseBuilder<IEnumerable<RoomDTO>>()
 													.AddData(result.Items)
 													.AddPagination(new PaginationDTO
@@ -50,6 +56,7 @@ namespace API.Controllers
 		public async Task<ActionResult<Response<RoomDTO>>> GetRoomInfo(int RoomId)
 		{
 			var RoomInfo = await _unitOfWork.RoomRepository.GetOneAsync(RoomId);
+
 			return new ResponseBuilder<RoomDTO>().AddData(RoomInfo).Build();
 		}
 

@@ -2,8 +2,8 @@ namespace API.Enums
 {
 	public enum StatusRomEnums
 	{
-		Inactive,
 		Active,
+		Inactive,
 		Busy,
 		Free,
 		Meeting

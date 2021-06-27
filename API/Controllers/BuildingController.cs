@@ -26,24 +26,23 @@ namespace API.Controllers
 		}
 
 		[HttpGet]
-		public async Task<ActionResult<Response<IEnumerable<BuildingResDTO>>>> GetAllBuildings(
-			[FromQuery] PaginationParams paginationParams, string filter = "", string sort = "created_at"
-			)
+		public async Task<ActionResult<Response<IEnumerable<BuildingDTO>>>> GetAllBuildings(
+			[FromQuery] Dictionary<string, int> page,
+			[FromQuery] Dictionary<string, string> filter,
+			[FromQuery] Dictionary<string, string> sort)
 		{
-			var result = await _unitOfWork.BuildingRepository.GetAllByPaginationAsync(paginationParams, filter, sort);
+			var _sort = sort.GetValueOrDefault("");
+			var result = await _unitOfWork.BuildingRepository.GetAllByPaginationAsync(page, filter, _sort);
 
-			var list = new List<BuildingResDTO>();
+			var list = new List<BuildingDTO>();
 			foreach (var item in result.Items)
 			{
 				var count = _unitOfWork.RoomRepository.GetSizeOfEntity(o => o.BuildingId == item.Id);
-				list.Add(new BuildingResDTO()
-				{
-					Building = item,
-					RoomNumber = count
-				});
+				item.RoomNumber = count;
+				list.Add(item);
 			}
 
-			var response = new ResponseBuilder<IEnumerable<BuildingResDTO>>()
+			var response = new ResponseBuilder<IEnumerable<BuildingDTO>>()
 													.AddData(list)
 													.AddPagination(new PaginationDTO
 													{
@@ -59,15 +58,12 @@ namespace API.Controllers
 		}
 
 		[HttpGet("{buildingId}")]
-		public async Task<ActionResult<Response<BuildingResDTO>>> GetBuildingInfo(int buildingId)
+		public async Task<ActionResult<Response<BuildingDTO>>> GetBuildingInfo(int buildingId)
 		{
 			var buildingInfo = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
-			var data = new BuildingResDTO()
-			{
-				Building = buildingInfo,
-				RoomNumber = _unitOfWork.RoomRepository.GetSizeOfEntity(x => x.BuildingId == buildingId)
-			};
-			return new ResponseBuilder<BuildingResDTO>().AddData(data).Build();
+			buildingInfo.RoomNumber = _unitOfWork.RoomRepository.GetSizeOfEntity(x => x.BuildingId == buildingId);
+
+			return new ResponseBuilder<BuildingDTO>().AddData(buildingInfo).Build();
 		}
 
 		[HttpPost]
