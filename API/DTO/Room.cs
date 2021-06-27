@@ -1,4 +1,6 @@
 using System;
+using API.Enums;
+
 namespace API.DTO
 {
 	public class RoomDTO
@@ -6,7 +8,8 @@ namespace API.DTO
 		public int Id { get; set; }
 		public DateTime? CreatedAt { get; set; } = null;
 		public string Name { get; set; }
-		public int BuildingId { get; set; }
+		public StatusRomEnums Status { get; set; }
+		public BuildingDTO Building { get; set; }
 		public int Capacity { get; set; }
 	}
 }

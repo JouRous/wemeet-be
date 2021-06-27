@@ -27,10 +27,12 @@ namespace API.Controllers
 
 		[HttpGet]
 		public async Task<ActionResult<Response<IEnumerable<BuildingResDTO>>>> GetAllBuildings(
-			[FromQuery] PaginationParams paginationParams, string filter = "", string sort = "created_at"
-			)
+			[FromQuery] Dictionary<string, int> page,
+			[FromQuery] Dictionary<string, string> filter,
+			[FromQuery] Dictionary<string, string> sort)
 		{
-			var result = await _unitOfWork.BuildingRepository.GetAllByPaginationAsync(paginationParams, filter, sort);
+			var _sort = sort.GetValueOrDefault("");
+			var result = await _unitOfWork.BuildingRepository.GetAllByPaginationAsync(page, filter, _sort);
 
 			var list = new List<BuildingResDTO>();
 			foreach (var item in result.Items)
