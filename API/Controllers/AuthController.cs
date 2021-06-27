@@ -68,7 +68,7 @@ namespace API.Controllers
         return Unauthorized("Invalid User");
       }
 
-      if (user.isDeactivated)
+      if (!user.isActive)
       {
         return StatusCode(StatusCodes.Status403Forbidden, new
         {

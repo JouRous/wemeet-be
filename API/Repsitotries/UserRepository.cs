@@ -34,7 +34,7 @@ namespace API.Repositories
     public void DeactivateUser(AppUser user)
     {
       user.DeletedAt = DateTime.Now;
-      user.isDeactivated = true;
+      user.isActive = false;
     }
 
     public async Task<AppUser> FindById(int id)
@@ -91,7 +91,7 @@ namespace API.Repositories
 
     public void RetrieveUser(AppUser user)
     {
-      user.isDeactivated = false;
+      user.isActive = true;
       user.DeletedAt = null;
     }
 
@@ -104,7 +104,7 @@ namespace API.Repositories
         _user.Fullname = user.Fullname;
         _user.Position = user.Position;
         _user.Role = user.Role;
-        _user.isDeactivated = user.isDeactivated;
+        _user.isActive = user.isActive;
       }
 
       return _user;
