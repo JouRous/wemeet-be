@@ -114,14 +114,14 @@ namespace API.Controllers
     {
       var user = await _unitOfWork.USerRepository.FindByEmail(email);
 
-      if (user == null)
-      {
-        return StatusCode(StatusCodes.Status404NotFound, new
-        {
-          status = 404,
-          success = false
-        });
-      }
+      // if (user == null)
+      // {
+      //   return StatusCode(StatusCodes.Status404NotFound, new
+      //   {
+      //     status = 404,
+      //     success = false
+      //   });
+      // }
 
       return Ok(new
       {
