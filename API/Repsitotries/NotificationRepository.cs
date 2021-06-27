@@ -1,19 +1,18 @@
-using API.Interfaces;
 using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
+using API.Interfaces;
 using API.Data;
 using API.DTO;
-using API.Interfaces;
 using API.Enums;
 using API.Entities;
 using API.Models;
 using API.Services;
 using API.Types;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Microsoft.EntityFrameworkCore;
 namespace API.Repsitotries
 {
   public class NotificationRepository : INotificationRepo
