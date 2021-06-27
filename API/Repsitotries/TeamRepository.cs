@@ -60,10 +60,10 @@ namespace API.Repositories
     }
 
 
-    public async Task<TeamDTO> GetTeamAsync(int teamId)
+    public async Task<TeamWithUserDTO> GetTeamAsync(int teamId)
     {
       return await _context.Teams.Where(team => team.Id == teamId)
-                                 .ProjectTo<TeamDTO>(_mapper.ConfigurationProvider)
+                                 .ProjectTo<TeamWithUserDTO>(_mapper.ConfigurationProvider)
                                  .SingleOrDefaultAsync();
     }
 

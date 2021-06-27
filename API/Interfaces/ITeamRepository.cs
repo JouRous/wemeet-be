@@ -9,7 +9,7 @@ namespace API.Interfaces
 {
   public interface ITeamRepository
   {
-    Task<TeamDTO> GetTeamAsync(int teamId);
+    Task<TeamWithUserDTO> GetTeamAsync(int teamId);
     Task<Pagination<TeamWithUserDTO>> GetAllAsync(Dictionary<string, int> page, Dictionary<string, string> filer, string sort);
     void AddTeam(Team team);
     Task UpdateTeamAsync(Team team);
