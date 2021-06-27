@@ -19,10 +19,16 @@ namespace API.Data
     public string Fullname { get; set; }
     public string Role { get; set; }
   }
+  class SeedTeamModel
+  {
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public int l_id { get; set; }
+  }
 
   public class Seed
   {
-    public static async Task SeedUsers(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
+    public static async Task SeedUsers(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, AppDbContext context)
     {
       if (await userManager.Users.AnyAsync())
       {
@@ -74,6 +80,24 @@ namespace API.Data
       };
 
       await userManager.CreateAsync(admin, "123123");
+
+      var teamData = await System.IO.File.ReadAllTextAsync("Data/TeamSeedData.json");
+      var teams = JsonSerializer.Deserialize<List<SeedTeamModel>>(teamData);
+
+      foreach (var team in teams)
+      {
+        var leader = await userManager.Users.FirstOrDefaultAsync(u => u.Id == team.l_id);
+        var _team = new Team
+        {
+          Name = team.Name,
+          Description = team.Description,
+          Leader = leader,
+          LeaderId = leader.Id
+        };
+        await context.Teams.AddAsync(_team);
+        await context.SaveChangesAsync();
+      }
+
     }
   }
 }
