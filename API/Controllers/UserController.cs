@@ -88,7 +88,7 @@ namespace API.Controllers
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<UserWithTeamDTO>> GetUser(int id)
+    public async Task<ActionResult<UserWithTeamUsersDTO>> GetUser(int id)
     {
       var user = await _unitOfWork.USerRepository.GetUserAsync(id);
 

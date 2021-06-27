@@ -44,12 +44,12 @@ namespace API.Repositories
       return user;
     }
 
-    public async Task<UserWithTeamDTO> GetUserAsync(int id)
+    public async Task<UserWithTeamUsersDTO> GetUserAsync(int id)
     {
       return await _context.Users.Where(user => user.Id == id)
                                  .Include(u => u.AppUserTeams)
                                  .ThenInclude(t => t.Team)
-                                 .ProjectTo<UserWithTeamDTO>(_mapper.ConfigurationProvider)
+                                 .ProjectTo<UserWithTeamUsersDTO>(_mapper.ConfigurationProvider)
                                  .SingleOrDefaultAsync();
     }
 
