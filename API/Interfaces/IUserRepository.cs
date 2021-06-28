@@ -13,7 +13,7 @@ namespace API.Interfaces
     Task<UserWithTeamUsersDTO> GetUserAsync(int id);
     Task<UserDTO> FindByEmail(string email);
     Task<AppUser> UpdateUserAsync(AppUser user, int id);
-    Task<Pagination<UserWithTeamDTO>> GetUsersAsync(Dictionary<string, int> page, Dictionary<string, string> filter, Dictionary<string, string> sort);
+    Task<Pagination<UserWithTeamDTO>> GetUsersAsync(Query<UserFilterModel> query);
     void DeactivateUser(AppUser user);
     void RetrieveUser(AppUser user);
   }

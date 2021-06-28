@@ -32,14 +32,11 @@ namespace API.Repositories
       _context.Teams.Add(team);
     }
 
-    public async Task<Pagination<TeamWithUserDTO>> GetAllAsync(Dictionary<string, int> page,
-                                                       Dictionary<string, string> filter,
-                                                       string sort = "-created_at")
+    public async Task<Pagination<TeamWithUserDTO>> GetAllAsync(Query<FilterTeamModel> teamQuery)
     {
-      var filterSerializer = JsonConvert.SerializeObject(filter);
-      var pageSerializer = JsonConvert.SerializeObject(page);
-      var _filter = JsonConvert.DeserializeObject<FilterTeamModel>(filterSerializer);
-      var paginationParams = JsonConvert.DeserializeObject<PaginationParams>(pageSerializer);
+      var _filter = teamQuery.filter;
+      var paginationParams = teamQuery.paginationParams;
+      var sort = teamQuery.sort;
 
       var stat = _context.Teams.Where(t => t.Name.Contains(_filter.Name))
                                 .Include(t => t.AppUserTeams)

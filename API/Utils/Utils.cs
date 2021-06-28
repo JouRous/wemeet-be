@@ -5,7 +5,7 @@ using System.Text;
 
 namespace API.Utils
 {
-  public class Utils
+  public static class Utils
   {
     private static Random random = new Random();
     public static string RandomString(int length)
@@ -31,5 +31,6 @@ namespace API.Utils
 
       return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
     }
+
   }
 }

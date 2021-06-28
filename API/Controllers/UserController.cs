@@ -137,7 +137,9 @@ namespace API.Controllers
     [FromQuery] Dictionary<string, string> filter,
     [FromQuery] Dictionary<string, string> sort)
     {
-      var result = await _unitOfWork.USerRepository.GetUsersAsync(page, filter, sort);
+      var userQuery = QueryBuilder<UserFilterModel>.Build(page, filter, sort);
+
+      var result = await _unitOfWork.USerRepository.GetUsersAsync(userQuery);
 
       var response = new ResponseBuilder<IEnumerable<UserWithTeamDTO>>()
              .AddData(result.Items)

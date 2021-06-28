@@ -10,6 +10,7 @@ using API.Interfaces;
 using API.Models;
 using API.Services;
 using API.Types;
+using API.Utils;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
@@ -60,15 +61,11 @@ namespace API.Repositories
                                  .SingleOrDefaultAsync();
     }
 
-    public async Task<Pagination<UserWithTeamDTO>> GetUsersAsync(Dictionary<string, int> page,
-                                                         Dictionary<string, string> filter,
-                                                         Dictionary<string, string> sort)
+    public async Task<Pagination<UserWithTeamDTO>> GetUsersAsync(Query<UserFilterModel> userQuery)
     {
-      var filterSerializer = JsonConvert.SerializeObject(filter);
-      var pageSerializer = JsonConvert.SerializeObject(page);
-      var _filter = JsonConvert.DeserializeObject<UserFilterModel>(filterSerializer);
-      var paginationParams = JsonConvert.DeserializeObject<PaginationParams>(pageSerializer);
-      var _sort = sort.GetValueOrDefault("sort");
+      var _filter = userQuery.filter;
+      var paginationParams = userQuery.paginationParams;
+      var _sort = userQuery.sort;
 
       var fullname = Utils.Utils.RemoveAccentedString(_filter.fullname).ToLower();
 
@@ -93,8 +90,8 @@ namespace API.Repositories
       var query = stat.Include(u => u.AppUserTeams)
                                 .ThenInclude(u => u.Team)
                                 .ProjectTo<UserWithTeamDTO>(_mapper.ConfigurationProvider).AsQueryable();
-      return await PaginationService.GetPagination<UserWithTeamDTO>(query, paginationParams.number, paginationParams.size);
 
+      return await PaginationService.GetPagination<UserWithTeamDTO>(query, paginationParams.number, paginationParams.size);
     }
 
     public void RetrieveUser(AppUser user)

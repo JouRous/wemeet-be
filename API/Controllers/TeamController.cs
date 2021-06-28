@@ -30,8 +30,9 @@ namespace API.Controllers
       [FromQuery] Dictionary<string, string> filter,
       [FromQuery] Dictionary<string, string> sort)
     {
-      var _sort = sort.GetValueOrDefault("");
-      var result = await _unitOfWork.TeamRepository.GetAllAsync(page, filter, _sort);
+      var teamQuery = QueryBuilder<FilterTeamModel>.Build(page, filter, sort);
+
+      var result = await _unitOfWork.TeamRepository.GetAllAsync(teamQuery);
 
       var response = new ResponseBuilder<IEnumerable<TeamWithUserDTO>>()
                           .AddData(result.Items)
