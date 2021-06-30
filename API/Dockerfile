@@ -5,11 +5,14 @@ WORKDIR /app
 RUN dotnet restore
 RUN dotnet build
 
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:/root/.dotnet/tools"
+RUN dotnet ef migrations add Init
+
 RUN mkdir -p /app/Uploads
 RUN mkdir -p /app/Uploads/Avatars
 
 # RUN dotnet tool install --global dotnet-ef
-# ENV PATH="${PATH}:/root/.dotnet/tools"
 
 EXPOSE 5000/tcp
 ENV ASPNETCORE_URLS http://*:5000
