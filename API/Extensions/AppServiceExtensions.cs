@@ -10,30 +10,30 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace API.Extensions
 {
-  public static class AppServiceExtensions
-  {
-    public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration config)
+    public static class AppServiceExtensions
     {
-      services.AddScoped<ITokenService, TokenService>();
-      services.AddScoped<IUserRepository, UserRepository>();
-      services.AddScoped<IUnitOfWork, UnitOfWork>();
-      services.AddTransient<IEmailService, EmailService>();
-
-      services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
-
-      services.AddDbContext<AppDbContext>(options =>
-      {
-        var env = Environment.GetEnvironmentVariable("BUILD_ENV");
-        var connStr = config.GetConnectionString("DefaultConnection");
-        if (env != null)
+        public static IServiceCollection AddAppServices(this IServiceCollection services, IConfiguration config)
         {
-          connStr = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IEmailService, EmailService>();
+
+            services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
+
+            services.AddDbContext<AppDbContext>(options =>
+            {
+                var env = Environment.GetEnvironmentVariable("BUILD_ENV");
+                var connStr = config.GetConnectionString("DefaultConnection");
+                if (env != null)
+                {
+                    connStr = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+                }
+
+                options.UseNpgsql(connStr);
+            });
+
+            return services;
         }
-
-        options.UseNpgsql(connStr);
-      });
-
-      return services;
     }
-  }
 }
