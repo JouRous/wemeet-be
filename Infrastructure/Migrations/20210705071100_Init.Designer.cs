@@ -10,22 +10,21 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20210705164120_Init")]
+    [Migration("20210705071100_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasPostgresExtension("uuid-ossp")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.5")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("AppUserTeam", b =>
                 {
-                    b.Property<Guid>("TeamsId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("TeamsId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("UsersId")
                         .HasColumnType("integer");
@@ -104,8 +103,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("MeetingId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("MeetingId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Nickname")
                         .HasColumnType("text");
@@ -196,8 +195,8 @@ namespace Infrastructure.Migrations
                     b.Property<int>("AppUserId")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("TeamId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("TeamId")
+                        .HasColumnType("integer");
 
                     b.HasKey("AppUserId", "TeamId");
 
@@ -208,9 +207,10 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Building", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Address")
                         .HasColumnType("text");
@@ -234,12 +234,13 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Meeting", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<Guid?>("ConflictWithId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("ConflictWithId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -268,8 +269,8 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Priority")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("RoomId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("RoomId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("timestamp without time zone");
@@ -280,8 +281,8 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Target")
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("TeamId")
-                        .HasColumnType("uuid");
+                    b.Property<int?>("TeamId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -301,9 +302,10 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Notification", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
@@ -342,8 +344,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.ParticipantMeeting", b =>
                 {
-                    b.Property<Guid>("MeetingId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("MeetingId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("ParticipantId")
                         .HasColumnType("integer");
@@ -357,15 +359,13 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Room", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<int>("BuildingId")
                         .HasColumnType("integer");
-
-                    b.Property<Guid?>("BuildingId1")
-                        .HasColumnType("uuid");
 
                     b.Property<int>("Capacity")
                         .HasColumnType("integer");
@@ -387,16 +387,17 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BuildingId1");
+                    b.HasIndex("BuildingId");
 
                     b.ToTable("Rooms");
                 });
 
             modelBuilder.Entity("Domain.Entities.Team", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Avatar")
                         .HasColumnType("text");
@@ -630,7 +631,9 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.Building", "Building")
                         .WithMany("Rooms")
-                        .HasForeignKey("BuildingId1");
+                        .HasForeignKey("BuildingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Building");
                 });

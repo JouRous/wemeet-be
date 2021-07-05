@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Types;
 using System.IO;
 using System.Reflection;
-using Application.Utils;
 
 namespace Infrastructure.Data
 {
@@ -52,8 +51,8 @@ namespace Infrastructure.Data
                     UserName = user.Email.ToLower(),
                     Nickname = user.Email.Split("@")[0],
                     Fullname = user.Fullname,
-                    isFirstLogin = false,
-                    UnsignedName = StringHelper.RemoveAccentedString(user.Fullname),
+                    isFirstLogin = true,
+                    // UnsignedName = Utils.Utils.RemoveAccentedString(user.Fullname),
                     Role = UserRoles.STAFF
                 };
 
@@ -92,16 +91,16 @@ namespace Infrastructure.Data
                     Name = team.Name,
                     Description = team.Description,
                     Leader = leader,
-                    // LeaderId = leader.Id,
+                    LeaderId = leader.Id,
                     AppUserTeams = new List<AppUserTeam>()
                 };
                 await context.Teams.AddAsync(_team);
                 await context.SaveChangesAsync();
-                // _team.AppUserTeams.Add(new AppUserTeam
-                // {
-                //     TeamId = _team.Id,
-                //     AppUserId = _team.LeaderId
-                // });
+                _team.AppUserTeams.Add(new AppUserTeam
+                {
+                    TeamId = _team.Id,
+                    AppUserId = _team.LeaderId
+                });
                 await context.SaveChangesAsync();
             }
 

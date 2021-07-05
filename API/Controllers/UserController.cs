@@ -142,16 +142,16 @@ namespace API.Controllers
             var result = await _unitOfWork.UserRepository.GetUsersAsync(userQuery);
 
             var response = new ResponseWithPaginationBuilder<IEnumerable<UserWithTeamDTO>>()
-                .AddData(result.Items)
-                .AddPagination(new PaginationDTO
-                {
-                    CurrentPage = result.CurrentPage,
-                    PerPage = result.PerPage,
-                    Total = result.Total,
-                    Count = (int)result.Count,
-                    TotalPages = result.TotalPages
-                })
-                .Build();
+                   .AddData(result.Items)
+                   .AddPagination(new PaginationDTO
+                   {
+                       CurrentPage = result.CurrentPage,
+                       PerPage = result.PerPage,
+                       Total = result.Total,
+                       Count = (int)result.Count,
+                       TotalPages = result.TotalPages
+                   })
+                   .Build();
 
             return response;
         }
@@ -164,6 +164,7 @@ namespace API.Controllers
             _user.isActive = userActionModel.is_active;
 
             await _unitOfWork.Complete();
+
 
             return Accepted(new
             {

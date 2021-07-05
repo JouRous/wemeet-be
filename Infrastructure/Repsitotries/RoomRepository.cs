@@ -35,10 +35,9 @@ namespace Infrastructure.Repositories
             _context.Rooms.Add(roomInfo);
         }
 
-        public async Task<Pagination<RoomDTO>> GetAllByPaginationAsync(
-            Dictionary<string, int> page,
-            Dictionary<string, string> filter,
-            string sort = "-created_at")
+        public async Task<Pagination<RoomDTO>> GetAllByPaginationAsync(Dictionary<string, int> page,
+                                                                                                             Dictionary<string, string> filter,
+                                                                                                             string sort = "-created_at")
         {
             var filterSerializer = JsonConvert.SerializeObject(filter);
             var pageSerializer = JsonConvert.SerializeObject(page);
@@ -61,12 +60,12 @@ namespace Infrastructure.Repositories
             return await PaginationService.GetPagination<RoomDTO>(query, paginationParams.number, paginationParams.size);
         }
 
-        public async Task<RoomDTO> GetOneAsync(string Id)
+        public async Task<RoomDTO> GetOneAsync(int Id)
         {
-            var result = await _context.Rooms.Where(room => room.Id.ToString() == Id.ToString())
+            var result = await _context.Rooms.Where(room => room.Id == Id)
                                     .ProjectTo<RoomDTO>(_mapper.ConfigurationProvider)
                                     .SingleOrDefaultAsync();
-            result.Building = _context.Buildings.Where(o => o.Id.ToString() == result.Building.Id.ToString()).ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider).FirstOrDefault();
+            result.Building = _context.Buildings.Where(o => o.Id == result.Building.Id).ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider).FirstOrDefault();
             return result;
         }
 
@@ -78,21 +77,21 @@ namespace Infrastructure.Repositories
 
         public void UpdatingOne(RoomDTO data)
         {
-            // var entity = _context.Rooms.Find(data.Id);
-            // if (data != null)
-            // {
-            //     // if (data.Building.Id > 0)
-            //     // {
-            //     //     var e = _context.Buildings.Find(data.Building.Id);
-            //     //     entity.BuildingId = e.Id;
-            //     // }
-            //     entity.Capacity = data.Capacity == 0 ? entity.Capacity : data.Capacity;
-            //     entity.Name = data.Name == null ? entity.Name : data.Name;
-            //     entity.UpdatedAt = DateTime.Now;
-            // }
+            var entity = _context.Rooms.Find(data.Id);
+            if (data != null)
+            {
+                if (data.Building.Id > 0)
+                {
+                    var e = _context.Buildings.Find(data.Building.Id);
+                    entity.BuildingId = e.Id;
+                }
+                entity.Capacity = data.Capacity == 0 ? entity.Capacity : data.Capacity;
+                entity.Name = data.Name == null ? entity.Name : data.Name;
+                entity.UpdatedAt = DateTime.Now;
+            }
 
-            // _context.Rooms.Update(entity);
-            throw new Exception();
+            _context.Rooms.Update(entity);
+
         }
 
         public void DeletingOne(int Id)

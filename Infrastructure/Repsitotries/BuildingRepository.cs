@@ -87,9 +87,9 @@ namespace Infrastructure.Repositories
 
         }
 
-        public async Task<BuildingDTO> GetOneAsync(string Id)
+        public async Task<BuildingDTO> GetOneAsync(int Id)
         {
-            var res = await _context.Buildings.Where(building => building.Id.ToString() == Id)
+            var res = await _context.Buildings.Where(building => building.Id == Id)
                 .ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
             return res == null ? default : res;
