@@ -1,22 +1,22 @@
-using API.Entities;
+using Domain.Entities;
 using API.Types;
-using API.DTO;
-using API.Models;
+using Domain.DTO;
+using Domain.Models;
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 
-namespace API.Interfaces
+namespace Domain.Interfaces
 {
-	public interface IRoomRepository
-	{
-		void AddOne(Room info);
-		Task<Pagination<RoomDTO>> GetAllByPaginationAsync(Dictionary<string, int> page,
-																											 Dictionary<string, string> filter,
-																											 string sort = "-created_at");
-		Task<RoomDTO> GetOneAsync(int Id);
-		int GetSizeOfEntity(Func<Room, bool> query);
-		void DeletingOne(int Id);
-		void UpdatingOne(RoomDTO room);
-	}
+    public interface IRoomRepository
+    {
+        void AddOne(Room info);
+        Task<Pagination<RoomDTO>> GetAllByPaginationAsync(Dictionary<string, int> page,
+                                                                                                             Dictionary<string, string> filter,
+                                                                                                             string sort = "-created_at");
+        Task<RoomDTO> GetOneAsync(int Id);
+        int GetSizeOfEntity(Func<Room, bool> query);
+        void DeletingOne(int Id);
+        void UpdatingOne(RoomDTO room);
+    }
 }

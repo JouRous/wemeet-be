@@ -1,19 +1,19 @@
-using API.Entities;
+using Domain.Entities;
 using API.Types;
-using API.DTO;
-using API.Models;
+using Domain.DTO;
+using Domain.Models;
 using System.Threading.Tasks;
 using System;
 
-namespace API.Interfaces
+namespace Domain.Interfaces
 {
-	public interface IMeetingRepo
-	{
-		void AddOne(MeetingDTO info);
-		Task<Pagination<MeetingDTO>> GetAllByPaginationAsync(PaginationParams paginationQuery, string f, string s);
-		Task<Pagination<MeetingDTO>> GetWaitMeetingByPaginationAsync(PaginationParams paginationParams, string filter, string sort);
-		MeetingDTO GetOneAsync(int Id);
-		void DeletingOne(int Id);
-		void UpdatingOne(MeetingDTO Meeting);
-	}
+    public interface IMeetingRepo
+    {
+        void AddOne(MeetingDTO info);
+        Task<Pagination<MeetingDTO>> GetAllByPaginationAsync(PaginationParams paginationQuery, string f, string s);
+        Task<Pagination<MeetingDTO>> GetWaitMeetingByPaginationAsync(PaginationParams paginationParams, string filter, string sort);
+        MeetingDTO GetOneAsync(int Id);
+        void DeletingOne(int Id);
+        void UpdatingOne(MeetingDTO Meeting);
+    }
 }

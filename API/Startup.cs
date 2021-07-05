@@ -1,6 +1,4 @@
-using System;
 using System.IO;
-using System.Text.Json.Serialization;
 using API.Extensions;
 using API.Middleware;
 using Microsoft.AspNetCore.Builder;
@@ -10,9 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using API.Services;
 using API.Configs;
+using Microsoft.OpenApi.Models;
 
 namespace API
 {

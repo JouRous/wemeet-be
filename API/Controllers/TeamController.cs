@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.DTO;
-using API.Entities;
-using API.Enums;
-using API.Interfaces;
-using API.Models;
+using Domain.DTO;
+using Domain.Entities;
+using Domain.Enums;
+using Domain.Interfaces;
+using Domain.Models;
 using API.Types;
 using API.Utils;
 using AutoMapper;

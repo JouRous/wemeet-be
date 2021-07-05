@@ -1,10 +1,10 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using API.DTO;
-using API.Entities;
-using API.Interfaces;
-using API.Models;
+using Domain.DTO;
+using Domain.Entities;
+using Domain.Interfaces;
+using Domain.Models;
 using API.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;

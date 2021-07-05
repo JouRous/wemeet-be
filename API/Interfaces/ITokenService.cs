@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
-using API.Entities;
+using Domain.Entities;
 
-namespace API.Interfaces
+namespace Domain.Interfaces
 {
-  public interface ITokenService
-  {
-    Task<string> CreateToken(AppUser user);
-    string CreateResetPasswordToken(string email);
-  }
+    public interface ITokenService
+    {
+        Task<string> CreateToken(AppUser user);
+        string CreateResetPasswordToken(string email);
+    }
 }

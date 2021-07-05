@@ -1,6 +1,6 @@
 using System;
 using API.Data;
-using API.Interfaces;
+using Domain.Interfaces;
 using API.Repositories;
 using API.Services;
 using API.Utils;

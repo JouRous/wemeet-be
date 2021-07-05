@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using API.Interfaces;
+using Domain.Interfaces;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;

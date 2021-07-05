@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 using API.Data;
-using API.Interfaces;
+using Domain.Interfaces;
 using AutoMapper;
 using API.Repsitotries;
 
