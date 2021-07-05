@@ -1,8 +1,8 @@
-namespace API.Types
+namespace Domain.Types
 {
-  public class PaginationParams
-  {
-    public int number { get; set; }
-    public int size { get; set; } = 20;
-  }
+    public class PaginationParams
+    {
+        public int number { get; set; }
+        public int size { get; set; } = 20;
+    }
 }

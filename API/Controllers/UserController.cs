@@ -5,13 +5,13 @@ using Domain.DTO;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Models;
-using API.Types;
-using API.Utils;
+using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Application.Utils;
 
 namespace API.Controllers
 {
@@ -62,9 +62,9 @@ namespace API.Controllers
             user.UserName = user.Email;
             user.isFirstLogin = true;
             user.AppUserTeams = new List<AppUserTeam>();
-            user.UnsignedName = Utils.Utils.RemoveAccentedString(user.Fullname);
+            user.UnsignedName = StringHelper.RemoveAccentedString(user.Fullname);
             user.Role = userActionModel.Role;
-            var randomPassword = Utils.Utils.RandomString(9);
+            var randomPassword = StringHelper.RandomString(9);
 
             var createStatus = await _userManager.CreateAsync(user, randomPassword);
 

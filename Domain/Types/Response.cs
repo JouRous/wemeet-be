@@ -1,7 +1,7 @@
 using Domain.DTO;
 using Domain.Models;
 
-namespace API.Types
+namespace Domain.Types
 {
     public class Response<T>
     {

@@ -1,4 +1,4 @@
-using API.Types;
+using Domain.Types;
 
 namespace Domain.Models
 {

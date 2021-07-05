@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using Domain.DTO;
 using Domain.Interfaces;
 using Domain.Models;
-using API.Types;
-using API.Utils;
+using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Application.Utils;
 
 namespace API.Controllers
 {

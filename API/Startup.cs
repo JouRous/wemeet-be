@@ -8,9 +8,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using API.Services;
 using API.Configs;
 using Microsoft.OpenApi.Models;
+using Application.Services;
+using Infrastructure;
+using System.Reflection;
+using Application.Utils;
+using Application;
 
 namespace API
 {
@@ -24,8 +28,13 @@ namespace API
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAppServices(_config);
             services.AddIdentityServices(_config);
+
+            services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
+
+            services.AddInfrastructureServices(_config);
+            services.AddApplicationServices();
+
             services.AddControllers();
             services.AddCors(options =>
                         {

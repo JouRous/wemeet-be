@@ -1,15 +1,14 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.DTO;
-using API.Services;
+using Application.Services;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Models;
-using API.Types;
-using API.Utils;
+using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Application.Utils;
 
 namespace API.Controllers
 {

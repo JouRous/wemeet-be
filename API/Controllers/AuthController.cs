@@ -5,7 +5,7 @@ using Domain.DTO;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Models;
-using API.Types;
+using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authentication;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using Application.Utils;
 
 namespace API.Controllers
 {
@@ -139,7 +140,7 @@ namespace API.Controllers
                 });
             }
 
-            var randomPassword = Utils.Utils.RandomString(9);
+            var randomPassword = StringHelper.RandomString(9);
 
             await _userManager.RemovePasswordAsync(user);
             await _userManager.AddPasswordAsync(user, model.password);
