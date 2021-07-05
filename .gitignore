@@ -456,3 +456,4 @@ bin
 obj
 API/appsettings.json
 API/Migrations
+API/Properties/launchSettings.json
