@@ -5,6 +5,8 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Domain.Types;
+using System.IO;
+using System.Reflection;
 
 namespace Infrastructure.Data
 {
@@ -30,8 +32,9 @@ namespace Infrastructure.Data
             {
                 return;
             }
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            var userData = await System.IO.File.ReadAllTextAsync("Data/UserSeedData.json");
+            var userData = await System.IO.File.ReadAllTextAsync(path + @"/Data/UserSeedData.json");
             var users = JsonSerializer.Deserialize<List<SeedUserModel>>(userData);
 
             if (users == null)

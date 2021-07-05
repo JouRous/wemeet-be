@@ -1,21 +1,27 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0
-COPY . /app
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app
+EXPOSE 80
+EXPOSE 443
 
-RUN dotnet restore
-RUN dotnet build
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+WORKDIR /src
+COPY ["API/API.csproj", "API/"]
+COPY ["Domain/Domain.csproj", "Domain/"]
+COPY ["Application/Application.csproj", "Application/"]
+COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
+RUN dotnet restore "API/API.csproj"
+COPY . .
+WORKDIR "/src/API"
+RUN dotnet build "API.csproj" -c Release -o /app/build
 
-RUN dotnet tool install --global dotnet-ef
-ENV PATH="${PATH}:/root/.dotnet/tools"
-RUN dotnet ef migrations add Init
+FROM build AS publish
+RUN dotnet publish "API.csproj" -c Release -o /app/publish
 
+FROM base AS final
+WORKDIR /app
 RUN mkdir -p /app/Uploads
 RUN mkdir -p /app/Uploads/Avatars
-
-# RUN dotnet tool install --global dotnet-ef
-
-EXPOSE 5000/tcp
-ENV ASPNETCORE_URLS http://*:5000
-ENV ASPNETCORE_ENVIRONMENT docker
-
-ENTRYPOINT dotnet run
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "API.dll"]

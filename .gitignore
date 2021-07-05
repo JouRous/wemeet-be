@@ -12,8 +12,6 @@
 *.sln.docstates
 
 **/Uploads
-**/Migrations
-**/Migrations/*
 **/Properties/*
 
 # User-specific files (MonoDevelop/Xamarin Studio)
