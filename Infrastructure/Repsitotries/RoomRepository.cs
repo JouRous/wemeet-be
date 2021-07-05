@@ -62,11 +62,12 @@ namespace Infrastructure.Repositories
 
         public async Task<RoomDTO> GetOneAsync(int Id)
         {
-            var result = await _context.Rooms.Where(room => room.Id == Id)
-                                    .ProjectTo<RoomDTO>(_mapper.ConfigurationProvider)
-                                    .SingleOrDefaultAsync();
-            result.Building = _context.Buildings.Where(o => o.Id == result.Building.Id).ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider).FirstOrDefault();
-            return result;
+            // var result = await _context.Rooms.Where(room => room.Id == Id)
+            //                         .ProjectTo<RoomDTO>(_mapper.ConfigurationProvider)
+            //                         .SingleOrDefaultAsync();
+            // result.Building = _context.Buildings.Where(o => o.Id == result.Building.Id).ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider).FirstOrDefault();
+            // return result;
+            throw new Exception();
         }
 
         public int GetSizeOfEntity(Func<Room, bool> query)
@@ -77,20 +78,20 @@ namespace Infrastructure.Repositories
 
         public void UpdatingOne(RoomDTO data)
         {
-            var entity = _context.Rooms.Find(data.Id);
-            if (data != null)
-            {
-                if (data.Building.Id > 0)
-                {
-                    var e = _context.Buildings.Find(data.Building.Id);
-                    entity.BuildingId = e.Id;
-                }
-                entity.Capacity = data.Capacity == 0 ? entity.Capacity : data.Capacity;
-                entity.Name = data.Name == null ? entity.Name : data.Name;
-                entity.UpdatedAt = DateTime.Now;
-            }
+            // var entity = _context.Rooms.Find(data.Id);
+            // if (data != null)
+            // {
+            //     if (data.Building.Id > 0)
+            //     {
+            //         var e = _context.Buildings.Find(data.Building.Id);
+            //         entity.BuildingId = e.Id;
+            //     }
+            //     entity.Capacity = data.Capacity == 0 ? entity.Capacity : data.Capacity;
+            //     entity.Name = data.Name == null ? entity.Name : data.Name;
+            //     entity.UpdatedAt = DateTime.Now;
+            // }
 
-            _context.Rooms.Update(entity);
+            // _context.Rooms.Update(entity);
 
         }
 

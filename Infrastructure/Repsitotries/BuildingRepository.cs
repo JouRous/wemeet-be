@@ -72,7 +72,7 @@ namespace Infrastructure.Repositories
 
         }
 
-        public void DeletingOne(int Id)
+        public void DeletingOne(Guid Id)
         {
             try
             {
@@ -87,12 +87,13 @@ namespace Infrastructure.Repositories
 
         }
 
-        public async Task<BuildingDTO> GetOneAsync(int Id)
+        public async Task<BuildingDTO> GetOneAsync(Guid Id)
         {
-            var res = await _context.Buildings.Where(building => building.Id == Id)
-                .ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider)
-                .SingleOrDefaultAsync();
-            return res == null ? default : res;
+            // var res = await _context.Buildings.Where(building => building.Id == Id)
+            //     .ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider)
+            //     .SingleOrDefaultAsync();
+            // return res == null ? default : res;
+            throw new Exception();
         }
 
     }

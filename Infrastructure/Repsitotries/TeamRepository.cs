@@ -61,9 +61,10 @@ namespace Infrastructure.Repositories
 
         public async Task<TeamWithUserDTO> GetTeamAsync(int teamId)
         {
-            return await _context.Teams.Where(team => team.Id == teamId)
-                                       .ProjectTo<TeamWithUserDTO>(_mapper.ConfigurationProvider)
-                                       .SingleOrDefaultAsync();
+            // return await _context.Teams.Where(team => team.Id == teamId)
+            //                            .ProjectTo<TeamWithUserDTO>(_mapper.ConfigurationProvider)
+            //                            .SingleOrDefaultAsync();
+            throw new System.Exception();
         }
 
         public async Task UpdateTeamAsync(Team team)
@@ -79,35 +80,35 @@ namespace Infrastructure.Repositories
 
         public async Task AddUserToTeamAsync(int teamId, ICollection<int> userIds)
         {
-            var team = await _context.Teams.Include(t => t.AppUserTeams).FirstOrDefaultAsync(t => t.Id == teamId);
+            // var team = await _context.Teams.Include(t => t.AppUserTeams).FirstOrDefaultAsync(t => t.Id == teamId);
 
-            team.AppUserTeams.Clear();
-            foreach (var userId in userIds)
-            {
-                if (userIds.Count > 0)
-                {
-                    team.AppUserTeams.Add(new AppUserTeam
-                    {
-                        AppUserId = userId,
-                        TeamId = team.Id
-                    });
-                }
-            }
+            // team.AppUserTeams.Clear();
+            // foreach (var userId in userIds)
+            // {
+            //     if (userIds.Count > 0)
+            //     {
+            //         team.AppUserTeams.Add(new AppUserTeam
+            //         {
+            //             AppUserId = userId,
+            //             TeamId = team.Id
+            //         });
+            //     }
+            // }
         }
 
         public async Task RemoveUserFromTeam(int teamId, ICollection<int> userIds)
         {
-            var team = await _context.Teams.Include(t => t.AppUserTeams).FirstOrDefaultAsync(t => t.Id == teamId);
+            // var team = await _context.Teams.Include(t => t.AppUserTeams).FirstOrDefaultAsync(t => t.Id == teamId);
 
-            foreach (var userId in userIds)
-            {
-                if (userIds.Count > 0)
-                {
-                    var relationUserTeam = await _context.AppUserTeams
-                                            .FirstOrDefaultAsync(x => x.TeamId == team.Id && x.AppUserId == userId);
-                    _context.Remove(relationUserTeam);
-                }
-            }
+            // foreach (var userId in userIds)
+            // {
+            //     if (userIds.Count > 0)
+            //     {
+            //         var relationUserTeam = await _context.AppUserTeams
+            //                                 .FirstOrDefaultAsync(x => x.TeamId == team.Id && x.AppUserId == userId);
+            //         _context.Remove(relationUserTeam);
+            //     }
+            // }
         }
     }
 }

@@ -96,11 +96,12 @@ namespace Infrastructure.Repositories
 
         public MeetingDTO GetOneAsync(int Id)
         {
-            var e = _context.Meetings.Where(met => met.Id == Id)
-                            .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider)
-                            .SingleOrDefault();
+            // var e = _context.Meetings.Where(met => met.Id == Id)
+            //                 .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider)
+            //                 .SingleOrDefault();
 
-            return e;
+            // return e;
+            throw new Exception();
         }
         public void AddOne(MeetingDTO meeting)
         {
@@ -152,15 +153,15 @@ namespace Infrastructure.Repositories
 
         public void UpdatingOne(MeetingDTO data)
         {
-            var entity = _context.Meetings.Where(X => X.Id == data.Id)
-            .ProjectTo<Meeting>(_mapper.ConfigurationProvider).SingleOrDefault();
+            // var entity = _context.Meetings.Where(X => X.Id == data.Id)
+            // .ProjectTo<Meeting>(_mapper.ConfigurationProvider).SingleOrDefault();
 
-            if (data != null)
-            {
-                entity = MappingFromDTO(entity, data);
-            }
+            // if (data != null)
+            // {
+            //     entity = MappingFromDTO(entity, data);
+            // }
 
-            _context.Meetings.Update(entity);
+            // _context.Meetings.Update(entity);
 
         }
 

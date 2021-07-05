@@ -58,7 +58,7 @@ namespace API.Controllers
         }
 
         [HttpGet("{buildingId}")]
-        public async Task<ActionResult<Response<BuildingDTO>>> GetBuildingInfo(int buildingId)
+        public async Task<ActionResult<Response<BuildingDTO>>> GetBuildingInfo(Guid buildingId)
         {
             var buildingInfo = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
             buildingInfo.RoomNumber = _unitOfWork.RoomRepository.GetSizeOfEntity(x => x.BuildingId == buildingId);
@@ -109,7 +109,7 @@ namespace API.Controllers
 
         [HttpPut]
         [Route("{buildingId}")]
-        public async Task<ActionResult> EditInfoBuilding([FromRoute] int buildingId, [FromBody] BuildingModel body)
+        public async Task<ActionResult> EditInfoBuilding([FromRoute] Guid buildingId, [FromBody] BuildingModel body)
         {
             var building = _mapper.Map<BuildingDTO>(body);
 
@@ -145,7 +145,7 @@ namespace API.Controllers
         }
 
         [HttpDelete("{buildingId}")]
-        public async Task<ActionResult<Response<string>>> RemoveBuilding(int buildingId)
+        public async Task<ActionResult<Response<string>>> RemoveBuilding(Guid buildingId)
         {
             BuildingDTO building = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
 

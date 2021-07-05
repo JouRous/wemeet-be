@@ -96,11 +96,11 @@ namespace Infrastructure.Data
                 };
                 await context.Teams.AddAsync(_team);
                 await context.SaveChangesAsync();
-                _team.AppUserTeams.Add(new AppUserTeam
-                {
-                    TeamId = _team.Id,
-                    AppUserId = _team.LeaderId
-                });
+                // _team.AppUserTeams.Add(new AppUserTeam
+                // {
+                //     TeamId = _team.Id,
+                //     AppUserId = _team.LeaderId
+                // });
                 await context.SaveChangesAsync();
             }
 
