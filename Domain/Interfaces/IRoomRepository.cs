@@ -14,7 +14,7 @@ namespace Domain.Interfaces
         Task<Pagination<RoomDTO>> GetAllByPaginationAsync(Dictionary<string, int> page,
                                                                                                              Dictionary<string, string> filter,
                                                                                                              string sort = "-created_at");
-        Task<RoomDTO> GetOneAsync(int Id);
+        Task<RoomDTO> GetOneAsync(string Id);
         int GetSizeOfEntity(Func<Room, bool> query);
         void DeletingOne(int Id);
         void UpdatingOne(RoomDTO room);

@@ -9,7 +9,7 @@ namespace Domain.Interfaces
 {
     public interface ITeamRepository
     {
-        Task<TeamWithUserDTO> GetTeamAsync(int teamId);
+        Task<TeamWithUserDTO> GetTeamAsync(string teamId);
         Task<Pagination<TeamWithUserDTO>> GetAllAsync(Query<FilterTeamModel> query);
         Task AddTeamAsync(Team team);
         Task UpdateTeamAsync(Team team);

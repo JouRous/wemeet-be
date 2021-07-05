@@ -8,6 +8,9 @@ namespace Infrastructure.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:PostgresExtension:uuid-ossp", ",,");
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -27,8 +30,7 @@ namespace Infrastructure.Migrations
                 name: "Buildings",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     Address = table.Column<string>(type: "text", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
@@ -44,8 +46,7 @@ namespace Infrastructure.Migrations
                 name: "Notifications",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     EntityType = table.Column<int>(type: "integer", nullable: false),
                     EntityId = table.Column<int>(type: "integer", nullable: false),
                     EndpointDetails = table.Column<string>(type: "text", nullable: true),
@@ -87,10 +88,10 @@ namespace Infrastructure.Migrations
                 name: "Rooms",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     BuildingId = table.Column<int>(type: "integer", nullable: false),
+                    BuildingId1 = table.Column<Guid>(type: "uuid", nullable: true),
                     Capacity = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
@@ -101,11 +102,11 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Rooms", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Rooms_Buildings_BuildingId",
-                        column: x => x.BuildingId,
+                        name: "FK_Rooms_Buildings_BuildingId1",
+                        column: x => x.BuildingId1,
                         principalTable: "Buildings",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -138,7 +139,7 @@ namespace Infrastructure.Migrations
                 name: "AppUserTeam",
                 columns: table => new
                 {
-                    TeamsId = table.Column<int>(type: "integer", nullable: false),
+                    TeamsId = table.Column<Guid>(type: "uuid", nullable: false),
                     UsersId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -151,7 +152,7 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     AppUserId = table.Column<int>(type: "integer", nullable: false),
-                    TeamId = table.Column<int>(type: "integer", nullable: false)
+                    TeamId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -205,8 +206,7 @@ namespace Infrastructure.Migrations
                 name: "Meetings",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Note = table.Column<string>(type: "text", nullable: true),
@@ -217,9 +217,9 @@ namespace Infrastructure.Migrations
                     Priority = table.Column<int>(type: "integer", nullable: false),
                     Target = table.Column<string>(type: "text", nullable: true),
                     Method = table.Column<int>(type: "integer", nullable: false),
-                    ConflictWithId = table.Column<int>(type: "integer", nullable: true),
-                    TeamId = table.Column<int>(type: "integer", nullable: true),
-                    RoomId = table.Column<int>(type: "integer", nullable: true),
+                    ConflictWithId = table.Column<Guid>(type: "uuid", nullable: true),
+                    TeamId = table.Column<Guid>(type: "uuid", nullable: true),
+                    RoomId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
@@ -257,7 +257,7 @@ namespace Infrastructure.Migrations
                     isActive = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    MeetingId = table.Column<int>(type: "integer", nullable: true),
+                    MeetingId = table.Column<Guid>(type: "uuid", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -289,7 +289,7 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     ParticipantId = table.Column<int>(type: "integer", nullable: false),
-                    MeetingId = table.Column<int>(type: "integer", nullable: false)
+                    MeetingId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -312,8 +312,7 @@ namespace Infrastructure.Migrations
                 name: "Teams",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Avatar = table.Column<string>(type: "text", nullable: true),
@@ -421,9 +420,9 @@ namespace Infrastructure.Migrations
                 column: "ParticipantId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Rooms_BuildingId",
+                name: "IX_Rooms_BuildingId1",
                 table: "Rooms",
-                column: "BuildingId");
+                column: "BuildingId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Teams_LeaderId",

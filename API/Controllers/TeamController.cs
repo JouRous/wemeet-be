@@ -56,11 +56,12 @@ namespace API.Controllers
         [HttpGet("{teamId}")]
         public async Task<ActionResult<Response<TeamWithUserDTO>>> GetTeam(int teamId)
         {
-            var team = await _unitOfWork.TeamRepository.GetTeamAsync(teamId);
+            // var team = await _unitOfWork.TeamRepository.GetTeamAsync(teamId);
 
-            return new ResponseBuilder<TeamWithUserDTO>()
-                        .AddData(team)
-                        .Build();
+            // return new ResponseBuilder<TeamWithUserDTO>()
+            //             .AddData(team)
+            //             .Build();
+            return Ok();
         }
 
 
@@ -93,15 +94,15 @@ namespace API.Controllers
             }
 
             team.Leader = leader;
-            team.LeaderId = leader.Id;
+            // team.LeaderId = leader.Id;
 
             await _unitOfWork.TeamRepository.AddTeamAsync(team);
 
-            team.AppUserTeams.Add(new AppUserTeam
-            {
-                AppUserId = team.LeaderId,
-                TeamId = team.Id
-            });
+            // team.AppUserTeams.Add(new AppUserTeam
+            // {
+            //     AppUserId = team.LeaderId,
+            //     TeamId = team.Id
+            // });
 
             await _unitOfWork.Complete();
 

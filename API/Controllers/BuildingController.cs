@@ -60,10 +60,11 @@ namespace API.Controllers
         [HttpGet("{buildingId}")]
         public async Task<ActionResult<Response<BuildingDTO>>> GetBuildingInfo(int buildingId)
         {
-            var buildingInfo = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
-            buildingInfo.RoomNumber = _unitOfWork.RoomRepository.GetSizeOfEntity(x => x.BuildingId == buildingId);
+            // var buildingInfo = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
+            // buildingInfo.RoomNumber = _unitOfWork.RoomRepository.GetSizeOfEntity(x => x.BuildingId == buildingId);
 
-            return new ResponseBuilder<BuildingDTO>().AddData(buildingInfo).Build();
+            // return new ResponseBuilder<BuildingDTO>().AddData(buildingInfo).Build();
+            return Ok();
         }
 
         [HttpPost]
@@ -147,16 +148,17 @@ namespace API.Controllers
         [HttpDelete("{buildingId}")]
         public async Task<ActionResult<Response<string>>> RemoveBuilding(int buildingId)
         {
-            BuildingDTO building = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
+            return Ok();
+            // BuildingDTO building = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
 
-            _unitOfWork.BuildingRepository.DeletingOne(buildingId);
+            // _unitOfWork.BuildingRepository.DeletingOne(buildingId);
 
-            var isCompleted = await _unitOfWork.Complete();
+            // var isCompleted = await _unitOfWork.Complete();
 
-            if (!isCompleted)
-            {
-                return BadRequest();
-            }
+            // if (!isCompleted)
+            // {
+            //     return BadRequest();
+            // }
 
             // var msg = new Notification()
             // {
@@ -170,11 +172,11 @@ namespace API.Controllers
 
             // await _notificationService.CreateNotify(msgDto);
 
-            var res = new ResponseBuilder<string>()
-                                            .AddData(_mapper.Map<string>("deleted"))
-                                            .Build();
+            // var res = new ResponseBuilder<string>()
+            //                                 .AddData(_mapper.Map<string>("deleted"))
+            //                                 .Build();
 
-            return res;
+            // return res;
         }
 
 

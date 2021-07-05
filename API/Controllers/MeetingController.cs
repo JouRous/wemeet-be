@@ -66,8 +66,9 @@ namespace API.Controllers
         [HttpGet("{MeetingId}")]
         public ActionResult<Response<MeetingDTO>> GetMeetingInfo(int MeetingId)
         {
-            var MeetingInfo = _unitOfWork.MeetingRepository.GetOneAsync(MeetingId);
-            return new ResponseBuilder<MeetingDTO>().AddData(MeetingInfo).Build();
+            // var MeetingInfo = _unitOfWork.MeetingRepository.GetOneAsync(MeetingId);
+            // return new ResponseBuilder<MeetingDTO>().AddData(MeetingInfo).Build();
+            return Ok();
         }
 
         [HttpPost]
@@ -110,14 +111,15 @@ namespace API.Controllers
         [HttpDelete("{MeetingId}")]
         public async Task<ActionResult<Response<string>>> RemoveMeeting(int MeetingId)
         {
-            var Meeting = _unitOfWork.MeetingRepository.GetOneAsync(MeetingId);
-            _unitOfWork.MeetingRepository.DeletingOne(MeetingId);
-            var isCompleted = await _unitOfWork.Complete();
-            if (!isCompleted) return BadRequest();
+            // var Meeting = _unitOfWork.MeetingRepository.GetOneAsync(MeetingId);
+            // _unitOfWork.MeetingRepository.DeletingOne(MeetingId);
+            // var isCompleted = await _unitOfWork.Complete();
+            // if (!isCompleted) return BadRequest();
 
-            var res = new ResponseBuilder<string>().AddData("deleted").Build();
+            // var res = new ResponseBuilder<string>().AddData("deleted").Build();
 
-            return res;
+            // return res;
+            return Ok();
         }
     }
 }

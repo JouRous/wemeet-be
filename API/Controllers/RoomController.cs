@@ -30,33 +30,35 @@ namespace API.Controllers
             [FromQuery] Dictionary<string, string> filter,
             [FromQuery] Dictionary<string, string> sort)
         {
-            var _sort = sort.GetValueOrDefault("");
-            var result = await _unitOfWork.RoomRepository.GetAllByPaginationAsync(page, filter, _sort);
-            for (var i = 0; i < result.Items.Count; i++)
-            {
-                result.Items[i].Building = await _unitOfWork.BuildingRepository.GetOneAsync(result.Items[i].Building.Id);
-            }
-            var response = new ResponseWithPaginationBuilder<IEnumerable<RoomDTO>>()
-                                                    .AddData(result.Items)
-                                                    .AddPagination(new PaginationDTO
-                                                    {
-                                                        CurrentPage = result.CurrentPage,
-                                                        PerPage = result.PerPage,
-                                                        Total = result.Total,
-                                                        Count = result.Count,
-                                                        TotalPages = result.TotalPages
-                                                    })
-                                                    .Build();
+            // var _sort = sort.GetValueOrDefault("");
+            // var result = await _unitOfWork.RoomRepository.GetAllByPaginationAsync(page, filter, _sort);
+            // for (var i = 0; i < result.Items.Count; i++)
+            // {
+            //     result.Items[i].Building = await _unitOfWork.BuildingRepository.GetOneAsync(result.Items[i].Building.Id);
+            // }
+            // var response = new ResponseWithPaginationBuilder<IEnumerable<RoomDTO>>()
+            //                                         .AddData(result.Items)
+            //                                         .AddPagination(new PaginationDTO
+            //                                         {
+            //                                             CurrentPage = result.CurrentPage,
+            //                                             PerPage = result.PerPage,
+            //                                             Total = result.Total,
+            //                                             Count = result.Count,
+            //                                             TotalPages = result.TotalPages
+            //                                         })
+            //                                         .Build();
 
-            return response;
+            // return response;
+            return Ok();
         }
 
         [HttpGet("{RoomId}")]
         public async Task<ActionResult<Response<RoomDTO>>> GetRoomInfo(int RoomId)
         {
-            var RoomInfo = await _unitOfWork.RoomRepository.GetOneAsync(RoomId);
+            // var RoomInfo = await _unitOfWork.RoomRepository.GetOneAsync(RoomId);
 
-            return new ResponseBuilder<RoomDTO>().AddData(RoomInfo).Build();
+            // return new ResponseBuilder<RoomDTO>().AddData(RoomInfo).Build();
+            return Ok();
         }
 
         [HttpPost]
@@ -117,10 +119,11 @@ namespace API.Controllers
         [HttpDelete("{roomId}")]
         public async Task<ActionResult<Response<string>>> RemoveRoom(int roomId)
         {
-            var room = await _unitOfWork.RoomRepository.GetOneAsync(roomId);
-            _unitOfWork.RoomRepository.DeletingOne(roomId);
-            var isCompleted = await _unitOfWork.Complete();
-            if (!isCompleted) return BadRequest();
+            // var room = await _unitOfWork.RoomRepository.GetOneAsync(roomId);
+            // _unitOfWork.RoomRepository.DeletingOne(roomId);
+            // var isCompleted = await _unitOfWork.Complete();
+            // if (!isCompleted) return BadRequest();
+
             // var msg = new Notification()
             // {
             // 	EntityType = Enums.EntityEnum.Building,
@@ -131,9 +134,10 @@ namespace API.Controllers
             // var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
             // await _notificationService.CreateNotify(msgDto);
 
-            var res = new ResponseBuilder<string>().AddData("deleted").Build();
+            // var res = new ResponseBuilder<string>().AddData("deleted").Build();
 
-            return res;
+            // return res;
+            return Ok();
         }
 
     }

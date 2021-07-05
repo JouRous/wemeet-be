@@ -21,6 +21,10 @@ namespace Infrastructure.Data
         {
             base.OnModelCreating(builder);
 
+            builder.HasPostgresExtension("uuid-ossp");
+
+
+
             // builder.Entity<AppUser>()
             // .HasMany(ur => ur.UserRoles)
             // .WithOne(u => u.User)

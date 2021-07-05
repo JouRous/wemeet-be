@@ -13,7 +13,7 @@ namespace Domain.Interfaces
         Task<Pagination<BuildingDTO>> GetAllByPaginationAsync(Dictionary<string, int> page,
                                                                                                              Dictionary<string, string> filter,
                                                                                                              string sort = "-created_at");
-        Task<BuildingDTO> GetOneAsync(int Id);
+        Task<BuildingDTO> GetOneAsync(string Id);
         void ModifyOne(BuildingDTO building);
         void DeletingOne(int id);
     }
