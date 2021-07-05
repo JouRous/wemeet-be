@@ -27,7 +27,7 @@ namespace API.Controllers
         {
             var result = await _unitOfWork.MeetingRepository.GetAllByPaginationAsync(paginationParams, filter, sort);
 
-            var response = new ResponseBuilder<IEnumerable<MeetingDTO>>()
+            var response = new ResponseWithPaginationBuilder<IEnumerable<MeetingDTO>>()
                                                     .AddData(result.Items)
                                                     .AddPagination(new PaginationDTO
                                                     {
@@ -35,7 +35,7 @@ namespace API.Controllers
                                                         PerPage = result.PerPage,
                                                         Total = result.Total,
                                                         Count = result.Count,
-                                                        TotalPage = result.TotalPages
+                                                        TotalPages = result.TotalPages
                                                     })
                                                     .Build();
 
@@ -48,7 +48,7 @@ namespace API.Controllers
         {
             var result = await _unitOfWork.MeetingRepository.GetWaitMeetingByPaginationAsync(paginationParams, filter, sort);
 
-            var response = new ResponseBuilder<IEnumerable<MeetingDTO>>()
+            var response = new ResponseWithPaginationBuilder<IEnumerable<MeetingDTO>>()
                                                     .AddData(result.Items)
                                                     .AddPagination(new PaginationDTO
                                                     {
@@ -56,7 +56,7 @@ namespace API.Controllers
                                                         PerPage = result.PerPage,
                                                         Total = result.Total,
                                                         Count = result.Count,
-                                                        TotalPage = result.TotalPages
+                                                        TotalPages = result.TotalPages
                                                     })
                                                     .Build();
 

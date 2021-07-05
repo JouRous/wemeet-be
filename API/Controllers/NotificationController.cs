@@ -26,7 +26,7 @@ namespace API.Controllers
         {
             var result = await _unitOfWork.NotificationRepository.GetMessagesPagiantionAsync(paginationParams);
 
-            var response = new ResponseBuilder<IEnumerable<NotificationMessageDTO>>()
+            var response = new ResponseWithPaginationBuilder<IEnumerable<NotificationMessageDTO>>()
                                                     .AddData(result.Items)
                                                     .AddPagination(new PaginationDTO
                                                     {
@@ -34,7 +34,7 @@ namespace API.Controllers
                                                         PerPage = result.PerPage,
                                                         Total = result.Total,
                                                         Count = result.Count,
-                                                        TotalPage = result.TotalPages
+                                                        TotalPages = result.TotalPages
                                                     })
                                                     .Build();
 
@@ -62,7 +62,7 @@ namespace API.Controllers
         public async Task<ActionResult> GetUnReadNotify([FromQuery] PaginationParams paginationParams)
         {
             var result = await _unitOfWork.NotificationRepository.GetMessagesUnreadPaginationAsync(paginationParams);
-            var response = new ResponseBuilder<IEnumerable<NotificationMessageDTO>>()
+            var response = new ResponseWithPaginationBuilder<IEnumerable<NotificationMessageDTO>>()
                                                     .AddData(result.Items)
                                                     .AddPagination(new PaginationDTO
                                                     {
@@ -70,7 +70,7 @@ namespace API.Controllers
                                                         PerPage = result.PerPage,
                                                         Total = result.Total,
                                                         Count = result.Count,
-                                                        TotalPage = result.TotalPages
+                                                        TotalPages = result.TotalPages
                                                     })
                                                     .Build();
 

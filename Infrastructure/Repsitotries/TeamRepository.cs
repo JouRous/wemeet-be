@@ -25,10 +25,12 @@ namespace Infrastructure.Repositories
             _mapper = mapper;
         }
 
-        public void AddTeam(Team team)
+        public async Task AddTeamAsync(Team team)
         {
             team.AppUserTeams = new List<AppUserTeam>();
             _context.Teams.Add(team);
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task<Pagination<TeamWithUserDTO>> GetAllAsync(Query<FilterTeamModel> teamQuery)
@@ -37,10 +39,11 @@ namespace Infrastructure.Repositories
             var paginationParams = teamQuery.paginationParams;
             var sort = teamQuery.sort;
 
-            var stat = _context.Teams.Where(t => t.Name.Contains(_filter.Name))
-                                      .Include(t => t.AppUserTeams)
-                                      .ThenInclude(t => t.User)
-                                      .ProjectTo<TeamWithUserDTO>(_mapper.ConfigurationProvider);
+            var stat = _context.Teams
+                .Where(t => t.Name.Contains(_filter.Name))
+                .Include(t => t.AppUserTeams)
+                .ThenInclude(t => t.User)
+                .ProjectTo<TeamWithUserDTO>(_mapper.ConfigurationProvider);
 
             switch (sort)
             {

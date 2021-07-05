@@ -8,6 +8,8 @@ using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Application.Utils;
+using MediatR;
+using Application.Features.Team.Queries;
 
 namespace API.Controllers
 {
@@ -15,36 +17,40 @@ namespace API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public TeamController(IUnitOfWork unitOfWork, IMapper mapper)
+        public TeamController(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _mediator = mediator;
         }
 
         [HttpGet]
-        public async Task<ActionResult<Response<IEnumerable<TeamWithUserDTO>>>> GetTeams(
-          [FromQuery] Dictionary<string, int> page,
-          [FromQuery] Dictionary<string, string> filter,
-          [FromQuery] Dictionary<string, string> sort)
+        public async Task<ActionResult> GetTeams(
+            [FromQuery] Dictionary<string, int> page,
+            [FromQuery] Dictionary<string, string> filter,
+            [FromQuery] Dictionary<string, string> sort)
         {
             var teamQuery = QueryBuilder<FilterTeamModel>.Build(page, filter, sort);
+            var query = new GetAllTeamQuery(teamQuery);
 
-            var result = await _unitOfWork.TeamRepository.GetAllAsync(teamQuery);
+            var result = await _mediator.Send(query);
+            var paginationDTO = new PaginationDTO
+            {
+                CurrentPage = result.CurrentPage,
+                PerPage = result.PerPage,
+                Total = result.Total,
+                Count = result.Count,
+                TotalPages = result.TotalPages
+            };
 
-            var response = new ResponseBuilder<IEnumerable<TeamWithUserDTO>>()
-                                .AddData(result.Items)
-                                .AddPagination(new PaginationDTO
-                                {
-                                    CurrentPage = result.CurrentPage,
-                                    PerPage = result.PerPage,
-                                    Total = result.Total,
-                                    Count = result.Count,
-                                    TotalPage = result.TotalPages
-                                })
-                                .Build();
+            var response = new ResponseWithPaginationBuilder<IEnumerable<TeamWithUserDTO>>()
+                .AddData(result.Items)
+                .AddPagination(paginationDTO)
+                .Build();
 
-            return response;
+            return Ok(response);
         }
 
         [HttpGet("{teamId}")]
@@ -59,7 +65,7 @@ namespace API.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<Response<TeamDTO>>> CreateTeam(TeamModel teamModel)
+        public async Task<ActionResult> CreateTeam(TeamModel teamModel)
         {
             var team = _mapper.Map<Team>(teamModel);
             var leader = await _unitOfWork.UserRepository.GetUserEntityAsync(teamModel.l_id);
@@ -89,14 +95,7 @@ namespace API.Controllers
             team.Leader = leader;
             team.LeaderId = leader.Id;
 
-            _unitOfWork.TeamRepository.AddTeam(team);
-
-            bool saveStatus = await _unitOfWork.Complete();
-
-            if (!saveStatus)
-            {
-                return BadRequest();
-            }
+            await _unitOfWork.TeamRepository.AddTeamAsync(team);
 
             team.AppUserTeams.Add(new AppUserTeam
             {
@@ -110,7 +109,7 @@ namespace API.Controllers
                                 .AddData(_mapper.Map<TeamDTO>(team))
                                 .Build();
 
-            return response;
+            return Ok(response);
         }
 
         [HttpPut]

@@ -36,7 +36,7 @@ namespace API.Controllers
             {
                 result.Items[i].Building = await _unitOfWork.BuildingRepository.GetOneAsync(result.Items[i].Building.Id);
             }
-            var response = new ResponseBuilder<IEnumerable<RoomDTO>>()
+            var response = new ResponseWithPaginationBuilder<IEnumerable<RoomDTO>>()
                                                     .AddData(result.Items)
                                                     .AddPagination(new PaginationDTO
                                                     {
@@ -44,7 +44,7 @@ namespace API.Controllers
                                                         PerPage = result.PerPage,
                                                         Total = result.Total,
                                                         Count = result.Count,
-                                                        TotalPage = result.TotalPages
+                                                        TotalPages = result.TotalPages
                                                     })
                                                     .Build();
 

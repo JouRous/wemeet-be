@@ -141,7 +141,7 @@ namespace API.Controllers
 
             var result = await _unitOfWork.UserRepository.GetUsersAsync(userQuery);
 
-            var response = new ResponseBuilder<IEnumerable<UserWithTeamDTO>>()
+            var response = new ResponseWithPaginationBuilder<IEnumerable<UserWithTeamDTO>>()
                    .AddData(result.Items)
                    .AddPagination(new PaginationDTO
                    {
@@ -149,7 +149,7 @@ namespace API.Controllers
                        PerPage = result.PerPage,
                        Total = result.Total,
                        Count = (int)result.Count,
-                       TotalPage = result.TotalPages
+                       TotalPages = result.TotalPages
                    })
                    .Build();
 

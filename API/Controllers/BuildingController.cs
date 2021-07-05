@@ -42,7 +42,7 @@ namespace API.Controllers
                 list.Add(item);
             }
 
-            var response = new ResponseBuilder<IEnumerable<BuildingDTO>>()
+            var response = new ResponseWithPaginationBuilder<IEnumerable<BuildingDTO>>()
                                                     .AddData(list)
                                                     .AddPagination(new PaginationDTO
                                                     {
@@ -50,7 +50,7 @@ namespace API.Controllers
                                                         PerPage = result.PerPage,
                                                         Total = result.Total,
                                                         Count = result.Count,
-                                                        TotalPage = result.TotalPages
+                                                        TotalPages = result.TotalPages
                                                     })
                                                     .Build();
 
