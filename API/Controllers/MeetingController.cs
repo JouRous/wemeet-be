@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.DTO;
 using Domain.Interfaces;
-using Domain.Models;
 using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +11,7 @@ using Application.Features.Commands;
 using MediatR;
 using System;
 using Application.Features.Queries;
+using Domain.Models;
 
 namespace API.Controllers
 {
@@ -30,21 +30,29 @@ namespace API.Controllers
 
         [HttpGet]
         public async Task<ActionResult<Response<IEnumerable<MeetingDTO>>>> GetAlls(
-            [FromQuery] PaginationParams paginationParams, string filter = "", string sort = "-created_at")
+            [FromQuery] Dictionary<string, int> page,
+            [FromQuery] Dictionary<string, string> filter,
+            [FromQuery] Dictionary<string, string> sort)
         {
-            var result = await _unitOfWork.MeetingRepository.GetAllByPaginationAsync(paginationParams, filter, sort);
+            var meetingQuery = QueryBuilder<MeetingFilterModel>
+                        .Build(page, filter, sort);
+            var query = new GetAllMeetingQuery(meetingQuery);
+
+            var result = await _mediator.Send(query);
+
+            var paginationDTO = new PaginationDTO
+            {
+                CurrentPage = result.CurrentPage,
+                PerPage = result.PerPage,
+                Total = result.Total,
+                Count = result.Count,
+                TotalPages = result.TotalPages
+            };
 
             var response = new ResponseWithPaginationBuilder<IEnumerable<MeetingDTO>>()
-                                                    .AddData(result.Items)
-                                                    .AddPagination(new PaginationDTO
-                                                    {
-                                                        CurrentPage = result.CurrentPage,
-                                                        PerPage = result.PerPage,
-                                                        Total = result.Total,
-                                                        Count = result.Count,
-                                                        TotalPages = result.TotalPages
-                                                    })
-                                                    .Build();
+                                .AddData(result.Items)
+                                .AddPagination(paginationDTO)
+                                .Build();
 
             return response;
         }

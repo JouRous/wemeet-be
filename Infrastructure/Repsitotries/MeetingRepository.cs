@@ -78,6 +78,29 @@ namespace Infrastructure.Repositories
             return res;
         }
 
+        public async Task<Pagination<MeetingDTO>> GetAllAsync(Query<MeetingFilterModel> meetingQuery)
+        {
+            var _filter = meetingQuery.filter;
+            var paginationParams = meetingQuery.paginationParams;
+            var sort = meetingQuery.sort;
+
+            var stat = _context.Meetings
+                        .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider);
+
+            switch (sort)
+            {
+                case "created_at":
+                    stat = stat.OrderBy(t => t.CreatedAt);
+                    break;
+                case "-created_at":
+                    stat = stat.OrderByDescending(t => t.CreatedAt);
+                    break;
+            }
+            var query = stat.AsQueryable();
+            return await PaginationService.GetPagination<MeetingDTO>(query, paginationParams.number, paginationParams.size);
+
+        }
+
 
         public async Task Update(Meeting meeting)
         {
@@ -121,5 +144,7 @@ namespace Infrastructure.Repositories
             _context.Meetings.Remove(meeting);
             await _context.SaveChangesAsync();
         }
+
+
     }
 }

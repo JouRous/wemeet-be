@@ -34,7 +34,7 @@ namespace Application.Utils
             CreateMap<BuildingModel, BuildingDTO>();
 
             CreateMap<Room, RoomDTO>()
-            .ForMember(room => room.Building, opt => opt.MapFrom(src => new BuildingDTO() { Id = src.BuildingId }));
+            .ForMember(room => room.Building, opt => opt.MapFrom(src => src.Building));
             CreateMap<RoomModel, Room>();
             CreateMap<RoomModel, RoomDTO>();
 

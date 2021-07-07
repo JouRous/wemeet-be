@@ -24,12 +24,11 @@ namespace API.Controllers
         private readonly ITokenService _tokenService;
 
         public UsersController(
-          IMapper mapper,
-          UserManager<AppUser> userManager,
-          IUnitOfWork unitOfWork,
-          ITokenService tokenService,
-          IEmailService emailService
-          )
+            IMapper mapper,
+            UserManager<AppUser> userManager,
+            IUnitOfWork unitOfWork,
+            ITokenService tokenService,
+            IEmailService emailService)
         {
             _userManager = userManager;
             _mapper = mapper;

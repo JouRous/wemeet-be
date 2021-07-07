@@ -14,6 +14,7 @@ namespace Domain.Interfaces
         Task<Pagination<MeetingDTO>> GetAllByPaginationAsync(PaginationParams paginationQuery, string f, string s);
         Task<Pagination<MeetingDTO>> GetWaitMeetingByPaginationAsync(PaginationParams paginationParams, string filter, string sort);
         Task<Meeting> GetOneAsync(Guid Id);
+        Task<Pagination<MeetingDTO>> GetAllAsync(Query<MeetingFilterModel> meetingQuery);
         Task Update(Meeting meeting);
         void DeletingOne(int Id);
         Task DeleteOneAsync(Meeting meeting);
