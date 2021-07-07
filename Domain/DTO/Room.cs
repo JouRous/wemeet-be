@@ -5,7 +5,7 @@ namespace Domain.DTO
 {
     public class RoomDTO
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public DateTime? CreatedAt { get; set; } = null;
         public string Name { get; set; }
         public StatusRomEnums Status { get; set; }

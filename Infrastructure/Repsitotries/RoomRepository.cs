@@ -36,8 +36,8 @@ namespace Infrastructure.Repositories
         }
 
         public async Task<Pagination<RoomDTO>> GetAllByPaginationAsync(Dictionary<string, int> page,
-                                                                                                             Dictionary<string, string> filter,
-                                                                                                             string sort = "-created_at")
+                                                                       Dictionary<string, string> filter,
+                                                                       string sort = "-created_at")
         {
             var filterSerializer = JsonConvert.SerializeObject(filter);
             var pageSerializer = JsonConvert.SerializeObject(page);

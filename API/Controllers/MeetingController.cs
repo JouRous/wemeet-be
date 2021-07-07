@@ -7,6 +7,10 @@ using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Application.Utils;
+using Domain.Entities;
+using Application.Features.Commands;
+using MediatR;
+using System;
 
 namespace API.Controllers
 {
@@ -14,11 +18,13 @@ namespace API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public MeetingController(IUnitOfWork unitOfWork, IMapper mapper)
+        public MeetingController(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _mediator = mediator;
         }
 
         [HttpGet]
@@ -66,58 +72,51 @@ namespace API.Controllers
         [HttpGet("{MeetingId}")]
         public ActionResult<Response<MeetingDTO>> GetMeetingInfo(int MeetingId)
         {
-            var MeetingInfo = _unitOfWork.MeetingRepository.GetOneAsync(MeetingId);
-            return new ResponseBuilder<MeetingDTO>().AddData(MeetingInfo).Build();
+            // var MeetingInfo = _unitOfWork.MeetingRepository.GetOneAsync(MeetingId);
+            // return new ResponseBuilder<MeetingDTO>().AddData(MeetingInfo).Build();
+            return Ok();
         }
 
         [HttpPost]
-        public async Task<ActionResult<Response<MeetingDTO>>> AddMeeting([FromBody] MeetingModel body)
+        public async Task<ActionResult> AddMeeting([FromBody] CreateMeetingCommand command)
         {
-            var MeetingMapper = _mapper.Map<MeetingDTO>(body);
+            var meeting = _mapper.Map<Meeting>(command);
 
-            _unitOfWork.MeetingRepository.AddOne(MeetingMapper);
+            var result = await _mediator.Send(command);
 
-            var isCompleted = await _unitOfWork.Complete();
+            var response = new ResponseBuilder<Guid>()
+                        .AddData(result)
+                        .AddMessage("Meeting has been created")
+                        .Build();
 
-            if (!isCompleted) return BadRequest();
-
-            var res = new ResponseBuilder<MeetingDTO>().AddData(_mapper.Map<MeetingDTO>(MeetingMapper)).Build();
-
-            return res;
-
+            return Ok(response);
         }
 
         [HttpPut]
         [Route("{MeetingId}")]
-        public async Task<ActionResult<Response<MeetingDTO>>> EditInfoMeeting([FromRoute] int MeetingId, [FromBody] MeetingModel body)
+        public async Task<ActionResult> EditInfoMeeting(
+            [FromRoute] Guid meetingId,
+            [FromBody] UpdateMeetingCommand command)
         {
-            var MeetingMapper = _mapper.Map<MeetingDTO>(body);
-            MeetingMapper.Id = MeetingId;
+            command.Id = meetingId;
 
-            _unitOfWork.MeetingRepository.UpdatingOne(MeetingMapper);
+            var res = await _mediator.Send(command);
 
-            var isCompleted = await _unitOfWork.Complete();
-
-            if (!isCompleted) return BadRequest();
-
-
-
-            var res = new ResponseBuilder<MeetingDTO>().AddData(MeetingMapper).Build();
-
-            return Accepted(res);
+            return Ok();
         }
 
         [HttpDelete("{MeetingId}")]
         public async Task<ActionResult<Response<string>>> RemoveMeeting(int MeetingId)
         {
-            var Meeting = _unitOfWork.MeetingRepository.GetOneAsync(MeetingId);
-            _unitOfWork.MeetingRepository.DeletingOne(MeetingId);
-            var isCompleted = await _unitOfWork.Complete();
-            if (!isCompleted) return BadRequest();
+            // var Meeting = _unitOfWork.MeetingRepository.GetOneAsync(MeetingId);
+            // _unitOfWork.MeetingRepository.DeletingOne(MeetingId);
+            // var isCompleted = await _unitOfWork.Complete();
+            // if (!isCompleted) return BadRequest();
 
-            var res = new ResponseBuilder<string>().AddData("deleted").Build();
+            // var res = new ResponseBuilder<string>().AddData("deleted").Build();
 
-            return res;
+            // return res;
+            return Ok();
         }
     }
 }

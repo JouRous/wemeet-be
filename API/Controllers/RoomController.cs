@@ -9,6 +9,7 @@ using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Application.Utils;
+using System;
 
 namespace API.Controllers
 {
@@ -88,7 +89,7 @@ namespace API.Controllers
 
         [HttpPut]
         [Route("{roomId}")]
-        public async Task<ActionResult<Response<RoomDTO>>> EditInfoRoom([FromRoute] int roomId, [FromBody] RoomModel body)
+        public async Task<ActionResult<Response<RoomDTO>>> EditInfoRoom([FromRoute] Guid roomId, [FromBody] RoomModel body)
         {
             var roomMapper = _mapper.Map<RoomDTO>(body);
             roomMapper.Id = roomId;
