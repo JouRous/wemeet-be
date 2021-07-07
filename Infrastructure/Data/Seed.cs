@@ -51,7 +51,7 @@ namespace Infrastructure.Data
                     UserName = user.Email.ToLower(),
                     Nickname = user.Email.Split("@")[0],
                     Fullname = user.Fullname,
-                    isFirstLogin = true,
+                    isFirstLogin = false,
                     // UnsignedName = Utils.Utils.RemoveAccentedString(user.Fullname),
                     Role = UserRoles.STAFF
                 };
