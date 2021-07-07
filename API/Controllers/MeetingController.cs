@@ -11,6 +11,7 @@ using Domain.Entities;
 using Application.Features.Commands;
 using MediatR;
 using System;
+using Application.Features.Queries;
 
 namespace API.Controllers
 {
@@ -70,11 +71,13 @@ namespace API.Controllers
         }
 
         [HttpGet("{MeetingId}")]
-        public ActionResult<Response<MeetingDTO>> GetMeetingInfo(int MeetingId)
+        public async Task<ActionResult<Response<MeetingDTO>>> GetMeetingInfoAsync(Guid meetingId)
         {
-            // var MeetingInfo = _unitOfWork.MeetingRepository.GetOneAsync(MeetingId);
-            // return new ResponseBuilder<MeetingDTO>().AddData(MeetingInfo).Build();
-            return Ok();
+            var query = new GetMeetingQuery(meetingId);
+
+            var result = await _mediator.Send(query);
+
+            return Ok(result);
         }
 
         [HttpPost]
@@ -102,21 +105,27 @@ namespace API.Controllers
 
             var res = await _mediator.Send(command);
 
-            return Ok();
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(res)
+                                .AddMessage("Meeting has been updated")
+                                .Build();
+
+            return Ok(response);
         }
 
         [HttpDelete("{MeetingId}")]
-        public async Task<ActionResult<Response<string>>> RemoveMeeting(int MeetingId)
+        public async Task<ActionResult> RemoveMeeting(Guid meetingId)
         {
-            // var Meeting = _unitOfWork.MeetingRepository.GetOneAsync(MeetingId);
-            // _unitOfWork.MeetingRepository.DeletingOne(MeetingId);
-            // var isCompleted = await _unitOfWork.Complete();
-            // if (!isCompleted) return BadRequest();
+            var command = new DeleteMeetingCommand(meetingId);
 
-            // var res = new ResponseBuilder<string>().AddData("deleted").Build();
+            var result = await _mediator.Send(command);
 
-            // return res;
-            return Ok();
+            var response = new ResponseBuilder<Guid>()
+                            .AddData(result)
+                            .AddMessage("Meeting has been removed")
+                            .Build();
+
+            return Ok(response);
         }
     }
 }

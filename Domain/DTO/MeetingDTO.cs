@@ -7,8 +7,7 @@ namespace Domain.DTO
 {
     public class MeetingDTO
     {
-        public int? Id { get; set; } = null;
-        public DateTime? CreatedAt { get; set; } = null;
+        public Guid Id { get; set; }
         public string Name { get; set; } = null;
         public string Description { get; set; } = null;
         public string Note { get; set; } = null;
@@ -17,11 +16,12 @@ namespace Domain.DTO
         public TeamDTO Team { get; set; } = null;
         public RoomDTO Room { get; set; } = null;
         public StatusMeeting Status { get; set; } = StatusMeeting.Waiting;
-        public DateTime? StartTime { get; set; } = null;
-        public DateTime? EndTime { get; set; } = null;
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
         public PriorityMeeting Priority { get; set; } = PriorityMeeting.Normal;
         public string Target { get; set; } = null;
         public MethodMeeting Method { get; set; } = MethodMeeting.Offline;
         public MeetingDTO ConflictWith { get; set; } = null;
+        public DateTime CreatedAt { get; set; }
     }
 }

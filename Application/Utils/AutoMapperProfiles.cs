@@ -44,11 +44,11 @@ namespace Application.Utils
             CreateMap<Meeting, MeetingDTO>()
               .ForMember(dest => dest.Room, opt => opt.MapFrom(src => src.Room))
               .ForMember(dest => dest.Creator, opt => opt.MapFrom(src => src.Creator))
-              .ForMember(dest => dest.Team, opt => opt.MapFrom(src => src.Team))
               .ForMember(dest => dest.ConflictWith, opt => opt.MapFrom(src => src.ConflictWith));
 
             CreateMap<MeetingModel, MeetingDTO>();
             CreateMap<Meeting, Meeting>();
+            // CreateMap<Meeting, MeetingDTO>().ReverseMap();
             CreateMap<CreateMeetingCommand, Meeting>().ReverseMap();
             CreateMap<UpdateMeetingCommand, Meeting>().ReverseMap();
         }

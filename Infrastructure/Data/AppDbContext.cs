@@ -16,6 +16,7 @@ namespace Infrastructure.Data
         public DbSet<Room> Rooms { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Meeting> Meetings { get; set; }
+        public DbSet<ParticipantMeeting> ParticipantMeeting { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

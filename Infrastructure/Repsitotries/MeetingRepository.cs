@@ -30,11 +30,6 @@ namespace Infrastructure.Repositories
         {
             return await _context.Meetings.FindAsync(Id);
         }
-        public void AddOne(MeetingDTO meeting)
-        {
-            // var meet = MappingFromDTO(new Meeting(), meeting);
-            // _context.Meetings.Add(meet);
-        }
 
         public async Task AddOneAsync(Meeting meeting)
         {
@@ -84,20 +79,6 @@ namespace Infrastructure.Repositories
         }
 
 
-        public void UpdatingOne(MeetingDTO data)
-        {
-            // var entity = _context.Meetings.Where(X => X.Id == data.Id)
-            // .ProjectTo<Meeting>(_mapper.ConfigurationProvider).SingleOrDefault();
-
-            // if (data != null)
-            // {
-            //     entity = MappingFromDTO(entity, data);
-            // }
-
-            // _context.Meetings.Update(entity);
-
-        }
-
         public async Task Update(Meeting meeting)
         {
             _context.Entry(meeting).State = EntityState.Modified;
@@ -119,19 +100,26 @@ namespace Infrastructure.Repositories
 
             if (meeting == null) return;
 
-            meeting.ParticipantMeetings.Clear();
-            await _context.SaveChangesAsync();
-            // foreach (var userId in userIds)
-            // {
-            //     meeting.ParticipantMeetings.Add(new ParticipantMeeting
-            //     {
-            //         MeetingId = meeting.Id,
-            //         ParticipantId = userId
-            //     });
-            // }
-            // _context.Meetings.Update(meeting);
+            _context.ParticipantMeeting.RemoveRange(
+                _context.ParticipantMeeting.Where(pm => pm.MeetingId == meeting.Id).ToList()
+            );
 
-            // await _context.SaveChangesAsync();
+            foreach (var userId in userIds)
+            {
+                meeting.ParticipantMeetings.Add(new ParticipantMeeting
+                {
+                    MeetingId = meeting.Id,
+                    ParticipantId = userId
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteOneAsync(Meeting meeting)
+        {
+            _context.Meetings.Remove(meeting);
+            await _context.SaveChangesAsync();
         }
     }
 }
