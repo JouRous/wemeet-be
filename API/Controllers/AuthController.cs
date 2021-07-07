@@ -32,15 +32,14 @@ namespace API.Controllers
         private readonly IEmailService _emailService;
 
         public AuthController(
-          UserManager<AppUser> userManager,
-          SignInManager<AppUser> signInManager,
-          RoleManager<AppRole> roleManager,
-          ITokenService tokenService,
-          IUnitOfWork unitOfWork,
-          IMapper mapper,
-          IWebHostEnvironment hostEnvironment,
-          IEmailService emailService
-        )
+            UserManager<AppUser> userManager,
+            SignInManager<AppUser> signInManager,
+            RoleManager<AppRole> roleManager,
+            ITokenService tokenService,
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            IWebHostEnvironment hostEnvironment,
+            IEmailService emailService)
         {
             _tokenService = tokenService;
             _mapper = mapper;

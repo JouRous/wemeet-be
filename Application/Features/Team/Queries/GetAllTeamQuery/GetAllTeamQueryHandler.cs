@@ -5,7 +5,7 @@ using Domain.Interfaces;
 using Domain.Models;
 using MediatR;
 
-namespace Application.Features.Team.Queries
+namespace Application.Features.Queries
 {
     public class GetAllTeamQueryHandler : IRequestHandler<GetAllTeamQuery, Pagination<TeamWithUserDTO>>
     {

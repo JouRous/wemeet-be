@@ -3,7 +3,7 @@ using Domain.Models;
 using Domain.Types;
 using MediatR;
 
-namespace Application.Features.Team.Queries
+namespace Application.Features.Queries
 {
     public class GetAllTeamQuery : IRequest<Pagination<TeamWithUserDTO>>
     {

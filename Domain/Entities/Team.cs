@@ -11,7 +11,7 @@ namespace Domain.Entities
         public string Avatar { get; set; }
         public int LeaderId { get; set; }
         public AppUser Leader { get; set; }
-        public ICollection<AppUserTeam> AppUserTeams { get; set; }
+        public ICollection<AppUserTeam> AppUserTeams { get; set; } = new List<AppUserTeam>();
         public ICollection<AppUser> Users { get; set; }
         public ICollection<Meeting> Meetings { get; set; }
     }

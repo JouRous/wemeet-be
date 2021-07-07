@@ -9,7 +9,9 @@ using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Application.Utils;
 using MediatR;
-using Application.Features.Team.Queries;
+using Application.Features.Queries;
+using System;
+using Application.Features.Commands;
 
 namespace API.Controllers
 {
@@ -54,13 +56,16 @@ namespace API.Controllers
         }
 
         [HttpGet("{teamId}")]
-        public async Task<ActionResult<Response<TeamWithUserDTO>>> GetTeam(int teamId)
+        public async Task<ActionResult> GetTeam(Guid teamId)
         {
-            var team = await _unitOfWork.TeamRepository.GetTeamAsync(teamId);
+            var query = new GetTeamQuery(teamId);
+            var result = await _mediator.Send(query);
 
-            return new ResponseBuilder<TeamWithUserDTO>()
-                        .AddData(team)
-                        .Build();
+            var response = new ResponseBuilder<TeamWithUserDTO>()
+                                .AddData(result)
+                                .Build();
+
+            return Ok(response);
         }
 
 
@@ -132,30 +137,21 @@ namespace API.Controllers
         [HttpPost("add-user")]
         public async Task<ActionResult> AddUserToTeam([FromBody] UserTeamActionModel userTeamActionModel)
         {
-            await _unitOfWork.TeamRepository.AddUserToTeamAsync(userTeamActionModel.Team_Id, userTeamActionModel.User_Ids);
+            var command = new AddUserToTeamCommand(userTeamActionModel.Team_Id, userTeamActionModel.User_Ids);
+            await _mediator.Send(command);
 
-            await _unitOfWork.Complete();
-
-            return Ok(new
-            {
-                success = true,
-                status = 200,
-                message = "Users had beed add to team"
-            });
+            return Ok(new ResponseBuilder<Unit>()
+                        .Build());
         }
 
         [HttpPost("remove-user")]
         public async Task<ActionResult> RemoveUserFromTeam([FromBody] UserTeamActionModel userTeamActionModel)
         {
-            await _unitOfWork.TeamRepository.RemoveUserFromTeam(userTeamActionModel.Team_Id, userTeamActionModel.User_Ids);
-            await _unitOfWork.Complete();
+            var command = new RemoveUserFromTeamCommand(userTeamActionModel.Team_Id, userTeamActionModel.User_Ids);
 
-            return Ok(new
-            {
-                success = true,
-                status = 200,
-                message = "Users had beed removed to team"
-            });
+            await _mediator.Send(command);
+
+            return Ok(new ResponseBuilder<Unit>().Build());
         }
 
     }
