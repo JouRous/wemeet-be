@@ -1,8 +1,0 @@
-namespace API.DTO
-{
-	public class BuildingResDTO
-	{
-		public BuildingDTO Building { get; set; }
-		public int RoomNumber { get; set; }
-	}
-}

@@ -1,123 +1,139 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using API.DTO;
-using API.Interfaces;
-using API.Models;
-using API.Types;
-using API.Utils;
+using Domain.DTO;
+using Domain.Interfaces;
+using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Application.Utils;
+using Domain.Entities;
+using Application.Features.Commands;
+using MediatR;
+using System;
+using Application.Features.Queries;
+using Domain.Models;
 
 namespace API.Controllers
 {
-	public class MeetingController : BaseApiController
-	{
-		private readonly IUnitOfWork _unitOfWork;
-		private readonly IMapper _mapper;
+    public class MeetingController : BaseApiController
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-		public MeetingController(IUnitOfWork unitOfWork, IMapper mapper)
-		{
-			_unitOfWork = unitOfWork;
-			_mapper = mapper;
-		}
+        public MeetingController(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _mediator = mediator;
+        }
 
-		[HttpGet]
-		public async Task<ActionResult<Response<IEnumerable<MeetingDTO>>>> GetAlls(
-			[FromQuery] PaginationParams paginationParams, string filter = "", string sort = "-created_at")
-		{
-			var result = await _unitOfWork.MeetingRepository.GetAllByPaginationAsync(paginationParams, filter, sort);
+        [HttpGet]
+        public async Task<ActionResult<Response<IEnumerable<MeetingDTO>>>> GetAlls(
+            [FromQuery] Dictionary<string, int> page,
+            [FromQuery] Dictionary<string, string> filter,
+            [FromQuery] Dictionary<string, string> sort)
+        {
+            var meetingQuery = QueryBuilder<MeetingFilterModel>
+                        .Build(page, filter, sort);
+            var query = new GetAllMeetingQuery(meetingQuery);
 
-			var response = new ResponseBuilder<IEnumerable<MeetingDTO>>()
-													.AddData(result.Items)
-													.AddPagination(new PaginationDTO
-													{
-														CurrentPage = result.CurrentPage,
-														PerPage = result.PerPage,
-														Total = result.Total,
-														Count = result.Count,
-														TotalPage = result.TotalPages
-													})
-													.Build();
+            var result = await _mediator.Send(query);
 
-			return response;
-		}
-		[HttpGet]
-		[Route("waiting")]
-		public async Task<ActionResult<Response<IEnumerable<MeetingDTO>>>> GetWaitingMeeting(
-			[FromQuery] PaginationParams paginationParams, string filter = "", string sort = "-created_at")
-		{
-			var result = await _unitOfWork.MeetingRepository.GetWaitMeetingByPaginationAsync(paginationParams, filter, sort);
+            var paginationDTO = new PaginationDTO
+            {
+                CurrentPage = result.CurrentPage,
+                PerPage = result.PerPage,
+                Total = result.Total,
+                Count = result.Count,
+                TotalPages = result.TotalPages
+            };
 
-			var response = new ResponseBuilder<IEnumerable<MeetingDTO>>()
-													.AddData(result.Items)
-													.AddPagination(new PaginationDTO
-													{
-														CurrentPage = result.CurrentPage,
-														PerPage = result.PerPage,
-														Total = result.Total,
-														Count = result.Count,
-														TotalPage = result.TotalPages
-													})
-													.Build();
+            var response = new ResponseWithPaginationBuilder<IEnumerable<MeetingDTO>>()
+                                .AddData(result.Items)
+                                .AddPagination(paginationDTO)
+                                .Build();
 
-			return response;
-		}
+            return response;
+        }
+        [HttpGet]
+        [Route("waiting")]
+        public async Task<ActionResult<Response<IEnumerable<MeetingDTO>>>> GetWaitingMeeting(
+            [FromQuery] PaginationParams paginationParams, string filter = "", string sort = "-created_at")
+        {
+            var result = await _unitOfWork.MeetingRepository.GetWaitMeetingByPaginationAsync(paginationParams, filter, sort);
 
-		[HttpGet("{MeetingId}")]
-		public ActionResult<Response<MeetingDTO>> GetMeetingInfo(int MeetingId)
-		{
-			var MeetingInfo = _unitOfWork.MeetingRepository.GetOneAsync(MeetingId);
-			return new ResponseBuilder<MeetingDTO>().AddData(MeetingInfo).Build();
-		}
+            var response = new ResponseWithPaginationBuilder<IEnumerable<MeetingDTO>>()
+                                                    .AddData(result.Items)
+                                                    .AddPagination(new PaginationDTO
+                                                    {
+                                                        CurrentPage = result.CurrentPage,
+                                                        PerPage = result.PerPage,
+                                                        Total = result.Total,
+                                                        Count = result.Count,
+                                                        TotalPages = result.TotalPages
+                                                    })
+                                                    .Build();
 
-		[HttpPost]
-		public async Task<ActionResult<Response<MeetingDTO>>> AddMeeting([FromBody] MeetingModel body)
-		{
-			var MeetingMapper = _mapper.Map<MeetingDTO>(body);
+            return response;
+        }
 
-			_unitOfWork.MeetingRepository.AddOne(MeetingMapper);
+        [HttpGet("{MeetingId}")]
+        public async Task<ActionResult<Response<MeetingDTO>>> GetMeetingInfoAsync(Guid meetingId)
+        {
+            var query = new GetMeetingQuery(meetingId);
 
-			var isCompleted = await _unitOfWork.Complete();
+            var result = await _mediator.Send(query);
 
-			if (!isCompleted) return BadRequest();
+            return Ok(result);
+        }
 
-			var res = new ResponseBuilder<MeetingDTO>().AddData(_mapper.Map<MeetingDTO>(MeetingMapper)).Build();
+        [HttpPost]
+        public async Task<ActionResult> AddMeeting([FromBody] CreateMeetingCommand command)
+        {
+            var meeting = _mapper.Map<Meeting>(command);
 
-			return res;
+            var result = await _mediator.Send(command);
 
-		}
+            var response = new ResponseBuilder<Guid>()
+                        .AddData(result)
+                        .AddMessage("Meeting has been created")
+                        .Build();
 
-		[HttpPut]
-		[Route("{MeetingId}")]
-		public async Task<ActionResult<Response<MeetingDTO>>> EditInfoMeeting([FromRoute] int MeetingId, [FromBody] MeetingModel body)
-		{
-			var MeetingMapper = _mapper.Map<MeetingDTO>(body);
-			MeetingMapper.Id = MeetingId;
+            return Ok(response);
+        }
 
-			_unitOfWork.MeetingRepository.UpdatingOne(MeetingMapper);
+        [HttpPut]
+        [Route("{MeetingId}")]
+        public async Task<ActionResult> EditInfoMeeting(
+            [FromRoute] Guid meetingId,
+            [FromBody] UpdateMeetingCommand command)
+        {
+            command.Id = meetingId;
 
-			var isCompleted = await _unitOfWork.Complete();
+            var res = await _mediator.Send(command);
 
-			if (!isCompleted) return BadRequest();
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(res)
+                                .AddMessage("Meeting has been updated")
+                                .Build();
 
+            return Ok(response);
+        }
 
+        [HttpDelete("{MeetingId}")]
+        public async Task<ActionResult> RemoveMeeting(Guid meetingId)
+        {
+            var command = new DeleteMeetingCommand(meetingId);
 
-			var res = new ResponseBuilder<MeetingDTO>().AddData(MeetingMapper).Build();
+            var result = await _mediator.Send(command);
 
-			return Accepted(res);
-		}
+            var response = new ResponseBuilder<Guid>()
+                            .AddData(result)
+                            .AddMessage("Meeting has been removed")
+                            .Build();
 
-		[HttpDelete("{MeetingId}")]
-		public async Task<ActionResult<Response<string>>> RemoveMeeting(int MeetingId)
-		{
-			var Meeting = _unitOfWork.MeetingRepository.GetOneAsync(MeetingId);
-			_unitOfWork.MeetingRepository.DeletingOne(MeetingId);
-			var isCompleted = await _unitOfWork.Complete();
-			if (!isCompleted) return BadRequest();
-
-			var res = new ResponseBuilder<string>().AddData("deleted").Build();
-
-			return res;
-		}
-	}
+            return Ok(response);
+        }
+    }
 }

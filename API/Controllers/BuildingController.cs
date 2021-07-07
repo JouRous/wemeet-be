@@ -1,186 +1,182 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using API.DTO;
-using API.Services;
-using API.Entities;
-using API.Interfaces;
-using API.Models;
-using API.Types;
-using API.Utils;
+using Domain.DTO;
+using Application.Services;
+using Domain.Entities;
+using Domain.Interfaces;
+using Domain.Models;
+using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Application.Utils;
 
 namespace API.Controllers
 {
-	public class BuildingController : BaseApiController
-	{
-		private readonly IUnitOfWork _unitOfWork;
-		private readonly IMapper _mapper;
-		private NotificationService _notificationService = new NotificationService();
+    public class BuildingController : BaseApiController
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private NotificationService _notificationService = new NotificationService();
 
-		public BuildingController(IUnitOfWork unitOfWork, IMapper mapper)
-		{
-			_unitOfWork = unitOfWork;
-			_mapper = mapper;
-		}
+        public BuildingController(IUnitOfWork unitOfWork, IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }
 
-		[HttpGet]
-		public async Task<ActionResult<Response<IEnumerable<BuildingResDTO>>>> GetAllBuildings(
-			[FromQuery] PaginationParams paginationParams, string filter = "", string sort = "created_at"
-			)
-		{
-			var result = await _unitOfWork.BuildingRepository.GetAllByPaginationAsync(paginationParams, filter, sort);
+        [HttpGet]
+        public async Task<ActionResult<Response<IEnumerable<BuildingDTO>>>> GetAllBuildings(
+            [FromQuery] Dictionary<string, int> page,
+            [FromQuery] Dictionary<string, string> filter,
+            [FromQuery] Dictionary<string, string> sort)
+        {
+            var _sort = sort.GetValueOrDefault("");
+            var result = await _unitOfWork.BuildingRepository.GetAllByPaginationAsync(page, filter, _sort);
 
-			var list = new List<BuildingResDTO>();
-			foreach (var item in result.Items)
-			{
-				var count = _unitOfWork.RoomRepository.GetSizeOfEntity(o => o.BuildingId == item.Id);
-				list.Add(new BuildingResDTO()
-				{
-					Building = item,
-					RoomNumber = count
-				});
-			}
+            var list = new List<BuildingDTO>();
+            foreach (var item in result.Items)
+            {
+                var count = _unitOfWork.RoomRepository.GetSizeOfEntity(o => o.BuildingId == item.Id);
+                item.RoomNumber = count;
+                list.Add(item);
+            }
 
-			var response = new ResponseBuilder<IEnumerable<BuildingResDTO>>()
-													.AddData(list)
-													.AddPagination(new PaginationDTO
-													{
-														CurrentPage = result.CurrentPage,
-														PerPage = result.PerPage,
-														Total = result.Total,
-														Count = result.Count,
-														TotalPage = result.TotalPages
-													})
-													.Build();
+            var response = new ResponseWithPaginationBuilder<IEnumerable<BuildingDTO>>()
+                                                    .AddData(list)
+                                                    .AddPagination(new PaginationDTO
+                                                    {
+                                                        CurrentPage = result.CurrentPage,
+                                                        PerPage = result.PerPage,
+                                                        Total = result.Total,
+                                                        Count = result.Count,
+                                                        TotalPages = result.TotalPages
+                                                    })
+                                                    .Build();
 
-			return response;
-		}
+            return response;
+        }
 
-		[HttpGet("{buildingId}")]
-		public async Task<ActionResult<Response<BuildingResDTO>>> GetBuildingInfo(int buildingId)
-		{
-			var buildingInfo = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
-			var data = new BuildingResDTO()
-			{
-				Building = buildingInfo,
-				RoomNumber = _unitOfWork.RoomRepository.GetSizeOfEntity(x => x.BuildingId == buildingId)
-			};
-			return new ResponseBuilder<BuildingResDTO>().AddData(data).Build();
-		}
+        [HttpGet("{buildingId}")]
+        public async Task<ActionResult<Response<BuildingDTO>>> GetBuildingInfo(Guid buildingId)
+        {
+            var buildingInfo = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
+            buildingInfo.RoomNumber = _unitOfWork.RoomRepository.GetSizeOfEntity(x => x.BuildingId == buildingId);
 
-		[HttpPost]
-		public async Task<ActionResult<Response<BuildingDTO>>> AddBuilding([FromBody] BuildingModel buildingInfo)
-		{
-			try
-			{
-				var building = _mapper.Map<Building>(buildingInfo);
+            return new ResponseBuilder<BuildingDTO>().AddData(buildingInfo).Build();
+        }
 
-				_unitOfWork.BuildingRepository.AddOne(building);
+        [HttpPost]
+        public async Task<ActionResult<Response<BuildingDTO>>> AddBuilding([FromBody] BuildingModel buildingInfo)
+        {
+            try
+            {
+                var building = _mapper.Map<Building>(buildingInfo);
 
-				var isCreated = await _unitOfWork.Complete();
+                _unitOfWork.BuildingRepository.AddOne(building);
 
-				if (!isCreated)
-				{
-					return BadRequest();
-				}
+                var isCreated = await _unitOfWork.Complete();
 
-				// var msg = new Notification()
-				// {
-				// 	EntityType = Enums.EntityEnum.Building,
-				// 	EntityId = building.Id,
-				// 	EndpointDetails = $"/api/building/{building.Id}",
-				// 	Message = "New building has created !"
-				// };
+                if (!isCreated)
+                {
+                    return BadRequest();
+                }
 
-				// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+                // var msg = new Notification()
+                // {
+                // 	EntityType = Enums.EntityEnum.Building,
+                // 	EntityId = building.Id,
+                // 	EndpointDetails = $"/api/building/{building.Id}",
+                // 	Message = "New building has created !"
+                // };
 
-				// await _notificationService.CreateNotify(msgDto);
+                // var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
 
-				var res = new ResponseBuilder<BuildingDTO>()
-												.AddData(_mapper.Map<BuildingDTO>(building))
-												.Build();
+                // await _notificationService.CreateNotify(msgDto);
 
-				return res;
-			}
-			catch (Exception e)
-			{
+                var res = new ResponseBuilder<BuildingDTO>()
+                                                .AddData(_mapper.Map<BuildingDTO>(building))
+                                                .Build();
 
-				throw e;
-			}
-		}
+                return res;
+            }
+            catch (Exception e)
+            {
 
-		[HttpPut]
-		[Route("{buildingId}")]
-		public async Task<ActionResult> EditInfoBuilding([FromRoute] int buildingId, [FromBody] BuildingModel body)
-		{
-			var building = _mapper.Map<BuildingDTO>(body);
+                throw e;
+            }
+        }
 
-			building.Id = buildingId;
+        [HttpPut]
+        [Route("{buildingId}")]
+        public async Task<ActionResult> EditInfoBuilding([FromRoute] Guid buildingId, [FromBody] BuildingModel body)
+        {
+            var building = _mapper.Map<BuildingDTO>(body);
 
-			_unitOfWork.BuildingRepository.ModifyOne(building);
-			var isCompleted = await _unitOfWork.Complete();
+            building.Id = buildingId;
 
-			if (!isCompleted)
-			{
-				return BadRequest();
-			}
+            _unitOfWork.BuildingRepository.ModifyOne(building);
+            var isCompleted = await _unitOfWork.Complete();
 
-			// var msg = new Notification()
-			// {
-			// 	EntityType = Enums.EntityEnum.Building,
-			// 	EntityId = building.Id,
-			// 	EndpointDetails = $"/api/building/{building.Id}",
-			// 	Message = "The building has updated !"
-			// };
+            if (!isCompleted)
+            {
+                return BadRequest();
+            }
 
-			// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+            // var msg = new Notification()
+            // {
+            // 	EntityType = Enums.EntityEnum.Building,
+            // 	EntityId = building.Id,
+            // 	EndpointDetails = $"/api/building/{building.Id}",
+            // 	Message = "The building has updated !"
+            // };
 
-			// await _notificationService.CreateNotify(msgDto);
+            // var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
 
-			return Accepted(new
-			{
-				status = 202,
-				success = true,
-				message = "Building had been updated",
-				updated = building
-			});
-		}
+            // await _notificationService.CreateNotify(msgDto);
 
-		[HttpDelete("{buildingId}")]
-		public async Task<ActionResult<Response<string>>> RemoveBuilding(int buildingId)
-		{
-			BuildingDTO building = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
+            return Accepted(new
+            {
+                status = 202,
+                success = true,
+                message = "Building had been updated",
+                updated = building
+            });
+        }
 
-			_unitOfWork.BuildingRepository.DeletingOne(buildingId);
+        [HttpDelete("{buildingId}")]
+        public async Task<ActionResult<Response<string>>> RemoveBuilding(Guid buildingId)
+        {
+            BuildingDTO building = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
 
-			var isCompleted = await _unitOfWork.Complete();
+            _unitOfWork.BuildingRepository.DeletingOne(buildingId);
 
-			if (!isCompleted)
-			{
-				return BadRequest();
-			}
+            var isCompleted = await _unitOfWork.Complete();
 
-			// var msg = new Notification()
-			// {
-			// 	EntityType = Enums.EntityEnum.Building,
-			// 	EntityId = building.Id,
-			// 	EndpointDetails = $"/api/building/{building.Id}",
-			// 	Message = "New building has deleted !"
-			// };
+            if (!isCompleted)
+            {
+                return BadRequest();
+            }
 
-			// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+            // var msg = new Notification()
+            // {
+            // 	EntityType = Enums.EntityEnum.Building,
+            // 	EntityId = building.Id,
+            // 	EndpointDetails = $"/api/building/{building.Id}",
+            // 	Message = "New building has deleted !"
+            // };
 
-			// await _notificationService.CreateNotify(msgDto);
+            // var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
 
-			var res = new ResponseBuilder<string>()
-											.AddData(_mapper.Map<string>("deleted"))
-											.Build();
+            // await _notificationService.CreateNotify(msgDto);
 
-			return res;
-		}
+            var res = new ResponseBuilder<string>()
+                                            .AddData(_mapper.Map<string>("deleted"))
+                                            .Build();
+
+            return res;
+        }
 
 
-	}
+    }
 }
