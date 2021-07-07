@@ -24,7 +24,6 @@ namespace Application.Utils
 
             CreateMap<UserActionModel, AppUser>();
 
-
             CreateMap<Team, TeamDTO>()
               .ForMember(dest => dest.Leader, opt => opt.MapFrom(src => src.Leader));
             CreateMap<Team, TeamWithUserDTO>()
@@ -33,8 +32,8 @@ namespace Application.Utils
             CreateMap<TeamModel, Team>();
 
             CreateMap<Building, BuildingDTO>();
-            CreateMap<BuildingModel, Building>();
-            CreateMap<BuildingModel, BuildingDTO>();
+            CreateMap<CreateBuildingCommand, Building>().ReverseMap();
+            CreateMap<UpdatebuildingCommand, Building>().ReverseMap();
 
             CreateMap<Room, RoomDTO>()
             .ForMember(room => room.Building, opt => opt.MapFrom(src => src.Building));

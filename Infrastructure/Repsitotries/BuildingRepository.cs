@@ -26,23 +26,38 @@ namespace Infrastructure.Repositories
             _context = app;
             _mapper = map;
         }
-        public void AddOne(Building buildingInfo)
-        {
-            _context.Buildings.Add(buildingInfo);
 
+        public async Task CreateAsync(Building building)
+        {
+            _context.Buildings.Add(building);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task<Pagination<BuildingDTO>> GetAllByPaginationAsync(Dictionary<string, int> page,
-                                                                           Dictionary<string, string> filter,
-                                                                           string sort = "-created_at")
+        public async Task UpdateAsync(Building building)
         {
-            var filterSerializer = JsonConvert.SerializeObject(filter);
-            var pageSerializer = JsonConvert.SerializeObject(page);
-            var _filter = JsonConvert.DeserializeObject<FilterTeamModel>(filterSerializer);
-            var paginationParams = JsonConvert.DeserializeObject<PaginationParams>(pageSerializer);
+            _context.Entry(building).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
 
-            var stat = _context.Buildings.Where(t => t.Name.Contains(_filter.Name))
-            .ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider);
+        public async Task DeleteAsync(Building building)
+        {
+            _context.Buildings.Remove(building);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Building> GetOneAsync(Guid Id)
+        {
+            return await _context.Buildings.FindAsync(Id);
+        }
+
+        public async Task<Pagination<BuildingDTO>> GetAllAsync(Query<BuildingFilterModel> buildingQuery)
+        {
+            var _filter = buildingQuery.filter;
+            var paginationParams = buildingQuery.paginationParams;
+            var sort = buildingQuery.sort;
+
+            var stat = _context.Buildings
+                        .ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider);
 
             switch (sort)
             {
@@ -56,45 +71,5 @@ namespace Infrastructure.Repositories
             var query = stat.AsQueryable();
             return await PaginationService.GetPagination<BuildingDTO>(query, paginationParams.number, paginationParams.size);
         }
-
-        public void ModifyOne(BuildingDTO building)
-        {
-            var entity = _context.Buildings.Find(building.Id);
-
-            if (entity != null)
-            {
-                entity.UpdatedAt = DateTime.Now;
-                entity.Address = building.Address == null ? entity.Address : building.Address;
-                entity.Name = building.Name == null ? entity.Name : building.Name;
-            }
-
-            _context.Buildings.Update(entity);
-
-        }
-
-        public void DeletingOne(Guid Id)
-        {
-            try
-            {
-                var entity = _context.Buildings.Find(Id);
-                if (entity == null) throw new Exception("entity is not exist!");
-                _context.Buildings.Remove(entity);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-        }
-
-        public async Task<BuildingDTO> GetOneAsync(Guid Id)
-        {
-            // var res = await _context.Buildings.Where(building => building.Id == Id)
-            //     .ProjectTo<BuildingDTO>(_mapper.ConfigurationProvider)
-            //     .SingleOrDefaultAsync();
-            // return res == null ? default : res;
-            throw new Exception();
-        }
-
     }
 }

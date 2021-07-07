@@ -33,10 +33,10 @@ namespace API.Controllers
         {
             var _sort = sort.GetValueOrDefault("");
             var result = await _unitOfWork.RoomRepository.GetAllByPaginationAsync(page, filter, _sort);
-            for (var i = 0; i < result.Items.Count; i++)
-            {
-                result.Items[i].Building = await _unitOfWork.BuildingRepository.GetOneAsync(result.Items[i].Building.Id);
-            }
+            // for (var i = 0; i < result.Items.Count; i++)
+            // {
+            //     result.Items[i].Building = await _unitOfWork.BuildingRepository.GetOneAsync(result.Items[i].Building.Id);
+            // }
             var response = new ResponseWithPaginationBuilder<IEnumerable<RoomDTO>>()
                                                     .AddData(result.Items)
                                                     .AddPagination(new PaginationDTO

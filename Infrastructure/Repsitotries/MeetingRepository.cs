@@ -112,7 +112,6 @@ namespace Infrastructure.Repositories
         {
             var entity = _context.Meetings.Find(Id);
             _context.Meetings.Remove(entity);
-
         }
 
         public async Task AddUserToMeetingAsync(Guid meetingId, ICollection<int> userIds)

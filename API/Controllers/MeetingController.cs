@@ -56,27 +56,7 @@ namespace API.Controllers
 
             return response;
         }
-        [HttpGet]
-        [Route("waiting")]
-        public async Task<ActionResult<Response<IEnumerable<MeetingDTO>>>> GetWaitingMeeting(
-            [FromQuery] PaginationParams paginationParams, string filter = "", string sort = "-created_at")
-        {
-            var result = await _unitOfWork.MeetingRepository.GetWaitMeetingByPaginationAsync(paginationParams, filter, sort);
 
-            var response = new ResponseWithPaginationBuilder<IEnumerable<MeetingDTO>>()
-                                                    .AddData(result.Items)
-                                                    .AddPagination(new PaginationDTO
-                                                    {
-                                                        CurrentPage = result.CurrentPage,
-                                                        PerPage = result.PerPage,
-                                                        Total = result.Total,
-                                                        Count = result.Count,
-                                                        TotalPages = result.TotalPages
-                                                    })
-                                                    .Build();
-
-            return response;
-        }
 
         [HttpGet("{MeetingId}")]
         public async Task<ActionResult<Response<MeetingDTO>>> GetMeetingInfoAsync(Guid meetingId)
@@ -91,8 +71,6 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult> AddMeeting([FromBody] CreateMeetingCommand command)
         {
-            var meeting = _mapper.Map<Meeting>(command);
-
             var result = await _mediator.Send(command);
 
             var response = new ResponseBuilder<Guid>()
