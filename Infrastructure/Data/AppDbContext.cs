@@ -18,6 +18,7 @@ namespace Infrastructure.Data
         public DbSet<Meeting> Meetings { get; set; }
         public DbSet<ParticipantMeeting> ParticipantMeeting { get; set; }
         public DbSet<Tag> Tags { get; set; }
+        public DbSet<MeetingTag> MeetingTag { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

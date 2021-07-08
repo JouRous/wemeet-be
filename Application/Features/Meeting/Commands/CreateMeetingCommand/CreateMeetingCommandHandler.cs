@@ -28,6 +28,7 @@ namespace Application.Features.Commands
             await _meetingRepo.AddOneAsync(meetingEntity);
 
             await _meetingRepo.AddUserToMeetingAsync(meetingEntity.Id, request.users_in_meeting);
+            await _meetingRepo.AddTagToMeeting(meetingEntity.Id, request.Tag_Ids);
 
             return meetingEntity.Id;
         }

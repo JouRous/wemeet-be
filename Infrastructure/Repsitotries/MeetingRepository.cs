@@ -28,7 +28,12 @@ namespace Infrastructure.Repositories
 
         public async Task<Meeting> GetOneAsync(Guid Id)
         {
-            return await _context.Meetings.FindAsync(Id);
+            return await _context.Meetings
+                            .Include(t => t.Room)
+                            .ThenInclude(r => r.Building)
+                            .Include(m => m.MeetingTags)
+                            .ThenInclude(mt => mt.Tag)
+                            .FirstOrDefaultAsync(m => m.Id == Id);
         }
 
         public async Task AddOneAsync(Meeting meeting)
@@ -144,6 +149,22 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddTagToMeeting(Guid meetingId, ICollection<Guid> tagIds)
+        {
+            _context.MeetingTag.RemoveRange(
+                _context.MeetingTag.Where(mt => mt.MeetingId == meetingId)
+            );
 
+            foreach (var tagId in tagIds)
+            {
+                _context.MeetingTag.Add(new MeetingTag
+                {
+                    MeetingId = meetingId,
+                    TagId = tagId
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
     }
 }

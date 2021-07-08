@@ -40,6 +40,7 @@ namespace Application.Utils
             .ForMember(room => room.Building, opt => opt.MapFrom(src => src.Building));
             CreateMap<RoomModel, Room>();
             CreateMap<RoomModel, RoomDTO>();
+            CreateMap<Room, RoomBaseDTO>().ReverseMap();
             CreateMap<CreateRoomCommand, Room>().ReverseMap();
             CreateMap<UpdateRoomCommand, Room>().ReverseMap();
 
@@ -48,11 +49,11 @@ namespace Application.Utils
             CreateMap<Meeting, MeetingDTO>()
               .ForMember(dest => dest.Room, opt => opt.MapFrom(src => src.Room))
               .ForMember(dest => dest.Creator, opt => opt.MapFrom(src => src.Creator))
-              .ForMember(dest => dest.ConflictWith, opt => opt.MapFrom(src => src.ConflictWith));
+              .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.MeetingTags.Select(x => x.Tag)));
 
             CreateMap<MeetingModel, MeetingDTO>();
             CreateMap<Meeting, Meeting>();
-            // CreateMap<Meeting, MeetingDTO>().ReverseMap();
+            CreateMap<Meeting, MeetingDTO>().ReverseMap();
             CreateMap<CreateMeetingCommand, Meeting>().ReverseMap();
             CreateMap<UpdateMeetingCommand, Meeting>().ReverseMap();
 

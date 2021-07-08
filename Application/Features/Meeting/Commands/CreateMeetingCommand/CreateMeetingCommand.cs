@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Domain.DTO;
-using Domain.Types;
 using MediatR;
 
 namespace Application.Features.Commands
@@ -16,5 +14,6 @@ namespace Application.Features.Commands
         public Guid Room_Id { get; set; }
         public ICollection<Guid> Team_Ids { get; set; }
         public ICollection<int> users_in_meeting { get; set; }
+        public ICollection<Guid> Tag_Ids { get; set; }
     }
 }
