@@ -30,6 +30,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.Meetings
                             .Include(m => m.Room)
+                            .ThenInclude(r => r.Building)
                             .Include(m => m.MeetingTags)
                             .ThenInclude(mt => mt.Tag)
                             .Include(m => m.ParticipantMeetings)

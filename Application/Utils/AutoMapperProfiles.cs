@@ -11,6 +11,7 @@ namespace Application.Utils
     {
         public AutoMapperProfiles()
         {
+            CreateMap<AppUser, UserBaseDTO>().ReverseMap();
             CreateMap<AppUser, UserDTO>()
               .ForAllMembers(options => options.Condition((src, dest, srcMembers) => srcMembers != null));
 
@@ -38,8 +39,6 @@ namespace Application.Utils
 
             CreateMap<Room, RoomDTO>()
             .ForMember(room => room.Building, opt => opt.MapFrom(src => src.Building));
-            CreateMap<RoomModel, Room>();
-            CreateMap<RoomModel, RoomDTO>();
             CreateMap<Room, RoomBaseDTO>().ReverseMap();
             CreateMap<CreateRoomCommand, Room>().ReverseMap();
             CreateMap<UpdateRoomCommand, Room>().ReverseMap();
@@ -52,15 +51,10 @@ namespace Application.Utils
               .ForMember(dest => dest.Room, opt => opt.MapFrom(src => src.Room))
               .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.MeetingTags.Select(x => x.Tag)))
               .ForMember(dest => dest.UserInMeeting,
-                  opt => opt.MapFrom(src => src.ParticipantMeetings.Select(x => x.Participant).ToList()))
+                  opt => opt.MapFrom(src => src.ParticipantMeetings.Select(x => x.Participant)))
               .ReverseMap();
-
-
-            CreateMap<MeetingModel, MeetingDTO>();
-            CreateMap<Meeting, Meeting>();
             CreateMap<CreateMeetingCommand, Meeting>().ReverseMap();
             CreateMap<UpdateMeetingCommand, Meeting>().ReverseMap();
-
         }
     }
 }
