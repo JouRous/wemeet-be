@@ -15,6 +15,7 @@ namespace Domain.DTO
         public TeamDTO Team { get; set; }
         public RoomBaseDTO Room { get; set; }
         public ICollection<TagDTO> Tags { get; set; }
+        public ICollection<FileDTO> Files { get; set; }
         public StatusMeeting Status { get; set; } = StatusMeeting.Waiting;
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }

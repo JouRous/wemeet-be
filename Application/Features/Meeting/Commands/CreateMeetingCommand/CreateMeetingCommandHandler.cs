@@ -8,23 +8,27 @@ using Domain.Entities;
 using Domain.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Commands
 {
     public class CreateMeetingCommandHandler : IRequestHandler<CreateMeetingCommand, Guid>
     {
         private readonly IMeetingRepo _meetingRepo;
+        private readonly IFileRepository _fileRepo;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _hostEnvironment;
 
         public CreateMeetingCommandHandler(
             IMeetingRepo meetingRepo,
+            IFileRepository fileRepository,
             IMapper mapper,
             IWebHostEnvironment webHostEnvironment)
         {
             _meetingRepo = meetingRepo;
             _mapper = mapper;
             _hostEnvironment = webHostEnvironment;
+            _fileRepo = fileRepository;
         }
 
         public async Task<Guid> Handle(CreateMeetingCommand request, CancellationToken cancellationToken)
@@ -42,7 +46,14 @@ namespace Application.Features.Commands
 
             foreach (var file in request.Attachments)
             {
-                string fileName = await FileHelper.UploadFile(file, pathToUpload);
+                var result = await FileHelper.UploadFile(file, pathToUpload);
+                var fileEntity = new FileEntity
+                {
+                    FileName = file.FileName,
+                    FileUrl = $"uploads/files/{result}"
+                };
+                await _fileRepo.Create(fileEntity);
+                await _meetingRepo.AddFileToMeeting(meetingEntity.Id, fileEntity.Id);
             }
 
             return meetingEntity.Id;

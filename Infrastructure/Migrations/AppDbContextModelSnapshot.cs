@@ -224,13 +224,36 @@ namespace Infrastructure.Migrations
                     b.ToTable("Buildings");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Meeting", b =>
+            modelBuilder.Entity("Domain.Entities.FileEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ConflictWithId")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileUrl")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FileEntities");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Meeting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -271,8 +294,6 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ConflictWithId");
-
                     b.HasIndex("CreatorId");
 
                     b.HasIndex("RoomId");
@@ -280,6 +301,21 @@ namespace Infrastructure.Migrations
                     b.HasIndex("TeamId");
 
                     b.ToTable("Meetings");
+                });
+
+            modelBuilder.Entity("Domain.Entities.MeetingFile", b =>
+                {
+                    b.Property<Guid>("FileEntityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("MeetingId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("FileEntityId", "MeetingId");
+
+                    b.HasIndex("MeetingId");
+
+                    b.ToTable("MeetingFile");
                 });
 
             modelBuilder.Entity("Domain.Entities.MeetingTag", b =>
@@ -593,10 +629,6 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Meeting", b =>
                 {
-                    b.HasOne("Domain.Entities.Meeting", "ConflictWith")
-                        .WithMany()
-                        .HasForeignKey("ConflictWithId");
-
                     b.HasOne("Domain.Entities.AppUser", "Creator")
                         .WithMany()
                         .HasForeignKey("CreatorId");
@@ -611,13 +643,30 @@ namespace Infrastructure.Migrations
                         .WithMany("Meetings")
                         .HasForeignKey("TeamId");
 
-                    b.Navigation("ConflictWith");
-
                     b.Navigation("Creator");
 
                     b.Navigation("Room");
 
                     b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("Domain.Entities.MeetingFile", b =>
+                {
+                    b.HasOne("Domain.Entities.FileEntity", "FileEntity")
+                        .WithMany("MeetingFiles")
+                        .HasForeignKey("FileEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Meeting", "Meeting")
+                        .WithMany("MeetingFiles")
+                        .HasForeignKey("MeetingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FileEntity");
+
+                    b.Navigation("Meeting");
                 });
 
             modelBuilder.Entity("Domain.Entities.MeetingTag", b =>
@@ -735,8 +784,15 @@ namespace Infrastructure.Migrations
                     b.Navigation("Rooms");
                 });
 
+            modelBuilder.Entity("Domain.Entities.FileEntity", b =>
+                {
+                    b.Navigation("MeetingFiles");
+                });
+
             modelBuilder.Entity("Domain.Entities.Meeting", b =>
                 {
+                    b.Navigation("MeetingFiles");
+
                     b.Navigation("MeetingTags");
 
                     b.Navigation("ParticipantMeetings");

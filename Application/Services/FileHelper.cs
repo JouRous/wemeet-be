@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -18,8 +19,7 @@ namespace API.Extensions
                 await file.CopyToAsync(fileStream);
             }
 
-            return fileName;
-
+            return fileToUpload;
         }
     }
 }

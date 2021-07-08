@@ -20,5 +20,6 @@ namespace Domain.Interfaces
         Task DeleteOneAsync(Meeting meeting);
         Task AddUserToMeetingAsync(Guid meetingId, ICollection<int> userIds);
         Task AddTagToMeeting(Guid meetingId, ICollection<Guid> tagIds);
+        Task AddFileToMeeting(Guid meetingId, Guid fileId);
     }
 }

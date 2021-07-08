@@ -35,6 +35,8 @@ namespace Infrastructure.Repositories
                             .ThenInclude(mt => mt.Tag)
                             .Include(m => m.ParticipantMeetings)
                             .ThenInclude(pm => pm.Participant)
+                            .Include(m => m.MeetingFiles)
+                            .ThenInclude(mf => mf.FileEntity)
                             .FirstOrDefaultAsync(m => m.Id == Id);
         }
 
@@ -165,6 +167,17 @@ namespace Infrastructure.Repositories
                     TagId = tagId
                 });
             }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddFileToMeeting(Guid meetingId, Guid fileId)
+        {
+            _context.MeetingFile.Add(new MeetingFile
+            {
+                FileEntityId = fileId,
+                MeetingId = meetingId
+            });
 
             await _context.SaveChangesAsync();
         }
