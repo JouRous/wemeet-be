@@ -90,7 +90,7 @@ namespace API.Controllers
         [Route("{MeetingId}")]
         public async Task<ActionResult> EditInfoMeeting(
             [FromRoute] Guid meetingId,
-            [FromBody] UpdateMeetingCommand command)
+            [FromForm] UpdateMeetingCommand command)
         {
             command.Id = meetingId;
 
