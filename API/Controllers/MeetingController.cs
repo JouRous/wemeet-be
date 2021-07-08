@@ -12,6 +12,9 @@ using MediatR;
 using System;
 using Application.Features.Queries;
 using Domain.Models;
+using API.Extensions;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace API.Controllers
 {
@@ -20,12 +23,14 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public MeetingController(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator)
+        public MeetingController(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator, IWebHostEnvironment hostEnvironment)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _mediator = mediator;
+            _hostEnvironment = hostEnvironment;
         }
 
         [HttpGet]
@@ -69,7 +74,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddMeeting([FromBody] CreateMeetingCommand command)
+        public async Task<ActionResult> AddMeeting([FromForm] CreateMeetingCommand command)
         {
             var result = await _mediator.Send(command);
 

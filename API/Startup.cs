@@ -40,13 +40,13 @@ namespace API
                         {
                             options.AddPolicy("CorsPolicy", builder => builder
                         .WithOrigins(_config["FE_URL"])
-                          .AllowAnyMethod()
-                          .AllowAnyHeader()
-                          .AllowCredentials());
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
                         });
             services.AddSignalR();
             services.AddMvcCore()
-              .AddJsonOptions(opt => opt.JsonSerializerOptions.PropertyNamingPolicy = new SnakeCaseNamingPolicy());
+                .AddJsonOptions(opt => opt.JsonSerializerOptions.PropertyNamingPolicy = new SnakeCaseNamingPolicy());
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
@@ -70,12 +70,29 @@ namespace API
 
             app.UseHttpsRedirection();
 
+            string avatarPath = Path.Combine(Directory.GetCurrentDirectory(), @"Uploads/Avatars");
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), @"Uploads/Files");
+
+            if (!Directory.Exists(avatarPath))
+            {
+                Directory.CreateDirectory(avatarPath);
+            }
+
+            if (!Directory.Exists(filePath))
+            {
+                Directory.CreateDirectory(filePath);
+            }
+
             app.UseStaticFiles(new StaticFileOptions()
             {
-                FileProvider = new PhysicalFileProvider(
-                Path.Combine(Directory.GetCurrentDirectory(), @"Uploads/Avatars")
-              ),
-                RequestPath = new PathString("/uploads/avatar")
+                FileProvider = new PhysicalFileProvider(avatarPath),
+                RequestPath = new PathString("/uploads/avatars")
+            });
+
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                FileProvider = new PhysicalFileProvider(filePath),
+                RequestPath = new PathString("/uploads/files")
             });
 
             app.UseRouting();
@@ -91,6 +108,7 @@ namespace API
                 endpoints.MapControllers();
                 endpoints.MapHub<NotificationService>("/notification");
             });
+
         }
     }
 }

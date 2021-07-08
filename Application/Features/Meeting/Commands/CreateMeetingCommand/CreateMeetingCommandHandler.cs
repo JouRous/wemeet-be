@@ -1,10 +1,13 @@
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using API.Extensions;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Interfaces;
 using MediatR;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Application.Features.Commands
 {
@@ -12,11 +15,16 @@ namespace Application.Features.Commands
     {
         private readonly IMeetingRepo _meetingRepo;
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public CreateMeetingCommandHandler(IMeetingRepo meetingRepo, IMapper mapper)
+        public CreateMeetingCommandHandler(
+            IMeetingRepo meetingRepo,
+            IMapper mapper,
+            IWebHostEnvironment webHostEnvironment)
         {
             _meetingRepo = meetingRepo;
             _mapper = mapper;
+            _hostEnvironment = webHostEnvironment;
         }
 
         public async Task<Guid> Handle(CreateMeetingCommand request, CancellationToken cancellationToken)
@@ -29,6 +37,13 @@ namespace Application.Features.Commands
 
             await _meetingRepo.AddUserToMeetingAsync(meetingEntity.Id, request.users_in_meeting);
             await _meetingRepo.AddTagToMeeting(meetingEntity.Id, request.Tag_Ids);
+
+            var pathToUpload = Path.Combine(_hostEnvironment.ContentRootPath, "Uploads", "Files");
+
+            foreach (var file in request.Attachments)
+            {
+                string fileName = await FileHelper.UploadFile(file, pathToUpload);
+            }
 
             return meetingEntity.Id;
         }
