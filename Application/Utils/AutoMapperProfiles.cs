@@ -46,18 +46,21 @@ namespace Application.Utils
 
             CreateMap<Notification, NotificationMessageDTO>();
 
+            CreateMap<Tag, TagDTO>().ReverseMap();
+
             CreateMap<Meeting, MeetingDTO>()
               .ForMember(dest => dest.Room, opt => opt.MapFrom(src => src.Room))
-              .ForMember(dest => dest.Creator, opt => opt.MapFrom(src => src.Creator))
-              .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.MeetingTags.Select(x => x.Tag)));
+              .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.MeetingTags.Select(x => x.Tag)))
+              .ForMember(dest => dest.UserInMeeting,
+                  opt => opt.MapFrom(src => src.ParticipantMeetings.Select(x => x.Participant).ToList()))
+              .ReverseMap();
+
 
             CreateMap<MeetingModel, MeetingDTO>();
             CreateMap<Meeting, Meeting>();
-            CreateMap<Meeting, MeetingDTO>().ReverseMap();
             CreateMap<CreateMeetingCommand, Meeting>().ReverseMap();
             CreateMap<UpdateMeetingCommand, Meeting>().ReverseMap();
 
-            CreateMap<Tag, TagDTO>().ReverseMap();
         }
     }
 }

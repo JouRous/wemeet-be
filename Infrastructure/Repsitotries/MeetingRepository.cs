@@ -29,10 +29,11 @@ namespace Infrastructure.Repositories
         public async Task<Meeting> GetOneAsync(Guid Id)
         {
             return await _context.Meetings
-                            .Include(t => t.Room)
-                            .ThenInclude(r => r.Building)
+                            .Include(m => m.Room)
                             .Include(m => m.MeetingTags)
                             .ThenInclude(mt => mt.Tag)
+                            .Include(m => m.ParticipantMeetings)
+                            .ThenInclude(pm => pm.Participant)
                             .FirstOrDefaultAsync(m => m.Id == Id);
         }
 

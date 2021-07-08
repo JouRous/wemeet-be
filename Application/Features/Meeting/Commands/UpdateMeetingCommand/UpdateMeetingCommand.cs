@@ -15,6 +15,7 @@ namespace Application.Features.Commands
         public Guid Room_Id { get; set; }
         public ICollection<Guid> Team_Ids { get; set; }
         public ICollection<int> users_in_meeting { get; set; }
+        public ICollection<Guid> Tag_Ids { get; set; }
 
         public UpdateMeetingCommand(Guid Id)
         {
