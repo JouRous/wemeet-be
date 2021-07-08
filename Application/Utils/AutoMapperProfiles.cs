@@ -32,6 +32,7 @@ namespace Application.Utils
             CreateMap<TeamModel, Team>();
 
             CreateMap<Building, BuildingDTO>();
+            CreateMap<Building, BuildingBaseDTO>().ReverseMap();
             CreateMap<CreateBuildingCommand, Building>().ReverseMap();
             CreateMap<UpdatebuildingCommand, Building>().ReverseMap();
 
@@ -39,6 +40,8 @@ namespace Application.Utils
             .ForMember(room => room.Building, opt => opt.MapFrom(src => src.Building));
             CreateMap<RoomModel, Room>();
             CreateMap<RoomModel, RoomDTO>();
+            CreateMap<CreateRoomCommand, Room>().ReverseMap();
+            CreateMap<UpdateRoomCommand, Room>().ReverseMap();
 
 
             CreateMap<Notification, NotificationMessageDTO>();

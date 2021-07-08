@@ -9,7 +9,7 @@ namespace Domain.DTO
         public DateTime? CreatedAt { get; set; } = null;
         public string Name { get; set; }
         public StatusRomEnums Status { get; set; }
-        public BuildingDTO Building { get; set; }
+        public BuildingBaseDTO Building { get; set; }
         public int Capacity { get; set; }
     }
 }
