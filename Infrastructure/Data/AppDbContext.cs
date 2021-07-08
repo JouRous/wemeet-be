@@ -17,22 +17,11 @@ namespace Infrastructure.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Meeting> Meetings { get; set; }
         public DbSet<ParticipantMeeting> ParticipantMeeting { get; set; }
+        public DbSet<Tag> Tags { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-
-            // builder.Entity<AppUser>()
-            // .HasMany(ur => ur.UserRoles)
-            // .WithOne(u => u.User)
-            // .HasForeignKey(ur => ur.UserId)
-            // .IsRequired();
-
-            // builder.Entity<AppRole>()
-            // .HasMany(ur => ur.UserRoles)
-            // .WithOne(r => r.Role)
-            // .HasForeignKey(ur => ur.RoleId)
-            // .IsRequired();
 
             builder.Entity<AppUserTeam>().HasKey(src => new { src.AppUserId, src.TeamId });
 
@@ -62,6 +51,18 @@ namespace Infrastructure.Data
             builder.Entity<AppUser>()
             .HasMany(u => u.LeadTeams)
             .WithOne(t => t.Leader);
+
+            builder.Entity<MeetingTag>().HasKey(src => new { src.MeetingId, src.TagId });
+
+            builder.Entity<MeetingTag>()
+            .HasOne<Meeting>(mt => mt.Meeting)
+            .WithMany(m => m.MeetingTags)
+            .HasForeignKey(pm => pm.MeetingId);
+
+            builder.Entity<MeetingTag>()
+            .HasOne<Tag>(pm => pm.Tag)
+            .WithMany(t => t.MeetingTags)
+            .HasForeignKey(pm => pm.TagId);
         }
     }
 }

@@ -43,7 +43,6 @@ namespace Application.Utils
             CreateMap<CreateRoomCommand, Room>().ReverseMap();
             CreateMap<UpdateRoomCommand, Room>().ReverseMap();
 
-
             CreateMap<Notification, NotificationMessageDTO>();
 
             CreateMap<Meeting, MeetingDTO>()
@@ -56,6 +55,8 @@ namespace Application.Utils
             // CreateMap<Meeting, MeetingDTO>().ReverseMap();
             CreateMap<CreateMeetingCommand, Meeting>().ReverseMap();
             CreateMap<UpdateMeetingCommand, Meeting>().ReverseMap();
+
+            CreateMap<Tag, TagDTO>().ReverseMap();
         }
     }
 }
