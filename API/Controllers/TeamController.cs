@@ -14,9 +14,14 @@ using System;
 using Application.Features.Commands;
 using Application.Exceptions;
 using Microsoft.AspNetCore.Http;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication;
+using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class TeamController : BaseApiController
     {
         private readonly IMapper _mapper;
@@ -72,6 +77,14 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateTeam(CreateTeamCommand command)
         {
+            var token = await HttpContext.GetTokenAsync("access_token");
+            var handler = new JwtSecurityTokenHandler();
+            var creatorId = handler.ReadJwtToken(token).Claims
+                .Where(c => c.Type.Equals("UserId"))
+                .Select(c => c.Value)
+                .SingleOrDefault();
+
+            command.CreatorId = Int32.Parse(creatorId);
             Guid result = Guid.Empty;
             try
             {

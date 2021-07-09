@@ -26,16 +26,19 @@
   {
     "Email": "5712xuanvu@gmail.com",
     "Password": "5712xuanvu",
-    "Fullname": "Vũ Lê"
+    "Fullname": "Vũ Lê",
+    "Role": "LEAD"
   },
   {
     "Email": "dpm11234@gmail.com",
-    "Fullname": "Dương Mậu"
+    "Fullname": "Dương Mậu",
+    "Role": "LEAD"
   },
   {
     "Email": "thanhanto0604@gmail.com",
     "Password": "codeAnTT",
-    "Fullname": "An Thanh"
+    "Fullname": "An Thanh",
+    "Role": "LEAD"
   },
   {
     "Email": "duyuit@mailinator.com",
