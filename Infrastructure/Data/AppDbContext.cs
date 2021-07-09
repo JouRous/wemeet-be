@@ -21,6 +21,7 @@ namespace Infrastructure.Data
         public DbSet<MeetingTag> MeetingTag { get; set; }
         public DbSet<FileEntity> FileEntities { get; set; }
         public DbSet<MeetingFile> MeetingFile { get; set; }
+        public DbSet<MeetingTeam> MeetingTeam { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -85,6 +86,19 @@ namespace Infrastructure.Data
             .HasOne<FileEntity>(mf => mf.FileEntity)
             .WithMany(f => f.MeetingFiles)
             .HasForeignKey(mf => mf.FileEntityId);
+
+            // Meeting - Team
+            builder.Entity<MeetingTeam>().HasKey(src => new { src.TeamId, src.MeetingId });
+
+            builder.Entity<MeetingTeam>()
+            .HasOne<Meeting>(mt => mt.Meeting)
+            .WithMany(t => t.MeetingTeams)
+            .HasForeignKey(mt => mt.MeetingId);
+
+            builder.Entity<MeetingTeam>()
+            .HasOne<Team>(mt => mt.Team)
+            .WithMany(t => t.MeetingTeams)
+            .HasForeignKey(mt => mt.TeamId);
         }
     }
 }

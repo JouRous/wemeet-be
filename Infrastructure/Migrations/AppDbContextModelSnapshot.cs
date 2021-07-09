@@ -286,9 +286,6 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("TeamId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -297,8 +294,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("CreatorId");
 
                     b.HasIndex("RoomId");
-
-                    b.HasIndex("TeamId");
 
                     b.ToTable("Meetings");
                 });
@@ -331,6 +326,21 @@ namespace Infrastructure.Migrations
                     b.HasIndex("TagId");
 
                     b.ToTable("MeetingTag");
+                });
+
+            modelBuilder.Entity("Domain.Entities.MeetingTeam", b =>
+                {
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("MeetingId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("TeamId", "MeetingId");
+
+                    b.HasIndex("MeetingId");
+
+                    b.ToTable("MeetingTeam");
                 });
 
             modelBuilder.Entity("Domain.Entities.Notification", b =>
@@ -639,15 +649,9 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Team", "Team")
-                        .WithMany("Meetings")
-                        .HasForeignKey("TeamId");
-
                     b.Navigation("Creator");
 
                     b.Navigation("Room");
-
-                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Domain.Entities.MeetingFile", b =>
@@ -686,6 +690,25 @@ namespace Infrastructure.Migrations
                     b.Navigation("Meeting");
 
                     b.Navigation("Tag");
+                });
+
+            modelBuilder.Entity("Domain.Entities.MeetingTeam", b =>
+                {
+                    b.HasOne("Domain.Entities.Meeting", "Meeting")
+                        .WithMany("MeetingTeams")
+                        .HasForeignKey("MeetingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Team", "Team")
+                        .WithMany("MeetingTeams")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Meeting");
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Domain.Entities.ParticipantMeeting", b =>
@@ -795,6 +818,8 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("MeetingTags");
 
+                    b.Navigation("MeetingTeams");
+
                     b.Navigation("ParticipantMeetings");
                 });
 
@@ -812,7 +837,7 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("AppUserTeams");
 
-                    b.Navigation("Meetings");
+                    b.Navigation("MeetingTeams");
                 });
 #pragma warning restore 612, 618
         }

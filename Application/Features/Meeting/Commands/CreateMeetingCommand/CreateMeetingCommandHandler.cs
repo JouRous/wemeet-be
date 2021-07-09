@@ -41,6 +41,7 @@ namespace Application.Features.Commands
 
             await _meetingRepo.AddUserToMeetingAsync(meetingEntity.Id, request.users_in_meeting);
             await _meetingRepo.AddTagToMeeting(meetingEntity.Id, request.Tag_Ids);
+            await _meetingRepo.AddTeams(meetingEntity.Id, request.Team_Ids);
 
             var pathToUpload = Path.Combine(_hostEnvironment.ContentRootPath, "Uploads", "Files");
 

@@ -12,8 +12,8 @@ namespace Domain.DTO
         public string Description { get; set; }
         public UserDTO Creator { get; set; }
         public ICollection<UserBaseDTO> UserInMeeting { get; set; }
-        public TeamDTO Team { get; set; }
         public RoomBaseDTO Room { get; set; }
+        public ICollection<TeamBaseDTO> Teams { get; set; }
         public ICollection<TagDTO> Tags { get; set; }
         public ICollection<FileDTO> Files { get; set; }
         public StatusMeeting Status { get; set; } = StatusMeeting.Waiting;

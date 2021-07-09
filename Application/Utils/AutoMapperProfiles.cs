@@ -25,6 +25,7 @@ namespace Application.Utils
 
             CreateMap<UserActionModel, AppUser>();
 
+            CreateMap<Team, TeamBaseDTO>().ReverseMap();
             CreateMap<Team, TeamDTO>()
               .ForMember(dest => dest.Leader, opt => opt.MapFrom(src => src.Leader));
             CreateMap<Team, TeamWithUserDTO>()
@@ -55,6 +56,9 @@ namespace Application.Utils
                   opt => opt.MapFrom(src => src.ParticipantMeetings.Select(x => x.Participant)))
               .ForMember(dest => dest.Files, opt => opt.MapFrom(
                   src => src.MeetingFiles.Select(x => x.FileEntity)
+              ))
+              .ForMember(dest => dest.Teams, opt => opt.MapFrom(
+                src => src.MeetingTeams.Select(x => x.Team)
               ))
               .ReverseMap();
             CreateMap<CreateMeetingCommand, Meeting>().ReverseMap();

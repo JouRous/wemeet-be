@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Infrastructure.Migrations
 {
-    public partial class Add_File_Fix : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -355,7 +355,6 @@ namespace Infrastructure.Migrations
                     StartTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     EndTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Method = table.Column<int>(type: "integer", nullable: false),
-                    TeamId = table.Column<Guid>(type: "uuid", nullable: true),
                     RoomId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
@@ -376,12 +375,6 @@ namespace Infrastructure.Migrations
                         principalTable: "Rooms",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Meetings_Teams_TeamId",
-                        column: x => x.TeamId,
-                        principalTable: "Teams",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -428,6 +421,30 @@ namespace Infrastructure.Migrations
                         name: "FK_MeetingTag_Tags_TagId",
                         column: x => x.TagId,
                         principalTable: "Tags",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MeetingTeam",
+                columns: table => new
+                {
+                    TeamId = table.Column<Guid>(type: "uuid", nullable: false),
+                    MeetingId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MeetingTeam", x => new { x.TeamId, x.MeetingId });
+                    table.ForeignKey(
+                        name: "FK_MeetingTeam_Meetings_MeetingId",
+                        column: x => x.MeetingId,
+                        principalTable: "Meetings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MeetingTeam_Teams_TeamId",
+                        column: x => x.TeamId,
+                        principalTable: "Teams",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -529,14 +546,14 @@ namespace Infrastructure.Migrations
                 column: "RoomId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Meetings_TeamId",
-                table: "Meetings",
-                column: "TeamId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_MeetingTag_TagId",
                 table: "MeetingTag",
                 column: "TagId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MeetingTeam_MeetingId",
+                table: "MeetingTeam",
+                column: "MeetingId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ParticipantMeeting_ParticipantId",
@@ -584,6 +601,9 @@ namespace Infrastructure.Migrations
                 name: "MeetingTag");
 
             migrationBuilder.DropTable(
+                name: "MeetingTeam");
+
+            migrationBuilder.DropTable(
                 name: "Notifications");
 
             migrationBuilder.DropTable(
@@ -599,19 +619,19 @@ namespace Infrastructure.Migrations
                 name: "Tags");
 
             migrationBuilder.DropTable(
+                name: "Teams");
+
+            migrationBuilder.DropTable(
                 name: "Meetings");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Rooms");
 
             migrationBuilder.DropTable(
-                name: "Teams");
-
-            migrationBuilder.DropTable(
                 name: "Buildings");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUsers");
         }
     }
 }

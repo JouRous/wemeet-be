@@ -37,6 +37,8 @@ namespace Infrastructure.Repositories
                             .ThenInclude(pm => pm.Participant)
                             .Include(m => m.MeetingFiles)
                             .ThenInclude(mf => mf.FileEntity)
+                            .Include(m => m.MeetingTeams)
+                            .ThenInclude(mt => mt.Team)
                             .FirstOrDefaultAsync(m => m.Id == Id);
         }
 
@@ -178,6 +180,24 @@ namespace Infrastructure.Repositories
                 FileEntityId = fileId,
                 MeetingId = meetingId
             });
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddTeams(Guid meetingId, ICollection<Guid> teamIds)
+        {
+            _context.MeetingTeam.RemoveRange(
+                _context.MeetingTeam.Where(mt => mt.MeetingId == meetingId).ToList()
+            );
+
+            foreach (var teamId in teamIds)
+            {
+                _context.MeetingTeam.Add(new MeetingTeam
+                {
+                    MeetingId = meetingId,
+                    TeamId = teamId
+                });
+            }
 
             await _context.SaveChangesAsync();
         }
