@@ -12,18 +12,18 @@ using MediatR;
 using Application.Features.Queries;
 using System;
 using Application.Features.Commands;
+using Application.Exceptions;
+using Microsoft.AspNetCore.Http;
 
 namespace API.Controllers
 {
     public class TeamController : BaseApiController
     {
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
 
-        public TeamController(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator)
+        public TeamController(IMapper mapper, IMediator mediator)
         {
-            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _mediator = mediator;
         }
@@ -70,68 +70,65 @@ namespace API.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult> CreateTeam(TeamModel teamModel)
+        public async Task<ActionResult> CreateTeam(CreateTeamCommand command)
         {
-            var team = _mapper.Map<Team>(teamModel);
-            var leader = await _unitOfWork.UserRepository.GetUserEntityAsync(teamModel.l_id);
-
-            if (leader == null)
+            Guid result = Guid.Empty;
+            try
             {
-                return BadRequest(new
-                {
-                    status = 400,
-                    success = false,
-                    message = "Leader not found"
-                });
+                result = await _mediator.Send(command);
+            }
+            catch (NotFoundException notFoundException)
+            {
+                var notFoundRes = new ResponseBuilder<Unit>()
+                                    .AddMessage(notFoundException.Message)
+                                    .AddHttpStatus(404, false)
+                                    .Build();
+                return BadRequest(notFoundRes);
+            }
+            catch (ForbiddenException forbiddenException)
+            {
+                var forbiddentRes = new ResponseBuilder<Unit>()
+                                    .AddMessage(forbiddenException.Message)
+                                    .AddHttpStatus(403, false)
+                                    .Build();
+                return StatusCode(StatusCodes.Status403Forbidden, forbiddentRes);
             }
 
-            var isLeaderRole = leader.Role.Equals(UserRoles.LEAD);
-
-            if (!isLeaderRole)
-            {
-                return BadRequest(new
-                {
-                    success = false,
-                    status = 400,
-                    message = "Staff can't be a leader"
-                });
-            }
-
-            team.Leader = leader;
-            team.LeaderId = leader.Id;
-
-            await _unitOfWork.TeamRepository.AddTeamAsync(team);
-
-            team.AppUserTeams.Add(new AppUserTeam
-            {
-                AppUserId = team.LeaderId,
-                TeamId = team.Id
-            });
-
-            await _unitOfWork.Complete();
-
-            var response = new ResponseBuilder<TeamDTO>()
-                                .AddData(_mapper.Map<TeamDTO>(team))
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .AddMessage("Team has been created")
                                 .Build();
 
             return Ok(response);
+
         }
 
-        [HttpPut]
-        public async Task<ActionResult> UpdateTeam(TeamModel teamModel)
+        [HttpPut("{teamId}")]
+        public async Task<ActionResult> UpdateTeam(Guid teamId, [FromBody] UpdateTeamCommand command)
         {
-            var team = _mapper.Map<Team>(teamModel);
+            command.Id = teamId;
+            var result = Guid.Empty;
 
-            await _unitOfWork.TeamRepository.UpdateTeamAsync(team);
-
-            await _unitOfWork.Complete();
-
-            return Accepted(new
+            try
             {
-                status = 202,
-                success = true,
-                message = "Team had been updated",
-            });
+                result = await _mediator.Send(command);
+            }
+            catch (NotFoundException notFoundException)
+            {
+                var notFoundRes = new ResponseBuilder<Unit>()
+                                    .AddMessage(notFoundException.Message)
+                                    .AddHttpStatus(404, false)
+                                    .Build();
+                return BadRequest(notFoundRes);
+            }
+
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .AddMessage("Team has beed updated")
+                                .Build();
+
+            return Ok(response);
+
         }
 
         [HttpPost("add-user")]

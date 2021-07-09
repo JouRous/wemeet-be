@@ -36,25 +36,23 @@ namespace Infrastructure.Repositories
 
         public async Task<AppUser> GetUserEntityAsync(int id)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == id);
-
-            return user;
+            return await _context.Users.FindAsync(id);
         }
 
         public async Task<UserWithTeamUsersDTO> GetUserAsync(int id)
         {
             return await _context.Users.Where(user => user.Id == id)
-                                       .Include(u => u.AppUserTeams)
-                                       .ThenInclude(t => t.Team)
-                                       .ProjectTo<UserWithTeamUsersDTO>(_mapper.ConfigurationProvider)
-                                       .SingleOrDefaultAsync();
+                .Include(u => u.AppUserTeams)
+                .ThenInclude(t => t.Team)
+                .ProjectTo<UserWithTeamUsersDTO>(_mapper.ConfigurationProvider)
+                .SingleOrDefaultAsync();
         }
 
         public async Task<UserDTO> GetUserByEmailAsync(string email)
         {
             return await _context.Users.Where(user => user.Email == email)
-                                       .ProjectTo<UserDTO>(_mapper.ConfigurationProvider)
-                                       .SingleOrDefaultAsync();
+                .ProjectTo<UserDTO>(_mapper.ConfigurationProvider)
+                .SingleOrDefaultAsync();
         }
 
         public async Task<Pagination<UserWithTeamDTO>> GetUsersAsync(Query<UserFilterModel> userQuery)

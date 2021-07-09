@@ -32,6 +32,8 @@ namespace Application.Utils
               .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.AppUserTeams.Select(x => x.User)))
               .ForMember(dest => dest.Leader, opt => opt.MapFrom(src => src.Leader));
             CreateMap<TeamModel, Team>();
+            CreateMap<CreateTeamCommand, Team>().ReverseMap();
+            CreateMap<UpdateTeamCommand, Team>().ReverseMap();
 
             CreateMap<Building, BuildingDTO>();
             CreateMap<Building, BuildingBaseDTO>().ReverseMap();

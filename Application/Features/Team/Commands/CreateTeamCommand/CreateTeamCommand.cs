@@ -1,9 +1,10 @@
+using System;
+using MediatR;
 
-namespace Domain.Models
+namespace Application.Features.Commands
 {
-    public class TeamModel
+    public class CreateTeamCommand : IRequest<Guid>
     {
-        public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public int l_id { get; set; }
