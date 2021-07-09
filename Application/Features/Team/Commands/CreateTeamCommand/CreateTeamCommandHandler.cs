@@ -26,11 +26,11 @@ namespace Application.Features.Commands
         public async Task<Guid> Handle(CreateTeamCommand request, CancellationToken cancellationToken)
         {
 
-            var leader = await _userRepo.GetUserEntityAsync(request.l_id);
+            var leader = await _userRepo.GetUserEntityAsync(request.CreatorId);
 
             if (leader == null)
             {
-                throw new NotFoundException(nameof(leader), request.l_id);
+                throw new NotFoundException(nameof(leader), request.CreatorId);
             }
 
             if (!leader.Role.Equals(UserRoles.LEAD))
