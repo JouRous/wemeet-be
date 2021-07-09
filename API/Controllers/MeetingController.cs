@@ -15,6 +15,7 @@ using Domain.Models;
 using API.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
+using Domain.Enums;
 
 namespace API.Controllers
 {
@@ -117,6 +118,15 @@ namespace API.Controllers
                             .Build();
 
             return Ok(response);
+        }
+
+        [HttpGet("handling/{meetingId}/{status}")]
+        public async Task<ActionResult> HandlingMeeting(Guid meetingId, StatusMeeting status)
+        {
+            var command = new HandlingMeetingCommand(meetingId, status);
+            await _mediator.Send(command);
+
+            return Ok(new ResponseBuilder<Unit>().AddMessage("Meeting has been processed").Build());
         }
     }
 }
