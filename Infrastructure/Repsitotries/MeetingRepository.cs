@@ -202,8 +202,5 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task GetEmailUserInMeeting(Guid meetingId, int userId)
-        {
-        }
     }
 }

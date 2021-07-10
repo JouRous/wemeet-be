@@ -126,5 +126,13 @@ namespace Infrastructure.Repositories
         {
             return await _context.Teams.FindAsync(teamId);
         }
+
+        public async Task<IEnumerable<TeamBaseDTO>> GetLeadingTeamAsync(int leaderId)
+        {
+            return await _context.Teams
+                            .Where(t => t.LeaderId == leaderId)
+                            .ProjectTo<TeamBaseDTO>(_mapper.ConfigurationProvider)
+                            .ToListAsync();
+        }
     }
 }

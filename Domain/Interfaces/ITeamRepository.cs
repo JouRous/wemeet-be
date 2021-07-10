@@ -12,6 +12,7 @@ namespace Domain.Interfaces
     {
         Task<TeamWithUserDTO> GetTeamAsync(Guid teamId);
         Task<Team> GetTeamEntityAsync(Guid teamId);
+        Task<IEnumerable<TeamBaseDTO>> GetLeadingTeamAsync(int leaderId);
         Task<Pagination<TeamWithUserDTO>> GetAllAsync(Query<FilterTeamModel> query);
         Task AddTeamAsync(Team team);
         Task UpdateTeamAsync(Team team);

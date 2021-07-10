@@ -161,5 +161,25 @@ namespace API.Controllers
             return Ok(new ResponseBuilder<Unit>().Build());
         }
 
+        [HttpGet("me")]
+        public async Task<ActionResult> GetLeadingTeam()
+        {
+            var token = await HttpContext.GetTokenAsync("access_token");
+            var handler = new JwtSecurityTokenHandler();
+            var leaderId = handler.ReadJwtToken(token).Claims
+                .Where(c => c.Type.Equals("UserId"))
+                .Select(c => c.Value)
+                .SingleOrDefault();
+
+            var query = new GetLeadingTeamQuery(Int32.Parse(leaderId));
+            var result = await _mediator.Send(query);
+
+            var response = new ResponseBuilder<IEnumerable<TeamBaseDTO>>()
+                                .AddData(result)
+                                .Build();
+
+            return Ok(response);
+        }
+
     }
 }
