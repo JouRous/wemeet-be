@@ -36,10 +36,6 @@ namespace API
             services.AddApplicationServices();
 
             services.AddControllers();
-
-            services.AddMvcCore()
-               .AddJsonOptions(opt => opt.JsonSerializerOptions.PropertyNamingPolicy = new SnakeCaseNamingPolicy());
-
             services.AddCors(options =>
                         {
                             options.AddPolicy("CorsPolicy", builder => builder
@@ -50,7 +46,8 @@ namespace API
                         .AllowCredentials());
                         });
             services.AddSignalR();
-
+            services.AddMvcCore()
+                .AddJsonOptions(opt => opt.JsonSerializerOptions.PropertyNamingPolicy = new SnakeCaseNamingPolicy());
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
@@ -99,11 +96,11 @@ namespace API
                 RequestPath = new PathString("/uploads/files")
             });
 
-            app.UseRouting();
 
             app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
             app.UseCors("CorsPolicy");
 
+            app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
 
