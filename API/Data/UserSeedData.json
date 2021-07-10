@@ -45,5 +45,23 @@
     "Password": "duy123A!",
     "Fullname": "Đức Duy",
     "Role": "LEAD"
+  },
+  {
+    "Email": "mau.adm@mailinator.com",
+    "Password": "123123",
+    "Fullname": "Mau Admin",
+    "Role": "ADMIN"
+  },
+  {
+    "Email": "duy.adm@mailinator.com",
+    "Password": "123123",
+    "Fullname": "Duy Admin",
+    "Role": "ADMIN"
+  },
+  {
+    "Email": "vu.adm@mailinator.com",
+    "Password": "123123",
+    "Fullname": "Vu Admin",
+    "Role": "ADMIN"
   }
 ]

@@ -75,7 +75,7 @@ namespace Infrastructure.Data
                 Fullname = "Admin",
                 Nickname = "Admin",
                 UserName = "admin",
-                Email = "admin",
+                Email = "adm.adm@mailinator.com",
                 Role = UserRoles.ADMIN
             };
 

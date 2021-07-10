@@ -12,6 +12,7 @@ namespace Application.Utils
         public AutoMapperProfiles()
         {
             CreateMap<AppUser, UserBaseDTO>().ReverseMap();
+            CreateMap<AppUser, AdminUserDTO>().ReverseMap();
             CreateMap<AppUser, UserDTO>()
               .ForAllMembers(options => options.Condition((src, dest, srcMembers) => srcMembers != null));
 

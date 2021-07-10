@@ -12,6 +12,8 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Application.Utils;
 using Infrastructure.Data;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Infrastructure.Repositories
 {
@@ -64,8 +66,8 @@ namespace Infrastructure.Repositories
             var fullname = StringHelper.RemoveAccentedString(_filter.fullname).ToLower();
 
             var stat = _context.Users.Where(u =>
-                                  u.UnsignedName.ToLower().Contains(fullname) ||
-                                  u.Email.Contains(fullname));
+                                  u.UnsignedName.ToLower().Contains(fullname)
+                                  || u.Email.Contains(fullname));
 
             if (!string.IsNullOrEmpty(_filter.role))
             {
@@ -109,5 +111,18 @@ namespace Infrastructure.Repositories
             return _user;
         }
 
+        public async Task<string> GetEmailAsync(int id)
+        {
+            return await _context.Users.Where(u => u.Id == id).Select(u => u.Email).FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<AdminUserDTO>> GetUserAdminsAsync()
+        {
+            return await _context.Users
+                            .Where(u => u.Role == UserRoles.ADMIN)
+                            .ProjectTo<AdminUserDTO>(_mapper.ConfigurationProvider)
+                            .ToListAsync();
+
+        }
     }
 }

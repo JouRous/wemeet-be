@@ -16,6 +16,7 @@ using API.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using Domain.Enums;
+using Microsoft.AspNetCore.Cors;
 
 namespace API.Controllers
 {
@@ -74,6 +75,7 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [EnableCors("AllowAll")]
         [HttpPost]
         public async Task<ActionResult> AddMeeting([FromForm] CreateMeetingCommand command)
         {

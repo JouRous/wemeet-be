@@ -8,10 +8,12 @@ namespace Application.Features.Commands
     public class HandlingMeetingCommandHandler : IRequestHandler<HandlingMeetingCommand>
     {
         private readonly IMeetingRepo _meetingRepo;
+        private readonly IEmailService _emailService;
 
-        public HandlingMeetingCommandHandler(IMeetingRepo meetingRepo)
+        public HandlingMeetingCommandHandler(IMeetingRepo meetingRepo, IEmailService emailService)
         {
             _meetingRepo = meetingRepo;
+            _emailService = emailService;
         }
 
         public async Task<Unit> Handle(HandlingMeetingCommand request, CancellationToken cancellationToken)

@@ -22,5 +22,6 @@ namespace Domain.Interfaces
         Task AddTagToMeeting(Guid meetingId, ICollection<Guid> tagIds);
         Task AddFileToMeeting(Guid meetingId, Guid fileId);
         Task AddTeams(Guid meetingId, ICollection<Guid> teamIds);
+        Task GetEmailUserInMeeting(Guid meetingId, int userId);
     }
 }
