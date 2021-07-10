@@ -35,11 +35,10 @@ namespace API
             services.AddInfrastructureServices(_config);
             services.AddApplicationServices();
 
-            services.AddControllers();
             services.AddCors(options =>
                         {
                             options.AddPolicy("CorsPolicy", builder => builder
-                        .WithOrigins(_config["FE_URL"])
+                        .AllowAnyOrigin()
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials());
@@ -51,6 +50,8 @@ namespace API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
+
+            services.AddControllers();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -65,6 +66,9 @@ namespace API
                     c.RoutePrefix = string.Empty;
                 });
             }
+
+            app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+            app.UseCors("CorsPolicy");
 
             app.UseMiddleware<ExceptionHandler>();
 
@@ -97,8 +101,7 @@ namespace API
 
             app.UseRouting();
 
-            app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
-            app.UseCors("CorsPolicy");
+
 
             app.UseAuthentication();
             app.UseAuthorization();

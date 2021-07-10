@@ -75,8 +75,8 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [EnableCors("AllowAll")]
         [HttpPost]
+        [EnableCors("AllowAll")]
         public async Task<ActionResult> AddMeeting([FromForm] CreateMeetingCommand command)
         {
             var result = await _mediator.Send(command);
