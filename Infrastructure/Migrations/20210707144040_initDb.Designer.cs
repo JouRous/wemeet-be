@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20210705173003_Init")]
-    partial class Init
+    [Migration("20210707144040_initDb")]
+    partial class initDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -103,9 +103,6 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("MeetingId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Nickname")
                         .HasColumnType("text");
 
@@ -152,8 +149,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("MeetingId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -267,7 +262,7 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Priority")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("RoomId")
+                    b.Property<Guid>("RoomId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("StartTime")
@@ -523,13 +518,6 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.Entities.AppUser", b =>
-                {
-                    b.HasOne("Domain.Entities.Meeting", null)
-                        .WithMany("UsersInMeeting")
-                        .HasForeignKey("MeetingId");
-                });
-
             modelBuilder.Entity("Domain.Entities.AppUserRole", b =>
                 {
                     b.HasOne("Domain.Entities.AppRole", null)
@@ -588,7 +576,9 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Domain.Entities.Room", "Room")
                         .WithMany("Meetings")
-                        .HasForeignKey("RoomId");
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domain.Entities.Team", "Team")
                         .WithMany("Meetings")
@@ -702,8 +692,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.Meeting", b =>
                 {
                     b.Navigation("ParticipantMeetings");
-
-                    b.Navigation("UsersInMeeting");
                 });
 
             modelBuilder.Entity("Domain.Entities.Room", b =>
