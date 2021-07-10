@@ -65,9 +65,18 @@ namespace Infrastructure.Repositories
 
             var fullname = StringHelper.RemoveAccentedString(_filter.fullname).ToLower();
 
-            var stat = _context.Users.Where(u =>
-                                  u.UnsignedName.ToLower().Contains(fullname)
-                                  || u.Email.Contains(fullname));
+            var stat = _context.Users
+                            .Where(u =>
+                                u.UnsignedName.ToLower()
+                                .Contains(fullname)
+                                || u.Email.Contains(fullname)
+                            );
+
+            if (_filter.Team != Guid.Empty)
+            {
+                stat = stat
+                        .Where(u => u.AppUserTeams.Any(ut => ut.TeamId == _filter.Team));
+            }
 
             if (!string.IsNullOrEmpty(_filter.role))
             {
@@ -84,8 +93,9 @@ namespace Infrastructure.Repositories
                     break;
             }
             var query = stat.Include(u => u.AppUserTeams)
-                                      .ThenInclude(u => u.Team)
-                                      .ProjectTo<UserWithTeamDTO>(_mapper.ConfigurationProvider).AsQueryable();
+                            .ThenInclude(u => u.Team)
+                            .ProjectTo<UserWithTeamDTO>(_mapper.ConfigurationProvider)
+                            .AsQueryable();
 
             return await PaginationService.GetPagination<UserWithTeamDTO>(query, paginationParams.number, paginationParams.size);
         }
