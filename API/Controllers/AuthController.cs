@@ -124,8 +124,10 @@ namespace API.Controllers
         public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordModel model)
         {
             var handler = new JwtSecurityTokenHandler();
-            var email = handler.ReadJwtToken(model.token)
-                   .Claims.Where(c => c.Type.Equals("email")).Select(c => c.Value).SingleOrDefault();
+            var email = handler.ReadJwtToken(model.token).Claims
+                .Where(c => c.Type.Equals("email"))
+                .Select(c => c.Value)
+                .SingleOrDefault();
 
             var user = await _userManager.Users.FirstOrDefaultAsync(user => user.Email == email.ToLower());
 
@@ -159,16 +161,15 @@ namespace API.Controllers
             var token = await HttpContext.GetTokenAsync("access_token");
             var handler = new JwtSecurityTokenHandler();
 
-            var email = handler.ReadJwtToken(token)
-                   .Claims.Where(c => c.Type.Equals("email")).Select(c => c.Value).SingleOrDefault();
-            var roles = handler.ReadJwtToken(token)
-                   .Claims.Where(c => c.Type.Equals("role")).Select(c => c.Value).ToList();
+            var email = handler.ReadJwtToken(token).Claims
+                .Where(c => c.Type.Equals("email"))
+                .Select(c => c.Value)
+                .SingleOrDefault();
 
             var User = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
             var profile = new
             {
-                User = User,
-                Roles = roles
+                User = User
             };
 
             return Ok(new Response<object>
@@ -186,8 +187,10 @@ namespace API.Controllers
             var token = await HttpContext.GetTokenAsync("access_token");
             var handler = new JwtSecurityTokenHandler();
 
-            var email = handler.ReadJwtToken(token)
-                   .Claims.Where(c => c.Type.Equals("email")).Select(c => c.Value).SingleOrDefault();
+            var email = handler.ReadJwtToken(token).Claims
+                .Where(c => c.Type.Equals("email"))
+                .Select(c => c.Value)
+                .SingleOrDefault();
             var user = await _userManager.Users.FirstOrDefaultAsync(user => user.Email == email);
 
             await _userManager.RemovePasswordAsync(user);

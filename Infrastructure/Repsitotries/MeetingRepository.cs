@@ -28,7 +28,18 @@ namespace Infrastructure.Repositories
 
         public async Task<Meeting> GetOneAsync(Guid Id)
         {
-            return await _context.Meetings.FindAsync(Id);
+            return await _context.Meetings
+                            .Include(m => m.Room)
+                            .ThenInclude(r => r.Building)
+                            .Include(m => m.MeetingTags)
+                            .ThenInclude(mt => mt.Tag)
+                            .Include(m => m.ParticipantMeetings)
+                            .ThenInclude(pm => pm.Participant)
+                            .Include(m => m.MeetingFiles)
+                            .ThenInclude(mf => mf.FileEntity)
+                            .Include(m => m.MeetingTeams)
+                            .ThenInclude(mt => mt.Team)
+                            .FirstOrDefaultAsync(m => m.Id == Id);
         }
 
         public async Task AddOneAsync(Meeting meeting)
@@ -112,7 +123,6 @@ namespace Infrastructure.Repositories
         {
             var entity = _context.Meetings.Find(Id);
             _context.Meetings.Remove(entity);
-
         }
 
         public async Task AddUserToMeetingAsync(Guid meetingId, ICollection<int> userIds)
@@ -145,6 +155,55 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddTagToMeeting(Guid meetingId, ICollection<Guid> tagIds)
+        {
+            _context.MeetingTag.RemoveRange(
+                _context.MeetingTag.Where(mt => mt.MeetingId == meetingId)
+            );
 
+            foreach (var tagId in tagIds)
+            {
+                _context.MeetingTag.Add(new MeetingTag
+                {
+                    MeetingId = meetingId,
+                    TagId = tagId
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddFileToMeeting(Guid meetingId, Guid fileId)
+        {
+            _context.MeetingFile.Add(new MeetingFile
+            {
+                FileEntityId = fileId,
+                MeetingId = meetingId
+            });
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddTeams(Guid meetingId, ICollection<Guid> teamIds)
+        {
+            _context.MeetingTeam.RemoveRange(
+                _context.MeetingTeam.Where(mt => mt.MeetingId == meetingId).ToList()
+            );
+
+            foreach (var teamId in teamIds)
+            {
+                _context.MeetingTeam.Add(new MeetingTeam
+                {
+                    MeetingId = meetingId,
+                    TeamId = teamId
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task GetEmailUserInMeeting(Guid meetingId, int userId)
+        {
+        }
     }
 }

@@ -26,6 +26,8 @@ namespace Infrastructure
             services.AddScoped<IMeetingRepo, MeetingRepository>();
             services.AddScoped<INotificationRepo, NotificationRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<ITagRepository, TagRepository>();
+            services.AddScoped<IFileRepository, FileRepository>();
 
             return services;
         }

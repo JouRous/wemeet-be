@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Types;
 using System.IO;
 using System.Reflection;
+using Application.Utils;
 
 namespace Infrastructure.Data
 {
@@ -52,7 +53,7 @@ namespace Infrastructure.Data
                     Nickname = user.Email.Split("@")[0],
                     Fullname = user.Fullname,
                     isFirstLogin = false,
-                    // UnsignedName = Utils.Utils.RemoveAccentedString(user.Fullname),
+                    UnsignedName = StringHelper.RemoveAccentedString(user.Fullname),
                     Role = UserRoles.STAFF
                 };
 
@@ -74,7 +75,7 @@ namespace Infrastructure.Data
                 Fullname = "Admin",
                 Nickname = "Admin",
                 UserName = "admin",
-                Email = "admin",
+                Email = "adm.adm@mailinator.com",
                 Role = UserRoles.ADMIN
             };
 

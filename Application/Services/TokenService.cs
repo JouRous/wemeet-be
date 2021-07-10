@@ -27,9 +27,9 @@ namespace Application.Services
         public string CreateResetPasswordToken(string email)
         {
             var claims = new List<Claim>
-      {
-        new Claim("email", email)
-      };
+            {
+                new Claim("email", email)
+            };
             var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -47,10 +47,10 @@ namespace Application.Services
         public async Task<string> CreateToken(AppUser user)
         {
             var claims = new List<Claim>
-      {
-        new Claim("UserId", user.Id.ToString()),
-        new Claim(ClaimTypes.Email, user.UserName)
-      };
+            {
+            new Claim("UserId", user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.UserName)
+            };
 
             var roles = await _userManager.GetRolesAsync(user);
 

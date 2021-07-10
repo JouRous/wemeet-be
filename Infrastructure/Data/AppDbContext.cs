@@ -17,22 +17,17 @@ namespace Infrastructure.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Meeting> Meetings { get; set; }
         public DbSet<ParticipantMeeting> ParticipantMeeting { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<MeetingTag> MeetingTag { get; set; }
+        public DbSet<FileEntity> FileEntities { get; set; }
+        public DbSet<MeetingFile> MeetingFile { get; set; }
+        public DbSet<MeetingTeam> MeetingTeam { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            // builder.Entity<AppUser>()
-            // .HasMany(ur => ur.UserRoles)
-            // .WithOne(u => u.User)
-            // .HasForeignKey(ur => ur.UserId)
-            // .IsRequired();
-
-            // builder.Entity<AppRole>()
-            // .HasMany(ur => ur.UserRoles)
-            // .WithOne(r => r.Role)
-            // .HasForeignKey(ur => ur.RoleId)
-            // .IsRequired();
+            // User - Team
 
             builder.Entity<AppUserTeam>().HasKey(src => new { src.AppUserId, src.TeamId });
 
@@ -46,6 +41,8 @@ namespace Infrastructure.Data
             .HasOne<Team>(ut => ut.Team)
             .WithMany(t => t.AppUserTeams)
             .HasForeignKey(ut => ut.TeamId);
+
+            // Meeting - User
 
             builder.Entity<ParticipantMeeting>().HasKey(src => new { src.MeetingId, src.ParticipantId });
 
@@ -62,6 +59,46 @@ namespace Infrastructure.Data
             builder.Entity<AppUser>()
             .HasMany(u => u.LeadTeams)
             .WithOne(t => t.Leader);
+
+            // Meeting - Tag
+
+            builder.Entity<MeetingTag>().HasKey(src => new { src.MeetingId, src.TagId });
+
+            builder.Entity<MeetingTag>()
+            .HasOne<Meeting>(mt => mt.Meeting)
+            .WithMany(m => m.MeetingTags)
+            .HasForeignKey(pm => pm.MeetingId);
+
+            builder.Entity<MeetingTag>()
+            .HasOne<Tag>(pm => pm.Tag)
+            .WithMany(t => t.MeetingTags)
+            .HasForeignKey(pm => pm.TagId);
+
+            // Meeting - File
+            builder.Entity<MeetingFile>().HasKey(src => new { src.FileEntityId, src.MeetingId });
+
+            builder.Entity<MeetingFile>()
+            .HasOne<Meeting>(mf => mf.Meeting)
+            .WithMany(m => m.MeetingFiles)
+            .HasForeignKey(pm => pm.MeetingId);
+
+            builder.Entity<MeetingFile>()
+            .HasOne<FileEntity>(mf => mf.FileEntity)
+            .WithMany(f => f.MeetingFiles)
+            .HasForeignKey(mf => mf.FileEntityId);
+
+            // Meeting - Team
+            builder.Entity<MeetingTeam>().HasKey(src => new { src.TeamId, src.MeetingId });
+
+            builder.Entity<MeetingTeam>()
+            .HasOne<Meeting>(mt => mt.Meeting)
+            .WithMany(t => t.MeetingTeams)
+            .HasForeignKey(mt => mt.MeetingId);
+
+            builder.Entity<MeetingTeam>()
+            .HasOne<Team>(mt => mt.Team)
+            .WithMany(t => t.MeetingTeams)
+            .HasForeignKey(mt => mt.TeamId);
         }
     }
 }

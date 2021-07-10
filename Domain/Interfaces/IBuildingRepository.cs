@@ -10,13 +10,10 @@ namespace Domain.Interfaces
 {
     public interface IBuildingRepository
     {
-        void AddOne(Building buildingInfo);
-        Task<Pagination<BuildingDTO>> GetAllByPaginationAsync(
-            Dictionary<string, int> page,
-            Dictionary<string, string> filter,
-            string sort = "-created_at");
-        Task<BuildingDTO> GetOneAsync(Guid Id);
-        void ModifyOne(BuildingDTO building);
-        void DeletingOne(Guid id);
+        Task CreateAsync(Building building);
+        Task UpdateAsync(Building building);
+        Task DeleteAsync(Building building);
+        Task<Pagination<BuildingDTO>> GetAllAsync(Query<BuildingFilterModel> query);
+        Task<Building> GetOneAsync(Guid Id);
     }
 }

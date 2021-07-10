@@ -28,6 +28,8 @@ namespace Application.Features.Commands
             await _meetingRepo.Update(meetingToUpdate);
 
             await _meetingRepo.AddUserToMeetingAsync(meetingToUpdate.Id, request.users_in_meeting);
+            await _meetingRepo.AddTagToMeeting(meetingToUpdate.Id, request.Tag_Ids);
+            await _meetingRepo.AddTeams(meetingToUpdate.Id, request.Team_Ids);
 
             return meetingToUpdate.Id;
         }

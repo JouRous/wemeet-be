@@ -68,13 +68,16 @@ namespace Infrastructure.Repositories
 
         public async Task UpdateTeamAsync(Team team)
         {
-            var _team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == team.Id);
+            // var _team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == team.Id);
 
-            if (_team != null)
-            {
-                _team.Name = team.Name;
-                _team.Description = team.Description;
-            }
+            // if (_team != null)
+            // {
+            //     _team.Name = team.Name;
+            //     _team.Description = team.Description;
+            // }
+
+            _context.Entry(team).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
         }
 
         public async Task AddUserToTeamAsync(Guid teamId, ICollection<int> userIds)
@@ -106,6 +109,22 @@ namespace Infrastructure.Repositories
             );
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task AddOneUSerToTeam(Guid teamId, int userId)
+        {
+            _context.AppUserTeams.Add(new AppUserTeam
+            {
+                TeamId = teamId,
+                AppUserId = userId
+            });
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Team> GetTeamEntityAsync(Guid teamId)
+        {
+            return await _context.Teams.FindAsync(teamId);
         }
     }
 }

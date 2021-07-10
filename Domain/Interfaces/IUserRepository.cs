@@ -11,6 +11,8 @@ namespace Domain.Interfaces
     {
         Task<AppUser> GetUserEntityAsync(int id);
         Task<UserWithTeamUsersDTO> GetUserAsync(int id);
+        Task<IEnumerable<AdminUserDTO>> GetUserAdminsAsync();
+        Task<string> GetEmailAsync(int id);
         Task<UserDTO> GetUserByEmailAsync(string email);
         Task<AppUser> UpdateUserAsync(AppUser user, int id);
         Task<Pagination<UserWithTeamDTO>> GetUsersAsync(Query<UserFilterModel> query);

@@ -12,6 +12,11 @@ using MediatR;
 using System;
 using Application.Features.Queries;
 using Domain.Models;
+using API.Extensions;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+using Domain.Enums;
+using Microsoft.AspNetCore.Cors;
 
 namespace API.Controllers
 {
@@ -20,12 +25,14 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public MeetingController(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator)
+        public MeetingController(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator, IWebHostEnvironment hostEnvironment)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _mediator = mediator;
+            _hostEnvironment = hostEnvironment;
         }
 
         [HttpGet]
@@ -56,27 +63,7 @@ namespace API.Controllers
 
             return response;
         }
-        [HttpGet]
-        [Route("waiting")]
-        public async Task<ActionResult<Response<IEnumerable<MeetingDTO>>>> GetWaitingMeeting(
-            [FromQuery] PaginationParams paginationParams, string filter = "", string sort = "-created_at")
-        {
-            var result = await _unitOfWork.MeetingRepository.GetWaitMeetingByPaginationAsync(paginationParams, filter, sort);
 
-            var response = new ResponseWithPaginationBuilder<IEnumerable<MeetingDTO>>()
-                                                    .AddData(result.Items)
-                                                    .AddPagination(new PaginationDTO
-                                                    {
-                                                        CurrentPage = result.CurrentPage,
-                                                        PerPage = result.PerPage,
-                                                        Total = result.Total,
-                                                        Count = result.Count,
-                                                        TotalPages = result.TotalPages
-                                                    })
-                                                    .Build();
-
-            return response;
-        }
 
         [HttpGet("{MeetingId}")]
         public async Task<ActionResult<Response<MeetingDTO>>> GetMeetingInfoAsync(Guid meetingId)
@@ -89,10 +76,8 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddMeeting([FromBody] CreateMeetingCommand command)
+        public async Task<ActionResult> AddMeeting([FromForm] CreateMeetingCommand command)
         {
-            var meeting = _mapper.Map<Meeting>(command);
-
             var result = await _mediator.Send(command);
 
             var response = new ResponseBuilder<Guid>()
@@ -107,7 +92,7 @@ namespace API.Controllers
         [Route("{MeetingId}")]
         public async Task<ActionResult> EditInfoMeeting(
             [FromRoute] Guid meetingId,
-            [FromBody] UpdateMeetingCommand command)
+            [FromForm] UpdateMeetingCommand command)
         {
             command.Id = meetingId;
 
@@ -134,6 +119,15 @@ namespace API.Controllers
                             .Build();
 
             return Ok(response);
+        }
+
+        [HttpGet("handling/{meetingId}/{status}")]
+        public async Task<ActionResult> HandlingMeeting(Guid meetingId, StatusMeeting status)
+        {
+            var command = new HandlingMeetingCommand(meetingId, status);
+            await _mediator.Send(command);
+
+            return Ok(new ResponseBuilder<Unit>().AddMessage("Meeting has been processed").Build());
         }
     }
 }

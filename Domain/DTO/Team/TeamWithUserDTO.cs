@@ -4,6 +4,6 @@ namespace Domain.DTO
 {
     public class TeamWithUserDTO : TeamDTO
     {
-        public ICollection<UserDTO> Users { get; set; }
+        public ICollection<UserBaseDTO> Users { get; set; }
     }
 }
