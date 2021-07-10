@@ -35,23 +35,26 @@ namespace API
             services.AddInfrastructureServices(_config);
             services.AddApplicationServices();
 
+            services.AddControllers();
+
+            services.AddMvcCore()
+               .AddJsonOptions(opt => opt.JsonSerializerOptions.PropertyNamingPolicy = new SnakeCaseNamingPolicy());
+
             services.AddCors(options =>
                         {
                             options.AddPolicy("CorsPolicy", builder => builder
-                        .AllowAnyOrigin()
+                        .SetIsOriginAllowed(host => true)
+                        .WithOrigins(_config["FE_URL"])
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials());
                         });
             services.AddSignalR();
-            services.AddMvcCore()
-                .AddJsonOptions(opt => opt.JsonSerializerOptions.PropertyNamingPolicy = new SnakeCaseNamingPolicy());
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
-
-            services.AddControllers();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -66,9 +69,6 @@ namespace API
                     c.RoutePrefix = string.Empty;
                 });
             }
-
-            app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
-            app.UseCors("CorsPolicy");
 
             app.UseMiddleware<ExceptionHandler>();
 
@@ -101,7 +101,8 @@ namespace API
 
             app.UseRouting();
 
-
+            app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+            app.UseCors("CorsPolicy");
 
             app.UseAuthentication();
             app.UseAuthorization();
