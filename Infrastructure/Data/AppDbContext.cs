@@ -100,6 +100,9 @@ namespace Infrastructure.Data
 			.HasOne<Team>(mt => mt.Team)
 			.WithMany(t => t.MeetingTeams)
 			.HasForeignKey(mt => mt.TeamId);
+			//User Setting 
+			builder.Entity<UserSetting>().HasOne(us => us.User);
+
 		}
 	}
 }

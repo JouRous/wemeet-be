@@ -7,6 +7,7 @@ namespace Domain.Entities
 		public virtual int StartFormatTime { get; set; }
 		public virtual int EndFormatTime { get; set; }
 		public virtual long NotifyBeforeMeeting { get; set; }
+		public virtual int AppUserId { get; set; }
 		public virtual AppUser User { get; set; }
 	}
 }
