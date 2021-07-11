@@ -11,9 +11,9 @@ namespace Domain.Interfaces
     public interface IMeetingRepo
     {
         Task AddOneAsync(Meeting meeting);
-        Task<Pagination<MeetingDTO>> GetAllByPaginationAsync(PaginationParams paginationQuery, string f, string s);
-        Task<Pagination<MeetingDTO>> GetWaitMeetingByPaginationAsync(PaginationParams paginationParams, string filter, string sort);
-        Task<Meeting> GetOneAsync(Guid Id);
+        Task<Pagination<MeetingBaseDTO>> GetWaitingMeetingAsync(Query<MeetingFilterModel> meetingQuery);
+        Task<MeetingDTO> GetOneAsync(Guid Id);
+        Task<Meeting> GetMeetingEntity(Guid Id);
         Task<Pagination<MeetingDTO>> GetAllAsync(Query<MeetingFilterModel> meetingQuery);
         Task Update(Meeting meeting);
         Task DeleteOneAsync(Meeting meeting);

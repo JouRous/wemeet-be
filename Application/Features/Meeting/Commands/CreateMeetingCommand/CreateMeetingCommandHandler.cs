@@ -62,7 +62,6 @@ namespace Application.Features.Commands
                 await _meetingRepo.AddFileToMeeting(meetingEntity.Id, fileEntity.Id);
             }
 
-
             var adminUsers = await _userRepo.GetUserAdminsAsync();
 
             foreach (var adminUser in adminUsers)

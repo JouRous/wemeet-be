@@ -26,7 +26,7 @@ namespace Infrastructure.Repositories
             _mapper = map;
         }
 
-        public async Task<Meeting> GetOneAsync(Guid Id)
+        public async Task<MeetingDTO> GetOneAsync(Guid Id)
         {
             return await _context.Meetings
                             .Include(m => m.Room)
@@ -40,7 +40,13 @@ namespace Infrastructure.Repositories
                             .Include(m => m.MeetingTeams)
                             .ThenInclude(mt => mt.Team)
                             .ThenInclude(t => t.Leader)
+                            .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider)
                             .FirstOrDefaultAsync(m => m.Id == Id);
+        }
+
+        public async Task<Meeting> GetMeetingEntity(Guid Id)
+        {
+            return await _context.Meetings.FindAsync(Id);
         }
 
         public async Task AddOneAsync(Meeting meeting)
@@ -49,11 +55,17 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Pagination<MeetingDTO>> GetAllByPaginationAsync(
-                        PaginationParams paginationParams, string filter, string sort)
+        public async Task<Pagination<MeetingBaseDTO>> GetWaitingMeetingAsync(Query<MeetingFilterModel> meetingQuery)
         {
-            var stat = _context.Meetings.Where(t => t.Name.Contains(filter))
-                .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider);
+            var paginationParams = meetingQuery.paginationParams;
+            var sort = meetingQuery.sort;
+
+            var stat = _context.Meetings
+                        .Where(t => t.Status == StatusMeeting.Waiting)
+                        .Include(m => m.MeetingTeams)
+                        .ThenInclude(mt => mt.Team)
+                        .ThenInclude(t => t.Leader)
+                        .ProjectTo<MeetingBaseDTO>(_mapper.ConfigurationProvider);
             switch (sort)
             {
                 case "created_at":
@@ -65,27 +77,7 @@ namespace Infrastructure.Repositories
             }
             var query = stat.AsQueryable();
 
-            var res = await PaginationService.GetPagination<MeetingDTO>(query, paginationParams.number, paginationParams.size);
-
-            return res;
-        }
-        public async Task<Pagination<MeetingDTO>> GetWaitMeetingByPaginationAsync(
-                        PaginationParams paginationParams, string filter, string sort)
-        {
-            var stat = _context.Meetings.Where(t => t.Name.Contains(filter) && t.Status == StatusMeeting.Waiting)
-                .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider);
-            switch (sort)
-            {
-                case "created_at":
-                    stat = stat.OrderBy(t => t.CreatedAt);
-                    break;
-                case "-created_at":
-                    stat = stat.OrderByDescending(t => t.CreatedAt);
-                    break;
-            }
-            var query = stat.AsQueryable();
-
-            var res = await PaginationService.GetPagination<MeetingDTO>(query, paginationParams.number, paginationParams.size);
+            var res = await PaginationService.GetPagination<MeetingBaseDTO>(query, paginationParams.number, paginationParams.size);
 
             return res;
         }
@@ -211,5 +203,7 @@ namespace Infrastructure.Repositories
 
             return user;
         }
+
+
     }
 }

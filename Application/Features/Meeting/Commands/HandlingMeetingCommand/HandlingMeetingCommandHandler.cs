@@ -20,7 +20,7 @@ namespace Application.Features.Commands
 
         public async Task<Unit> Handle(HandlingMeetingCommand request, CancellationToken cancellationToken)
         {
-            var meetingToProcess = await _meetingRepo.GetOneAsync(request.MeetingId);
+            var meetingToProcess = await _meetingRepo.GetMeetingEntity(request.MeetingId);
 
             if (meetingToProcess == null)
             {

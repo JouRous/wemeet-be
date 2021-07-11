@@ -68,14 +68,6 @@ namespace Infrastructure.Repositories
 
         public async Task UpdateTeamAsync(Team team)
         {
-            // var _team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == team.Id);
-
-            // if (_team != null)
-            // {
-            //     _team.Name = team.Name;
-            //     _team.Description = team.Description;
-            // }
-
             _context.Entry(team).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
