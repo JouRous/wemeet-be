@@ -39,6 +39,7 @@ namespace Infrastructure.Repositories
                             .ThenInclude(mf => mf.FileEntity)
                             .Include(m => m.MeetingTeams)
                             .ThenInclude(mt => mt.Team)
+                            .ThenInclude(t => t.Leader)
                             .FirstOrDefaultAsync(m => m.Id == Id);
         }
 
@@ -199,5 +200,16 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<IEnumerable<AppUser>> GetUserInMeeting(Guid meetingId)
+        {
+            var user = await _context.Meetings
+                                .Where(m => m.Id == meetingId)
+                                .Include(m => m.ParticipantMeetings)
+                                .ThenInclude(pm => pm.Participant)
+                                .Select(m => m.ParticipantMeetings.Select(pm => pm.Participant))
+                                .FirstOrDefaultAsync();
+
+            return user;
+        }
     }
 }

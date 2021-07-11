@@ -136,6 +136,82 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Meetings",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    Method = table.Column<int>(type: "integer", nullable: false),
+                    RoomId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Meetings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Meetings_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MeetingFile",
+                columns: table => new
+                {
+                    FileEntityId = table.Column<Guid>(type: "uuid", nullable: false),
+                    MeetingId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MeetingFile", x => new { x.FileEntityId, x.MeetingId });
+                    table.ForeignKey(
+                        name: "FK_MeetingFile_FileEntities_FileEntityId",
+                        column: x => x.FileEntityId,
+                        principalTable: "FileEntities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MeetingFile_Meetings_MeetingId",
+                        column: x => x.MeetingId,
+                        principalTable: "Meetings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MeetingTag",
+                columns: table => new
+                {
+                    MeetingId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TagId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MeetingTag", x => new { x.MeetingId, x.TagId });
+                    table.ForeignKey(
+                        name: "FK_MeetingTag_Meetings_MeetingId",
+                        column: x => x.MeetingId,
+                        principalTable: "Meetings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MeetingTag_Tags_TagId",
+                        column: x => x.TagId,
+                        principalTable: "Tags",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
@@ -215,82 +291,6 @@ namespace Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Meetings",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    Description = table.Column<string>(type: "text", nullable: true),
-                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    StartTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    EndTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    Method = table.Column<int>(type: "integer", nullable: false),
-                    RoomId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Meetings", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Meetings_Rooms_RoomId",
-                        column: x => x.RoomId,
-                        principalTable: "Rooms",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MeetingFile",
-                columns: table => new
-                {
-                    FileEntityId = table.Column<Guid>(type: "uuid", nullable: false),
-                    MeetingId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MeetingFile", x => new { x.FileEntityId, x.MeetingId });
-                    table.ForeignKey(
-                        name: "FK_MeetingFile_FileEntities_FileEntityId",
-                        column: x => x.FileEntityId,
-                        principalTable: "FileEntities",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_MeetingFile_Meetings_MeetingId",
-                        column: x => x.MeetingId,
-                        principalTable: "Meetings",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MeetingTag",
-                columns: table => new
-                {
-                    MeetingId = table.Column<Guid>(type: "uuid", nullable: false),
-                    TagId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MeetingTag", x => new { x.MeetingId, x.TagId });
-                    table.ForeignKey(
-                        name: "FK_MeetingTag_Meetings_MeetingId",
-                        column: x => x.MeetingId,
-                        principalTable: "Meetings",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_MeetingTag_Tags_TagId",
-                        column: x => x.TagId,
-                        principalTable: "Tags",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -455,11 +455,6 @@ namespace Infrastructure.Migrations
                 column: "MeetingId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Meetings_CreatorId",
-                table: "Meetings",
-                column: "CreatorId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Meetings_RoomId",
                 table: "Meetings",
                 column: "RoomId");
@@ -544,14 +539,6 @@ namespace Infrastructure.Migrations
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Meetings_AspNetUsers_CreatorId",
-                table: "Meetings",
-                column: "CreatorId",
-                principalTable: "AspNetUsers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_ParticipantMeeting_AspNetUsers_ParticipantId",

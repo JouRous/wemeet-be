@@ -7,6 +7,7 @@ namespace Application.Features.Commands
 {
     public class CreateMeetingCommand : IRequest<Guid>
     {
+        public Guid CreatorId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string Note { get; set; }

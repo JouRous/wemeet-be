@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20210711071806_Init")]
+    [Migration("20210711122727_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -215,7 +215,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<Guid?>("CreatorId")
+                    b.Property<Guid>("CreatorId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -246,8 +246,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CreatorId");
 
                     b.HasIndex("RoomId");
 
@@ -598,17 +596,11 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Meeting", b =>
                 {
-                    b.HasOne("Domain.Entities.AppUser", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatorId");
-
                     b.HasOne("Domain.Entities.Room", "Room")
                         .WithMany("Meetings")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Creator");
 
                     b.Navigation("Room");
                 });

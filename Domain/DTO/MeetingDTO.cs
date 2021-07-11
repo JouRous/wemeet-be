@@ -10,7 +10,7 @@ namespace Domain.DTO
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public UserDTO Creator { get; set; }
+        public UserBaseDTO Creator { get; set; }
         public ICollection<UserBaseDTO> UserInMeeting { get; set; }
         public RoomBaseDTO Room { get; set; }
         public ICollection<TeamBaseDTO> Teams { get; set; }

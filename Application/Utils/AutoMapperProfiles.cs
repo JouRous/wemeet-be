@@ -62,6 +62,9 @@ namespace Application.Utils
               .ForMember(dest => dest.Teams, opt => opt.MapFrom(
                 src => src.MeetingTeams.Select(x => x.Team)
               ))
+              .ForMember(dest => dest.Creator, opt => opt.MapFrom(
+                src => src.MeetingTeams.Select(x => x.Team).First().Leader
+              ))
               .ReverseMap();
             CreateMap<CreateMeetingCommand, Meeting>().ReverseMap();
             CreateMap<UpdateMeetingCommand, Meeting>().ReverseMap();

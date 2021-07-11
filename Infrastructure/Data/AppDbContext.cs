@@ -48,6 +48,10 @@ namespace Infrastructure.Data
             .WithMany(t => t.AppUserTeams)
             .HasForeignKey(ut => ut.TeamId);
 
+            builder.Entity<AppUser>()
+            .HasMany(u => u.LeadTeams)
+            .WithOne(t => t.Leader);
+
             // Meeting - User
 
             builder.Entity<ParticipantMeeting>().HasKey(src => new { src.MeetingId, src.ParticipantId });
@@ -62,9 +66,7 @@ namespace Infrastructure.Data
             .WithMany(m => m.ParticipantMeetings)
             .HasForeignKey(pm => pm.MeetingId);
 
-            builder.Entity<AppUser>()
-            .HasMany(u => u.LeadTeams)
-            .WithOne(t => t.Leader);
+
 
             // Meeting - Tag
 

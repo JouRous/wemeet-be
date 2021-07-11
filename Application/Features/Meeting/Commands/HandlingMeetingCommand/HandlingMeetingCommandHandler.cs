@@ -1,5 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Exceptions;
+using Domain.Enums;
 using Domain.Interfaces;
 using MediatR;
 
@@ -20,9 +22,27 @@ namespace Application.Features.Commands
         {
             var meetingToProcess = await _meetingRepo.GetOneAsync(request.MeetingId);
 
+            if (meetingToProcess == null)
+            {
+                // throw new NotFoundException(nameof(meetingToProcess), request.MeetingId);
+            }
+
             meetingToProcess.Status = request.Status;
 
             await _meetingRepo.Update(meetingToProcess);
+
+            var users = await _meetingRepo.GetUserInMeeting(meetingToProcess.Id);
+
+            if (meetingToProcess.Status == StatusMeeting.Accepted)
+            {
+                foreach (var user in users)
+                {
+                    await _emailService.sendMailAsync(
+                        user.Email,
+                        $"Bạn được thêm vào cuộc họp {meetingToProcess.Name}",
+                        $"Bạn được thêm vào cuộc họp {meetingToProcess.Name}");
+                }
+            }
 
             return Unit.Value;
         }
