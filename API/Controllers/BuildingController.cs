@@ -18,15 +18,11 @@ namespace API.Controllers
 {
     public class BuildingController : BaseApiController
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
         private NotificationService _notificationService = new NotificationService();
         private readonly IMediator _mediator;
 
-        public BuildingController(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator)
+        public BuildingController(IMediator mediator)
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
             _mediator = mediator;
         }
 

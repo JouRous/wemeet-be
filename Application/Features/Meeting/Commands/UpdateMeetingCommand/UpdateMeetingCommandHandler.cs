@@ -21,7 +21,7 @@ namespace Application.Features.Commands
 
         public async Task<Guid> Handle(UpdateMeetingCommand request, CancellationToken cancellationToken)
         {
-            var meetingToUpdate = await _meetingRepo.GetOneAsync(request.Id);
+            var meetingToUpdate = await _meetingRepo.GetMeetingEntity(request.Id);
 
             _mapper.Map(request, meetingToUpdate, typeof(UpdateMeetingCommand), typeof(Meeting));
 

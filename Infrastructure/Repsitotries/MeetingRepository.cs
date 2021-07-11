@@ -26,7 +26,7 @@ namespace Infrastructure.Repositories
             _mapper = map;
         }
 
-        public async Task<Meeting> GetOneAsync(Guid Id)
+        public async Task<MeetingDTO> GetOneAsync(Guid Id)
         {
             return await _context.Meetings
                             .Include(m => m.Room)
@@ -39,7 +39,14 @@ namespace Infrastructure.Repositories
                             .ThenInclude(mf => mf.FileEntity)
                             .Include(m => m.MeetingTeams)
                             .ThenInclude(mt => mt.Team)
+                            .ThenInclude(t => t.Leader)
+                            .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider)
                             .FirstOrDefaultAsync(m => m.Id == Id);
+        }
+
+        public async Task<Meeting> GetMeetingEntity(Guid Id)
+        {
+            return await _context.Meetings.FindAsync(Id);
         }
 
         public async Task AddOneAsync(Meeting meeting)
@@ -48,11 +55,17 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Pagination<MeetingDTO>> GetAllByPaginationAsync(
-                        PaginationParams paginationParams, string filter, string sort)
+        public async Task<Pagination<MeetingBaseDTO>> GetWaitingMeetingAsync(Query<MeetingFilterModel> meetingQuery)
         {
-            var stat = _context.Meetings.Where(t => t.Name.Contains(filter))
-                .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider);
+            var paginationParams = meetingQuery.paginationParams;
+            var sort = meetingQuery.sort;
+
+            var stat = _context.Meetings
+                        .Where(t => t.Status == StatusMeeting.Waiting)
+                        .Include(m => m.MeetingTeams)
+                        .ThenInclude(mt => mt.Team)
+                        .ThenInclude(t => t.Leader)
+                        .ProjectTo<MeetingBaseDTO>(_mapper.ConfigurationProvider);
             switch (sort)
             {
                 case "created_at":
@@ -64,27 +77,7 @@ namespace Infrastructure.Repositories
             }
             var query = stat.AsQueryable();
 
-            var res = await PaginationService.GetPagination<MeetingDTO>(query, paginationParams.number, paginationParams.size);
-
-            return res;
-        }
-        public async Task<Pagination<MeetingDTO>> GetWaitMeetingByPaginationAsync(
-                        PaginationParams paginationParams, string filter, string sort)
-        {
-            var stat = _context.Meetings.Where(t => t.Name.Contains(filter) && t.Status == StatusMeeting.Waiting)
-                .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider);
-            switch (sort)
-            {
-                case "created_at":
-                    stat = stat.OrderBy(t => t.CreatedAt);
-                    break;
-                case "-created_at":
-                    stat = stat.OrderByDescending(t => t.CreatedAt);
-                    break;
-            }
-            var query = stat.AsQueryable();
-
-            var res = await PaginationService.GetPagination<MeetingDTO>(query, paginationParams.number, paginationParams.size);
+            var res = await PaginationService.GetPagination<MeetingBaseDTO>(query, paginationParams.number, paginationParams.size);
 
             return res;
         }
@@ -108,7 +101,10 @@ namespace Infrastructure.Repositories
                     break;
             }
             var query = stat.AsQueryable();
-            return await PaginationService.GetPagination<MeetingDTO>(query, paginationParams.number, paginationParams.size);
+            return await PaginationService
+                            .GetPagination<MeetingDTO>(query,
+                                                       paginationParams.number,
+                                                       paginationParams.size);
 
         }
 
@@ -119,13 +115,7 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public void DeletingOne(int Id)
-        {
-            var entity = _context.Meetings.Find(Id);
-            _context.Meetings.Remove(entity);
-        }
-
-        public async Task AddUserToMeetingAsync(Guid meetingId, ICollection<int> userIds)
+        public async Task AddUserToMeetingAsync(Guid meetingId, ICollection<Guid> userIds)
         {
             if (userIds.Count < 0) return;
 
@@ -202,8 +192,18 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task GetEmailUserInMeeting(Guid meetingId, int userId)
+        public async Task<IEnumerable<AppUser>> GetUserInMeeting(Guid meetingId)
         {
+            var user = await _context.Meetings
+                                .Where(m => m.Id == meetingId)
+                                .Include(m => m.ParticipantMeetings)
+                                .ThenInclude(pm => pm.Participant)
+                                .Select(m => m.ParticipantMeetings.Select(pm => pm.Participant))
+                                .FirstOrDefaultAsync();
+
+            return user;
         }
+
+
     }
 }

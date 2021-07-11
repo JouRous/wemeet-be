@@ -17,7 +17,7 @@ namespace Application.Features.Commands
 
         public async Task<Guid> Handle(DeleteMeetingCommand request, CancellationToken cancellationToken)
         {
-            var meetingToDelete = await _meetingRepo.GetOneAsync(request.Id);
+            var meetingToDelete = await _meetingRepo.GetMeetingEntity(request.Id);
             await _meetingRepo.DeleteOneAsync(meetingToDelete);
 
             return request.Id;

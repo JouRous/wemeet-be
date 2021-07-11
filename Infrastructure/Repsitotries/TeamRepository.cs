@@ -68,19 +68,11 @@ namespace Infrastructure.Repositories
 
         public async Task UpdateTeamAsync(Team team)
         {
-            // var _team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == team.Id);
-
-            // if (_team != null)
-            // {
-            //     _team.Name = team.Name;
-            //     _team.Description = team.Description;
-            // }
-
             _context.Entry(team).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
 
-        public async Task AddUserToTeamAsync(Guid teamId, ICollection<int> userIds)
+        public async Task AddUserToTeamAsync(Guid teamId, ICollection<Guid> userIds)
         {
             var team = await _context.Teams.FindAsync(teamId);
 
@@ -100,7 +92,7 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task RemoveUserFromTeam(Guid teamId, ICollection<int> userIds)
+        public async Task RemoveUserFromTeam(Guid teamId, ICollection<Guid> userIds)
         {
             var team = await _context.Teams.Include(t => t.AppUserTeams).FirstOrDefaultAsync(t => t.Id == teamId);
 
@@ -111,7 +103,7 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task AddOneUSerToTeam(Guid teamId, int userId)
+        public async Task AddOneUSerToTeam(Guid teamId, Guid userId)
         {
             _context.AppUserTeams.Add(new AppUserTeam
             {
@@ -125,6 +117,14 @@ namespace Infrastructure.Repositories
         public async Task<Team> GetTeamEntityAsync(Guid teamId)
         {
             return await _context.Teams.FindAsync(teamId);
+        }
+
+        public async Task<IEnumerable<TeamBaseDTO>> GetLeadingTeamAsync(Guid leaderId)
+        {
+            return await _context.Teams
+                            .Where(t => t.LeaderId == leaderId)
+                            .ProjectTo<TeamBaseDTO>(_mapper.ConfigurationProvider)
+                            .ToListAsync();
         }
     }
 }

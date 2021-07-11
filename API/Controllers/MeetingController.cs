@@ -22,17 +22,11 @@ namespace API.Controllers
 {
     public class MeetingController : BaseApiController
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
         private readonly IMediator _mediator;
-        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public MeetingController(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator, IWebHostEnvironment hostEnvironment)
+        public MeetingController(IMediator mediator, IWebHostEnvironment hostEnvironment)
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
             _mediator = mediator;
-            _hostEnvironment = hostEnvironment;
         }
 
         [HttpGet]
@@ -64,6 +58,35 @@ namespace API.Controllers
             return response;
         }
 
+        [HttpGet("waiting")]
+        public async Task<ActionResult> GetWaitingMeeting(
+            [FromQuery] Dictionary<string, int> page,
+            [FromQuery] Dictionary<string, string> filter,
+            [FromQuery] Dictionary<string, string> sort
+        )
+        {
+            var meetingQuery = QueryBuilder<MeetingFilterModel>
+                       .Build(page, filter, sort);
+            var query = new GetWatingMeetingQuery(meetingQuery);
+
+            var result = await _mediator.Send(query);
+
+            var paginationDTO = new PaginationDTO
+            {
+                CurrentPage = result.CurrentPage,
+                PerPage = result.PerPage,
+                Total = result.Total,
+                Count = result.Count,
+                TotalPages = result.TotalPages
+            };
+
+            var response = new ResponseWithPaginationBuilder<IEnumerable<MeetingBaseDTO>>()
+                                .AddData(result.Items)
+                                .AddPagination(paginationDTO)
+                                .Build();
+
+            return Ok(response);
+        }
 
         [HttpGet("{MeetingId}")]
         public async Task<ActionResult<Response<MeetingDTO>>> GetMeetingInfoAsync(Guid meetingId)
@@ -72,7 +95,11 @@ namespace API.Controllers
 
             var result = await _mediator.Send(query);
 
-            return Ok(result);
+            var response = new ResponseBuilder<MeetingDTO>()
+                                .AddData(result)
+                                .Build();
+
+            return Ok(response);
         }
 
         [HttpPost]

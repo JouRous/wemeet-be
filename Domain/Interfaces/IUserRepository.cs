@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.DTO;
@@ -7,16 +8,17 @@ using Domain.Types;
 
 namespace Domain.Interfaces
 {
-	public interface IUserRepository
-	{
-		Task<AppUser> GetUserEntityAsync(int id);
-		Task<UserWithTeamUsersDTO> GetUserAsync(int id);
-		Task<IEnumerable<AdminUserDTO>> GetUserAdminsAsync();
-		Task<string> GetEmailAsync(int id);
-		Task<UserDTO> GetUserByEmailAsync(string email);
-		Task<AppUser> UpdateUserAsync(AppUser user, int id);
-		Task<Pagination<UserWithTeamDTO>> GetUsersAsync(Query<UserFilterModel> query);
-		void DeactivateUser(AppUser user);
-		void RetrieveUser(AppUser user);
-	}
+    public interface IUserRepository
+    {
+        Task<Pagination<UserWithTeamDTO>> GetUsersAsync(Query<UserFilterModel> query);
+        Task<AppUser> GetUserEntityAsync(Guid id);
+        Task<UserWithTeamUsersDTO> GetUserAsync(Guid id);
+        Task<IEnumerable<AdminUserDTO>> GetUserAdminsAsync();
+        Task<AppUser> GetUserEntityByEmailAsync(string email);
+        Task<string> GetEmailAsync(Guid id);
+        Task<UserDTO> GetUserByEmailAsync(string email);
+        Task UpdateUserAsync(AppUser user);
+        Task DeactivateUser(AppUser user);
+        Task RetrieveUser(AppUser user);
+    }
 }

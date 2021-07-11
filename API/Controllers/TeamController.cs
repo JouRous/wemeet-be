@@ -21,12 +21,10 @@ namespace API.Controllers
     [Authorize]
     public class TeamController : BaseApiController
     {
-        private readonly IMapper _mapper;
         private readonly IMediator _mediator;
 
         public TeamController(IMapper mapper, IMediator mediator)
         {
-            _mapper = mapper;
             _mediator = mediator;
         }
 
@@ -81,7 +79,7 @@ namespace API.Controllers
                 .Select(c => c.Value)
                 .SingleOrDefault();
 
-            command.CreatorId = Int32.Parse(creatorId);
+            command.CreatorId = new Guid(creatorId);
             Guid result = Guid.Empty;
             try
             {
@@ -159,6 +157,26 @@ namespace API.Controllers
             await _mediator.Send(command);
 
             return Ok(new ResponseBuilder<Unit>().Build());
+        }
+
+        [HttpGet("me")]
+        public async Task<ActionResult> GetLeadingTeam()
+        {
+            var token = await HttpContext.GetTokenAsync("access_token");
+            var handler = new JwtSecurityTokenHandler();
+            var leaderId = handler.ReadJwtToken(token).Claims
+                .Where(c => c.Type.Equals("UserId"))
+                .Select(c => c.Value)
+                .SingleOrDefault();
+
+            var query = new GetLeadingTeamQuery(new Guid(leaderId));
+            var result = await _mediator.Send(query);
+
+            var response = new ResponseBuilder<IEnumerable<TeamBaseDTO>>()
+                                .AddData(result)
+                                .Build();
+
+            return Ok(response);
         }
 
     }

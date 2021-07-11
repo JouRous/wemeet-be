@@ -17,15 +17,11 @@ namespace API.Controllers
 {
     public class RoomController : BaseApiController
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
         private readonly IMediator _mediator;
         private NotificationService _notificationService = new NotificationService();
 
-        public RoomController(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator)
+        public RoomController(IMediator mediator)
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
             _mediator = mediator;
         }
 

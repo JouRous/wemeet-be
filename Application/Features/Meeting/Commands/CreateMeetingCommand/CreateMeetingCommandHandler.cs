@@ -62,14 +62,6 @@ namespace Application.Features.Commands
                 await _meetingRepo.AddFileToMeeting(meetingEntity.Id, fileEntity.Id);
             }
 
-            // foreach (var userId in request.users_in_meeting)
-            // {
-            //     var email = await _userRepo.GetEmailAsync(userId);
-            //     await _emailService.sendMailAsync(
-            //         email,
-            //         $"Bạn được thêm vào cuộc họp {meetingEntity.Name}",
-            //         $"Bạn được thêm vào cuộc họp {meetingEntity.Name}");
-            // }
             var adminUsers = await _userRepo.GetUserAdminsAsync();
 
             foreach (var adminUser in adminUsers)
