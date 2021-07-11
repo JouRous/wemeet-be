@@ -26,15 +26,12 @@ namespace Application.Utils
             .ForMember(dest => dest.Teams, opt => opt.MapFrom(src => src.AppUserTeams.Select(x => x.Team)))
             .ForAllMembers(options => options.Condition((src, dest, srcMembers) => srcMembers != null));
 
-            CreateMap<UserActionModel, AppUser>();
-
             CreateMap<Team, TeamBaseDTO>().ReverseMap();
             CreateMap<Team, TeamDTO>()
               .ForMember(dest => dest.Leader, opt => opt.MapFrom(src => src.Leader));
             CreateMap<Team, TeamWithUserDTO>()
               .ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.AppUserTeams.Select(x => x.User)))
               .ForMember(dest => dest.Leader, opt => opt.MapFrom(src => src.Leader));
-            CreateMap<TeamModel, Team>();
             CreateMap<CreateTeamCommand, Team>().ReverseMap();
             CreateMap<UpdateTeamCommand, Team>().ReverseMap();
 
