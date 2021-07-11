@@ -22,9 +22,8 @@ namespace Infrastructure.Repositories
         public readonly AppDbContext _context;
         private readonly IMapper _mapper;
         public UserRepository(
-          AppDbContext context,
-          IMapper mapper
-        )
+            AppDbContext context,
+            IMapper mapper)
         {
             _mapper = mapper;
             _context = context;
@@ -132,7 +131,6 @@ namespace Infrastructure.Repositories
                             .Where(u => u.Role == UserRoles.ADMIN)
                             .ProjectTo<AdminUserDTO>(_mapper.ConfigurationProvider)
                             .ToListAsync();
-
         }
     }
 }

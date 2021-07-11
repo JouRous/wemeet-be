@@ -3,6 +3,7 @@ version: "3.7"
 services:
   db:
     image: postgres
+    container_name: wemeetdb_cl
     environment:
       POSTGRES_DB: "wemeet"
       POSTGRES_PASSWORD: "123123"
@@ -18,13 +19,42 @@ services:
     build:
       context: .
       dockerfile: API/Dockerfile
+    container_name: web_api
     ports:
       - 5000:80
     restart: always
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "ConnectionStrings:Default=Server=db; Port=5432; User Id=postgres; Password=123123; Database=wemeet"
+    volumes:
+      - "./storage/uploads:/app/Uploads"
     depends_on:
       - db
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@wemeet.com
+      - PGADMIN_DEFAULT_PASSWORD=123123
+    restart: always
+    ports:
+      - 5050:80
+    volumes:
+      - pgadmin_data:/root/.pgadmin
+
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    restart: always
+    ports:
+      - 8080:8000
+      - 9000:9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
 volumes:
   app-data:
+  pgadmin_data:
+  portainer_data:
