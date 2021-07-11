@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20210711045113_Init1")]
-    partial class Init1
+    [Migration("20210711071806_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,21 +20,6 @@ namespace Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.5")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-            modelBuilder.Entity("AppUserTeam", b =>
-                {
-                    b.Property<Guid>("TeamsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UsersId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("TeamsId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("AppUserTeam");
-                });
 
             modelBuilder.Entity("Domain.Entities.AppRole", b =>
                 {
@@ -121,6 +106,9 @@ namespace Infrastructure.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("TeamId")
+                        .HasColumnType("uuid");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
@@ -145,6 +133,8 @@ namespace Infrastructure.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("TeamId");
 
                     b.ToTable("AspNetUsers");
                 });
@@ -580,19 +570,11 @@ namespace Infrastructure.Migrations
                     b.HasDiscriminator().HasValue("AppUserRole");
                 });
 
-            modelBuilder.Entity("AppUserTeam", b =>
+            modelBuilder.Entity("Domain.Entities.AppUser", b =>
                 {
                     b.HasOne("Domain.Entities.Team", null)
-                        .WithMany()
-                        .HasForeignKey("TeamsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.AppUser", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany("Users")
+                        .HasForeignKey("TeamId");
                 });
 
             modelBuilder.Entity("Domain.Entities.AppUserTeam", b =>
@@ -845,6 +827,8 @@ namespace Infrastructure.Migrations
                     b.Navigation("AppUserTeams");
 
                     b.Navigation("MeetingTeams");
+
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

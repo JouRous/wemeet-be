@@ -10,15 +10,15 @@ namespace Domain.Interfaces
 {
     public interface IUserRepository
     {
+        Task<Pagination<UserWithTeamDTO>> GetUsersAsync(Query<UserFilterModel> query);
         Task<AppUser> GetUserEntityAsync(Guid id);
         Task<UserWithTeamUsersDTO> GetUserAsync(Guid id);
         Task<IEnumerable<AdminUserDTO>> GetUserAdminsAsync();
         Task<AppUser> GetUserEntityByEmailAsync(string email);
         Task<string> GetEmailAsync(Guid id);
         Task<UserDTO> GetUserByEmailAsync(string email);
-        Task<AppUser> UpdateUserAsync(AppUser user, Guid id);
-        Task<Pagination<UserWithTeamDTO>> GetUsersAsync(Query<UserFilterModel> query);
-        void DeactivateUser(AppUser user);
-        void RetrieveUser(AppUser user);
+        Task UpdateUserAsync(AppUser user);
+        Task DeactivateUser(AppUser user);
+        Task RetrieveUser(AppUser user);
     }
 }

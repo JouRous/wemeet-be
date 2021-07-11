@@ -12,7 +12,6 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Application.Utils;
 using Infrastructure.Data;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Infrastructure.Repositories
@@ -27,12 +26,6 @@ namespace Infrastructure.Repositories
         {
             _mapper = mapper;
             _context = context;
-        }
-
-        public void DeactivateUser(AppUser user)
-        {
-            user.DeletedAt = DateTime.Now;
-            user.isActive = false;
         }
 
         public async Task<AppUser> GetUserEntityAsync(Guid id)
@@ -78,8 +71,7 @@ namespace Infrastructure.Repositories
 
             if (_filter.Team != Guid.Empty)
             {
-                stat = stat
-                        .Where(u => u.AppUserTeams.Any(ut => ut.TeamId == _filter.Team));
+                stat = stat.Where(u => u.AppUserTeams.Any(ut => ut.TeamId == _filter.Team));
             }
 
             if (!string.IsNullOrEmpty(_filter.role))
@@ -104,25 +96,10 @@ namespace Infrastructure.Repositories
             return await PaginationService.GetPagination<UserWithTeamDTO>(query, paginationParams.number, paginationParams.size);
         }
 
-        public void RetrieveUser(AppUser user)
+        public async Task UpdateUserAsync(AppUser user)
         {
-            user.isActive = true;
-            user.DeletedAt = null;
-        }
-
-        public async Task<AppUser> UpdateUserAsync(AppUser user, Guid id)
-        {
-            var _user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
-            if (_user != null)
-            {
-                _user.Nickname = user.Nickname;
-                _user.Fullname = user.Fullname;
-                _user.Position = user.Position;
-                _user.Role = user.Role;
-                _user.isActive = user.isActive;
-            }
-
-            return _user;
+            _context.Entry(user).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
         }
 
         public async Task<string> GetEmailAsync(Guid id)
@@ -136,6 +113,22 @@ namespace Infrastructure.Repositories
                             .Where(u => u.Role == UserRoles.ADMIN)
                             .ProjectTo<AdminUserDTO>(_mapper.ConfigurationProvider)
                             .ToListAsync();
+        }
+
+        public async Task RetrieveUser(AppUser user)
+        {
+            user.isActive = true;
+            user.DeletedAt = null;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeactivateUser(AppUser user)
+        {
+            user.DeletedAt = DateTime.Now;
+            user.isActive = false;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

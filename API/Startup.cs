@@ -87,7 +87,7 @@ namespace API
             app.UseStaticFiles(new StaticFileOptions()
             {
                 FileProvider = new PhysicalFileProvider(avatarPath),
-                RequestPath = new PathString("/uploads/avatars")
+                RequestPath = new PathString("/uploads/avatar")
             });
 
             app.UseStaticFiles(new StaticFileOptions()
