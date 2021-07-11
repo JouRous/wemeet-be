@@ -8,8 +8,6 @@ namespace Domain.Entities
     {
         public virtual string Name { get; set; }
         public virtual string Description { get; set; }
-        public virtual Guid CreatorId { get; set; }
-        // public virtual AppUser Creator { get; set; }
         public virtual StatusMeeting Status { get; set; } = StatusMeeting.Waiting;
         public virtual DateTime StartTime { get; set; }
         public virtual DateTime EndTime { get; set; }
