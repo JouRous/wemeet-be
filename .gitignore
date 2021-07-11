@@ -13,6 +13,7 @@
 
 **/Uploads
 **/Properties/*
+**/storage/*
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

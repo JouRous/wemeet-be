@@ -8,9 +8,9 @@ namespace Application.Utils
     public class ResponseBuilder<T> : IResponseBuilder<T>
     {
         private T data = default(T);
-        private PaginationDTO pagination = null;
         private int statusCode = 200;
         private bool status = true;
+        private string message = "Ok";
 
         public IResponseBuilder<T> AddData(T data)
         {
@@ -25,9 +25,9 @@ namespace Application.Utils
             return this;
         }
 
-        public IResponseBuilder<T> AddPagination(PaginationDTO pagination)
+        public IResponseBuilder<T> AddMessage(string message)
         {
-            this.pagination = pagination;
+            this.message = message;
             return this;
         }
 
@@ -36,9 +36,9 @@ namespace Application.Utils
             return new Response<T>
             {
                 Data = this.data,
-                pagination = this.pagination,
                 status = this.statusCode,
-                success = this.status
+                success = this.status,
+                Message = this.message
             };
         }
 

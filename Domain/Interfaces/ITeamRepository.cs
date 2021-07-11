@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.DTO;
@@ -9,11 +10,14 @@ namespace Domain.Interfaces
 {
     public interface ITeamRepository
     {
-        Task<TeamWithUserDTO> GetTeamAsync(int teamId);
+        Task<TeamWithUserDTO> GetTeamAsync(Guid teamId);
+        Task<Team> GetTeamEntityAsync(Guid teamId);
+        Task<IEnumerable<TeamBaseDTO>> GetLeadingTeamAsync(Guid leaderId);
         Task<Pagination<TeamWithUserDTO>> GetAllAsync(Query<FilterTeamModel> query);
-        void AddTeam(Team team);
+        Task AddTeamAsync(Team team);
         Task UpdateTeamAsync(Team team);
-        Task AddUserToTeamAsync(int teamId, ICollection<int> userIds);
-        Task RemoveUserFromTeam(int teamId, ICollection<int> userIds);
+        Task AddOneUSerToTeam(Guid teamId, Guid userId);
+        Task AddUserToTeamAsync(Guid teamId, ICollection<Guid> userIds);
+        Task RemoveUserFromTeam(Guid teamId, ICollection<Guid> userIds);
     }
 }

@@ -10,171 +10,107 @@ using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Application.Utils;
+using Application.Features.Commands;
+using MediatR;
+using Application.Features.Queries;
 
 namespace API.Controllers
 {
     public class BuildingController : BaseApiController
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
         private NotificationService _notificationService = new NotificationService();
+        private readonly IMediator _mediator;
 
-        public BuildingController(IUnitOfWork unitOfWork, IMapper mapper)
+        public BuildingController(IMediator mediator)
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
+            _mediator = mediator;
         }
 
         [HttpGet]
-        public async Task<ActionResult<Response<IEnumerable<BuildingDTO>>>> GetAllBuildings(
+        public async Task<ActionResult> GetAllBuildings(
             [FromQuery] Dictionary<string, int> page,
             [FromQuery] Dictionary<string, string> filter,
             [FromQuery] Dictionary<string, string> sort)
         {
-            var _sort = sort.GetValueOrDefault("");
-            var result = await _unitOfWork.BuildingRepository.GetAllByPaginationAsync(page, filter, _sort);
+            var buildingQuery = QueryBuilder<BuildingFilterModel>
+                        .Build(page, filter, sort);
 
-            var list = new List<BuildingDTO>();
-            foreach (var item in result.Items)
+            var query = new GetAllBuildingQuery(buildingQuery);
+
+            var result = await _mediator.Send(query);
+
+            var paginationDTO = new PaginationDTO
             {
-                var count = _unitOfWork.RoomRepository.GetSizeOfEntity(o => o.BuildingId == item.Id);
-                item.RoomNumber = count;
-                list.Add(item);
-            }
+                CurrentPage = result.CurrentPage,
+                PerPage = result.PerPage,
+                Total = result.Total,
+                Count = result.Count,
+                TotalPages = result.TotalPages
+            };
 
-            var response = new ResponseBuilder<IEnumerable<BuildingDTO>>()
-                                                    .AddData(list)
-                                                    .AddPagination(new PaginationDTO
-                                                    {
-                                                        CurrentPage = result.CurrentPage,
-                                                        PerPage = result.PerPage,
-                                                        Total = result.Total,
-                                                        Count = result.Count,
-                                                        TotalPage = result.TotalPages
-                                                    })
-                                                    .Build();
+            var response = new ResponseWithPaginationBuilder<IEnumerable<BuildingDTO>>()
+                                .AddData(result.Items)
+                                .AddPagination(paginationDTO)
+                                .Build();
 
-            return response;
+            return Ok(response);
         }
 
         [HttpGet("{buildingId}")]
-        public async Task<ActionResult<Response<BuildingDTO>>> GetBuildingInfo(int buildingId)
+        public async Task<ActionResult> GetBuilding(Guid buildingId)
         {
-            var buildingInfo = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
-            buildingInfo.RoomNumber = _unitOfWork.RoomRepository.GetSizeOfEntity(x => x.BuildingId == buildingId);
+            var query = new GetBuildingQuery(buildingId);
+            var result = await _mediator.Send(query);
 
-            return new ResponseBuilder<BuildingDTO>().AddData(buildingInfo).Build();
+            var response = new ResponseBuilder<BuildingDTO>()
+                                .AddData(result)
+                                .Build();
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Response<BuildingDTO>>> AddBuilding([FromBody] BuildingModel buildingInfo)
+        public async Task<ActionResult> CreateBuilding([FromBody] CreateBuildingCommand command)
         {
-            try
-            {
-                var building = _mapper.Map<Building>(buildingInfo);
+            var result = await _mediator.Send(command);
 
-                _unitOfWork.BuildingRepository.AddOne(building);
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .AddMessage("Building has been created")
+                                .Build();
 
-                var isCreated = await _unitOfWork.Complete();
-
-                if (!isCreated)
-                {
-                    return BadRequest();
-                }
-
-                // var msg = new Notification()
-                // {
-                // 	EntityType = Enums.EntityEnum.Building,
-                // 	EntityId = building.Id,
-                // 	EndpointDetails = $"/api/building/{building.Id}",
-                // 	Message = "New building has created !"
-                // };
-
-                // var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
-
-                // await _notificationService.CreateNotify(msgDto);
-
-                var res = new ResponseBuilder<BuildingDTO>()
-                                                .AddData(_mapper.Map<BuildingDTO>(building))
-                                                .Build();
-
-                return res;
-            }
-            catch (Exception e)
-            {
-
-                throw e;
-            }
+            return Ok(response);
         }
 
         [HttpPut]
         [Route("{buildingId}")]
-        public async Task<ActionResult> EditInfoBuilding([FromRoute] int buildingId, [FromBody] BuildingModel body)
+        public async Task<ActionResult> UpdateBuilding([FromRoute] Guid buildingId, [FromBody] UpdatebuildingCommand command)
         {
-            var building = _mapper.Map<BuildingDTO>(body);
+            command.Id = buildingId;
 
-            building.Id = buildingId;
+            var result = await _mediator.Send(command);
 
-            _unitOfWork.BuildingRepository.ModifyOne(building);
-            var isCompleted = await _unitOfWork.Complete();
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .AddMessage("Building has been updated")
+                                .Build();
 
-            if (!isCompleted)
-            {
-                return BadRequest();
-            }
-
-            // var msg = new Notification()
-            // {
-            // 	EntityType = Enums.EntityEnum.Building,
-            // 	EntityId = building.Id,
-            // 	EndpointDetails = $"/api/building/{building.Id}",
-            // 	Message = "The building has updated !"
-            // };
-
-            // var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
-
-            // await _notificationService.CreateNotify(msgDto);
-
-            return Accepted(new
-            {
-                status = 202,
-                success = true,
-                message = "Building had been updated",
-                updated = building
-            });
+            return Ok(response);
         }
 
         [HttpDelete("{buildingId}")]
-        public async Task<ActionResult<Response<string>>> RemoveBuilding(int buildingId)
+        public async Task<ActionResult> RemoveBuilding(Guid buildingId)
         {
-            BuildingDTO building = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
+            var command = new DeleteBuildingCommand(buildingId);
 
-            _unitOfWork.BuildingRepository.DeletingOne(buildingId);
+            var result = await _mediator.Send(command);
 
-            var isCompleted = await _unitOfWork.Complete();
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .AddMessage("Building has been deleted")
+                                .Build();
 
-            if (!isCompleted)
-            {
-                return BadRequest();
-            }
-
-            // var msg = new Notification()
-            // {
-            // 	EntityType = Enums.EntityEnum.Building,
-            // 	EntityId = building.Id,
-            // 	EndpointDetails = $"/api/building/{building.Id}",
-            // 	Message = "New building has deleted !"
-            // };
-
-            // var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
-
-            // await _notificationService.CreateNotify(msgDto);
-
-            var res = new ResponseBuilder<string>()
-                                            .AddData(_mapper.Map<string>("deleted"))
-                                            .Build();
-
-            return res;
+            return Ok(response);
         }
 
 

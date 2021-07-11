@@ -12,6 +12,7 @@ using Domain.Types;
 using Application.Services;
 using Domain.Interfaces;
 using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
@@ -25,87 +26,26 @@ namespace Infrastructure.Repositories
             _mapper = map;
         }
 
-        private Meeting MappingFromDTO(Meeting newMeeting, MeetingDTO dto)
+        public async Task<Meeting> GetOneAsync(Guid Id)
         {
-
-            if (dto.Creator != null)
-            {
-                var creator = _context.Users.Where(user => (user.Id == dto.Creator.Id)).FirstOrDefault();
-                if (creator != null) newMeeting.Creator = creator;
-            }
-            if (dto.Team != null)
-            {
-                var team = _context.Teams.Find(dto.Team.Id);
-                if (team != null) newMeeting.Team = team;
-            }
-            if (dto.Room != null)
-            {
-                var room = _context.Rooms.Find(dto.Room.Id);
-                if (room != null) newMeeting.Room = room;
-            }
-            newMeeting.UsersInMeeting = new List<AppUser>();
-            foreach (var user in dto.UserInMeeting)
-            {
-                var u = _context.Users.Where(o => o.Id == user.Id).FirstOrDefault();
-                if (u != null) newMeeting.UsersInMeeting.Add(u);
-            }
-            if (dto.ConflictWith != null)
-            {
-                var conflict = _context.Meetings.Find(dto.ConflictWith.Id);
-                if (conflict != null) newMeeting.ConflictWith = conflict;
-            }
-            if (dto.Description != null) newMeeting.Description = dto.Description;
-            if (dto.Name != null) newMeeting.Name = dto.Name;
-            if (dto.Note != null) newMeeting.Note = dto.Note;
-            if (dto.StartTime != null) newMeeting.StartTime = (DateTime)dto.StartTime;
-            if (dto.EndTime != null) newMeeting.EndTime = (DateTime)dto.EndTime;
-            if (dto.Target != null) newMeeting.Target = dto.Target;
-            newMeeting.Priority = (PriorityMeeting)dto.Priority;
-            newMeeting.Status = (StatusMeeting)dto.Status;
-            newMeeting.Method = (MethodMeeting)dto.Method;
-
-            return newMeeting;
+            return await _context.Meetings
+                            .Include(m => m.Room)
+                            .ThenInclude(r => r.Building)
+                            .Include(m => m.MeetingTags)
+                            .ThenInclude(mt => mt.Tag)
+                            .Include(m => m.ParticipantMeetings)
+                            .ThenInclude(pm => pm.Participant)
+                            .Include(m => m.MeetingFiles)
+                            .ThenInclude(mf => mf.FileEntity)
+                            .Include(m => m.MeetingTeams)
+                            .ThenInclude(mt => mt.Team)
+                            .FirstOrDefaultAsync(m => m.Id == Id);
         }
 
-        private MeetingDTO ExportDTO(Meeting dto, MeetingDTO newMeeting)
+        public async Task AddOneAsync(Meeting meeting)
         {
-            if (dto == null) return null;
-            var creator = _mapper.Map<UserDTO>(dto.Creator);
-            if (creator != null) newMeeting.Creator = creator;
-            var team = _mapper.Map<TeamDTO>(dto.Team);
-            if (team != null) newMeeting.Team = team;
-            var room = _mapper.Map<RoomDTO>(dto.Room);
-            if (room != null) newMeeting.Room = room;
-            foreach (var user in dto.UsersInMeeting)
-            {
-                var u = _mapper.Map<UserDTO>(user);
-                if (u != null) newMeeting.UserInMeeting.Add(u);
-            }
-            newMeeting.Description = dto.Description;
-            newMeeting.Note = dto.Note;
-            newMeeting.StartTime = (DateTime)dto.StartTime;
-            newMeeting.EndTime = (DateTime)dto.EndTime;
-            newMeeting.Priority = (PriorityMeeting)dto.Priority;
-            newMeeting.Status = (StatusMeeting)dto.Status;
-            newMeeting.Target = dto.Target;
-            newMeeting.Method = (MethodMeeting)dto.Method;
-
-            newMeeting.ConflictWith = null;
-            return newMeeting;
-        }
-
-        public MeetingDTO GetOneAsync(int Id)
-        {
-            var e = _context.Meetings.Where(met => met.Id == Id)
-                            .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider)
-                            .SingleOrDefault();
-
-            return e;
-        }
-        public void AddOne(MeetingDTO meeting)
-        {
-            var meet = MappingFromDTO(new Meeting(), meeting);
-            _context.Meetings.Add(meet);
+            _context.Meetings.Add(meeting);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<Pagination<MeetingDTO>> GetAllByPaginationAsync(
@@ -149,26 +89,115 @@ namespace Infrastructure.Repositories
             return res;
         }
 
-
-        public void UpdatingOne(MeetingDTO data)
+        public async Task<Pagination<MeetingDTO>> GetAllAsync(Query<MeetingFilterModel> meetingQuery)
         {
-            var entity = _context.Meetings.Where(X => X.Id == data.Id)
-            .ProjectTo<Meeting>(_mapper.ConfigurationProvider).SingleOrDefault();
+            var _filter = meetingQuery.filter;
+            var paginationParams = meetingQuery.paginationParams;
+            var sort = meetingQuery.sort;
 
-            if (data != null)
+            var stat = _context.Meetings
+                        .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider);
+
+            switch (sort)
             {
-                entity = MappingFromDTO(entity, data);
+                case "created_at":
+                    stat = stat.OrderBy(t => t.CreatedAt);
+                    break;
+                case "-created_at":
+                    stat = stat.OrderByDescending(t => t.CreatedAt);
+                    break;
+            }
+            var query = stat.AsQueryable();
+            return await PaginationService
+                            .GetPagination<MeetingDTO>(query,
+                                                       paginationParams.number,
+                                                       paginationParams.size);
+
+        }
+
+
+        public async Task Update(Meeting meeting)
+        {
+            _context.Entry(meeting).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddUserToMeetingAsync(Guid meetingId, ICollection<Guid> userIds)
+        {
+            if (userIds.Count < 0) return;
+
+            var meeting = await _context.Meetings.FindAsync(meetingId);
+
+            if (meeting == null) return;
+
+            _context.ParticipantMeeting.RemoveRange(
+                _context.ParticipantMeeting.Where(pm => pm.MeetingId == meeting.Id).ToList()
+            );
+
+            foreach (var userId in userIds)
+            {
+                meeting.ParticipantMeetings.Add(new ParticipantMeeting
+                {
+                    MeetingId = meeting.Id,
+                    ParticipantId = userId
+                });
             }
 
-            _context.Meetings.Update(entity);
-
+            await _context.SaveChangesAsync();
         }
 
-        public void DeletingOne(int Id)
+        public async Task DeleteOneAsync(Meeting meeting)
         {
-            var entity = _context.Meetings.Find(Id);
-            _context.Meetings.Remove(entity);
-
+            _context.Meetings.Remove(meeting);
+            await _context.SaveChangesAsync();
         }
+
+        public async Task AddTagToMeeting(Guid meetingId, ICollection<Guid> tagIds)
+        {
+            _context.MeetingTag.RemoveRange(
+                _context.MeetingTag.Where(mt => mt.MeetingId == meetingId)
+            );
+
+            foreach (var tagId in tagIds)
+            {
+                _context.MeetingTag.Add(new MeetingTag
+                {
+                    MeetingId = meetingId,
+                    TagId = tagId
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddFileToMeeting(Guid meetingId, Guid fileId)
+        {
+            _context.MeetingFile.Add(new MeetingFile
+            {
+                FileEntityId = fileId,
+                MeetingId = meetingId
+            });
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddTeams(Guid meetingId, ICollection<Guid> teamIds)
+        {
+            _context.MeetingTeam.RemoveRange(
+                _context.MeetingTeam.Where(mt => mt.MeetingId == meetingId).ToList()
+            );
+
+            foreach (var teamId in teamIds)
+            {
+                _context.MeetingTeam.Add(new MeetingTeam
+                {
+                    MeetingId = meetingId,
+                    TeamId = teamId
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

@@ -1,162 +1,182 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.DTO;
-using Domain.Entities;
-using Domain.Interfaces;
 using Domain.Models;
-using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Application.Utils;
+using MediatR;
+using Application.Features.Queries;
+using System;
+using Application.Features.Commands;
+using Application.Exceptions;
+using Microsoft.AspNetCore.Http;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication;
+using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class TeamController : BaseApiController
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public TeamController(IUnitOfWork unitOfWork, IMapper mapper)
+        public TeamController(IMapper mapper, IMediator mediator)
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
+            _mediator = mediator;
         }
 
         [HttpGet]
-        public async Task<ActionResult<Response<IEnumerable<TeamWithUserDTO>>>> GetTeams(
-          [FromQuery] Dictionary<string, int> page,
-          [FromQuery] Dictionary<string, string> filter,
-          [FromQuery] Dictionary<string, string> sort)
+        public async Task<ActionResult> GetTeams(
+            [FromQuery] Dictionary<string, int> page,
+            [FromQuery] Dictionary<string, string> filter,
+            [FromQuery] Dictionary<string, string> sort)
         {
             var teamQuery = QueryBuilder<FilterTeamModel>.Build(page, filter, sort);
+            var query = new GetAllTeamQuery(teamQuery);
 
-            var result = await _unitOfWork.TeamRepository.GetAllAsync(teamQuery);
+            var result = await _mediator.Send(query);
+            var paginationDTO = new PaginationDTO
+            {
+                CurrentPage = result.CurrentPage,
+                PerPage = result.PerPage,
+                Total = result.Total,
+                Count = result.Count,
+                TotalPages = result.TotalPages
+            };
 
-            var response = new ResponseBuilder<IEnumerable<TeamWithUserDTO>>()
-                                .AddData(result.Items)
-                                .AddPagination(new PaginationDTO
-                                {
-                                    CurrentPage = result.CurrentPage,
-                                    PerPage = result.PerPage,
-                                    Total = result.Total,
-                                    Count = result.Count,
-                                    TotalPage = result.TotalPages
-                                })
-                                .Build();
+            var response = new ResponseWithPaginationBuilder<IEnumerable<TeamWithUserDTO>>()
+                .AddData(result.Items)
+                .AddPagination(paginationDTO)
+                .Build();
 
-            return response;
+            return Ok(response);
         }
 
         [HttpGet("{teamId}")]
-        public async Task<ActionResult<Response<TeamWithUserDTO>>> GetTeam(int teamId)
+        public async Task<ActionResult> GetTeam(Guid teamId)
         {
-            var team = await _unitOfWork.TeamRepository.GetTeamAsync(teamId);
+            var query = new GetTeamQuery(teamId);
+            var result = await _mediator.Send(query);
 
-            return new ResponseBuilder<TeamWithUserDTO>()
-                        .AddData(team)
-                        .Build();
+            var response = new ResponseBuilder<TeamWithUserDTO>()
+                                .AddData(result)
+                                .Build();
+
+            return Ok(response);
         }
 
 
         [HttpPost]
-        public async Task<ActionResult<Response<TeamDTO>>> CreateTeam(TeamModel teamModel)
+        public async Task<ActionResult> CreateTeam(CreateTeamCommand command)
         {
-            var team = _mapper.Map<Team>(teamModel);
-            var leader = await _unitOfWork.UserRepository.GetUserEntityAsync(teamModel.l_id);
+            var token = await HttpContext.GetTokenAsync("access_token");
+            var handler = new JwtSecurityTokenHandler();
+            var creatorId = handler.ReadJwtToken(token).Claims
+                .Where(c => c.Type.Equals("UserId"))
+                .Select(c => c.Value)
+                .SingleOrDefault();
 
-            if (leader == null)
+            command.CreatorId = new Guid(creatorId);
+            Guid result = Guid.Empty;
+            try
             {
-                return BadRequest(new
-                {
-                    status = 400,
-                    success = false,
-                    message = "Leader not found"
-                });
+                result = await _mediator.Send(command);
+            }
+            catch (NotFoundException notFoundException)
+            {
+                var notFoundRes = new ResponseBuilder<Unit>()
+                                    .AddMessage(notFoundException.Message)
+                                    .AddHttpStatus(404, false)
+                                    .Build();
+                return BadRequest(notFoundRes);
+            }
+            catch (ForbiddenException forbiddenException)
+            {
+                var forbiddentRes = new ResponseBuilder<Unit>()
+                                    .AddMessage(forbiddenException.Message)
+                                    .AddHttpStatus(403, false)
+                                    .Build();
+                return StatusCode(StatusCodes.Status403Forbidden, forbiddentRes);
             }
 
-            var isLeaderRole = leader.Role.Equals(UserRoles.LEAD);
-
-            if (!isLeaderRole)
-            {
-                return BadRequest(new
-                {
-                    success = false,
-                    status = 400,
-                    message = "Staff can't be a leader"
-                });
-            }
-
-            team.Leader = leader;
-            team.LeaderId = leader.Id;
-
-            _unitOfWork.TeamRepository.AddTeam(team);
-
-            bool saveStatus = await _unitOfWork.Complete();
-
-            if (!saveStatus)
-            {
-                return BadRequest();
-            }
-
-            team.AppUserTeams.Add(new AppUserTeam
-            {
-                AppUserId = team.LeaderId,
-                TeamId = team.Id
-            });
-
-            await _unitOfWork.Complete();
-
-            var response = new ResponseBuilder<TeamDTO>()
-                                .AddData(_mapper.Map<TeamDTO>(team))
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .AddMessage("Team has been created")
                                 .Build();
 
-            return response;
+            return Ok(response);
+
         }
 
-        [HttpPut]
-        public async Task<ActionResult> UpdateTeam(TeamModel teamModel)
+        [HttpPut("{teamId}")]
+        public async Task<ActionResult> UpdateTeam(Guid teamId, [FromBody] UpdateTeamCommand command)
         {
-            var team = _mapper.Map<Team>(teamModel);
+            command.Id = teamId;
+            var result = Guid.Empty;
 
-            await _unitOfWork.TeamRepository.UpdateTeamAsync(team);
-
-            await _unitOfWork.Complete();
-
-            return Accepted(new
+            try
             {
-                status = 202,
-                success = true,
-                message = "Team had been updated",
-            });
+                result = await _mediator.Send(command);
+            }
+            catch (NotFoundException notFoundException)
+            {
+                var notFoundRes = new ResponseBuilder<Unit>()
+                                    .AddMessage(notFoundException.Message)
+                                    .AddHttpStatus(404, false)
+                                    .Build();
+                return BadRequest(notFoundRes);
+            }
+
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .AddMessage("Team has beed updated")
+                                .Build();
+
+            return Ok(response);
+
         }
 
         [HttpPost("add-user")]
         public async Task<ActionResult> AddUserToTeam([FromBody] UserTeamActionModel userTeamActionModel)
         {
-            await _unitOfWork.TeamRepository.AddUserToTeamAsync(userTeamActionModel.Team_Id, userTeamActionModel.User_Ids);
+            var command = new AddUserToTeamCommand(userTeamActionModel.Team_Id, userTeamActionModel.User_Ids);
+            await _mediator.Send(command);
 
-            await _unitOfWork.Complete();
-
-            return Ok(new
-            {
-                success = true,
-                status = 200,
-                message = "Users had beed add to team"
-            });
+            return Ok(new ResponseBuilder<Unit>()
+                        .Build());
         }
 
         [HttpPost("remove-user")]
         public async Task<ActionResult> RemoveUserFromTeam([FromBody] UserTeamActionModel userTeamActionModel)
         {
-            await _unitOfWork.TeamRepository.RemoveUserFromTeam(userTeamActionModel.Team_Id, userTeamActionModel.User_Ids);
-            await _unitOfWork.Complete();
+            var command = new RemoveUserFromTeamCommand(userTeamActionModel.Team_Id, userTeamActionModel.User_Ids);
 
-            return Ok(new
-            {
-                success = true,
-                status = 200,
-                message = "Users had beed removed to team"
-            });
+            await _mediator.Send(command);
+
+            return Ok(new ResponseBuilder<Unit>().Build());
+        }
+
+        [HttpGet("me")]
+        public async Task<ActionResult> GetLeadingTeam()
+        {
+            var token = await HttpContext.GetTokenAsync("access_token");
+            var handler = new JwtSecurityTokenHandler();
+            var leaderId = handler.ReadJwtToken(token).Claims
+                .Where(c => c.Type.Equals("UserId"))
+                .Select(c => c.Value)
+                .SingleOrDefault();
+
+            var query = new GetLeadingTeamQuery(new Guid(leaderId));
+            var result = await _mediator.Send(query);
+
+            var response = new ResponseBuilder<IEnumerable<TeamBaseDTO>>()
+                                .AddData(result)
+                                .Build();
+
+            return Ok(response);
         }
 
     }

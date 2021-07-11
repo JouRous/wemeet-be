@@ -12,6 +12,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Application.Utils;
+using System;
+using Application.Features.Commands;
+using MediatR;
+using Application.Features.Queries;
+using Application.Exceptions;
 
 namespace API.Controllers
 {
@@ -22,20 +27,22 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailService _emailService;
         private readonly ITokenService _tokenService;
+        private readonly IMediator _mediator;
 
         public UsersController(
-          IMapper mapper,
-          UserManager<AppUser> userManager,
-          IUnitOfWork unitOfWork,
-          ITokenService tokenService,
-          IEmailService emailService
-          )
+            IMapper mapper,
+            UserManager<AppUser> userManager,
+            IUnitOfWork unitOfWork,
+            ITokenService tokenService,
+            IEmailService emailService,
+            IMediator mediator)
         {
             _userManager = userManager;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _emailService = emailService;
             _tokenService = tokenService;
+            _mediator = mediator;
         }
 
         private async Task<bool> CheckUserExist(string email)
@@ -43,92 +50,53 @@ namespace API.Controllers
             return await _userManager.Users.AnyAsync(user => user.Email == email);
         }
 
+
         [HttpPost()]
-        public async Task<ActionResult<Response<AuthModel>>> CreateUser([FromBody] UserActionModel userActionModel)
+        public async Task<ActionResult> CreateUser([FromForm] CreateUserCommand commnad)
         {
-            if (await CheckUserExist(userActionModel.Email))
+            var result = Guid.Empty;
+
+            try
             {
-                return StatusCode(StatusCodes.Status409Conflict, new
-                {
-                    status = 409,
-                    success = false,
-                    message = "User already exist"
-                });
+                result = await _mediator.Send(commnad);
+            }
+            catch (ApplicationException ex)
+            {
+                var exRes = new ResponseBuilder<Unit>()
+                                .AddMessage(ex.Message)
+                                .AddHttpStatus(400, false)
+                                .Build();
+                return BadRequest(exRes);
             }
 
-            var transaction = await DbContext.Database.BeginTransactionAsync();
-            var user = _mapper.Map<AppUser>(userActionModel);
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .AddMessage("Create user success")
+                                .Build();
 
-            user.UserName = user.Email;
-            user.isFirstLogin = true;
-            user.AppUserTeams = new List<AppUserTeam>();
-            user.UnsignedName = StringHelper.RemoveAccentedString(user.Fullname);
-            user.Role = userActionModel.Role;
-            var randomPassword = StringHelper.RandomString(9);
-
-            var createStatus = await _userManager.CreateAsync(user, randomPassword);
-
-            if (!createStatus.Succeeded)
-            {
-                await transaction.RollbackAsync();
-                return BadRequest(createStatus.Errors);
-            }
-
-            transaction.Commit();
-
-            await _emailService.sendMailAsync(user.Email, "Dang ky thanh cong.", $"Mat khau la {randomPassword}");
-
-            return Ok(new
-            {
-                success = true,
-                status = 200,
-                message = "Create user success"
-            });
-
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserWithTeamUsersDTO>> GetUser(int id)
+        public async Task<ActionResult> GetUser(Guid id)
         {
-            var user = await _unitOfWork.UserRepository.GetUserAsync(id);
+            var result = await _mediator.Send(new GetUserQuery(id));
 
-            if (user == null)
-            {
-                return StatusCode(StatusCodes.Status404NotFound, new
-                {
-                    status = 404,
-                    success = false
-                });
-            }
-
-            return Ok(new
-            {
-                data = user,
-                status = 200,
-                success = true
-            });
+            var response = new ResponseBuilder<UserWithTeamUsersDTO>()
+                                .AddData(result)
+                                .Build();
+            return Ok(response);
         }
 
         [HttpGet("get-by-email/{email}")]
-        public async Task<ActionResult<UserDTO>> GetUserByEmail(string email)
+        public async Task<ActionResult> GetUserByEmail(string email)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
+            var result = await _mediator.Send(new GetUserByEmailQuery(email));
 
-            // if (user == null)
-            // {
-            //   return StatusCode(StatusCodes.Status404NotFound, new
-            //   {
-            //     status = 404,
-            //     success = false
-            //   });
-            // }
-
-            return Ok(new
-            {
-                data = user,
-                status = 200,
-                success = true
-            });
+            var response = new ResponseBuilder<UserDTO>()
+                                .AddData(result)
+                                .Build();
+            return Ok(response);
         }
 
         [HttpGet]
@@ -141,7 +109,7 @@ namespace API.Controllers
 
             var result = await _unitOfWork.UserRepository.GetUsersAsync(userQuery);
 
-            var response = new ResponseBuilder<IEnumerable<UserWithTeamDTO>>()
+            var response = new ResponseWithPaginationBuilder<IEnumerable<UserWithTeamDTO>>()
                    .AddData(result.Items)
                    .AddPagination(new PaginationDTO
                    {
@@ -149,7 +117,7 @@ namespace API.Controllers
                        PerPage = result.PerPage,
                        Total = result.Total,
                        Count = (int)result.Count,
-                       TotalPage = result.TotalPages
+                       TotalPages = result.TotalPages
                    })
                    .Build();
 
@@ -157,90 +125,58 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateUser([FromBody] UserActionModel userActionModel, int id)
+        public async Task<ActionResult> UpdateUser([FromForm] UpdateUserCommand command, Guid id)
         {
-            var user = _mapper.Map<AppUser>(userActionModel);
-            var _user = await _unitOfWork.UserRepository.UpdateUserAsync(user, id);
-            _user.isActive = userActionModel.is_active;
+            command.Id = id;
+            var result = Guid.Empty;
 
-            await _unitOfWork.Complete();
-
-
-            return Accepted(new
+            try
             {
-                status = 202,
-                success = true,
-                message = "User had been updated"
-            });
-
+                result = await _mediator.Send(command);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new ResponseBuilder<Unit>()
+                                    .AddMessage(ex.Message)
+                                    .AddHttpStatus(404, false)
+                                    .Build());
+            }
+            return Ok(new ResponseBuilder<Guid>()
+                            .AddData(result)
+                            .Build());
         }
 
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeactivateUser(int id)
+        public async Task<ActionResult> DeactivateUser(Guid id)
         {
-            var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Id == id);
-
-            if (user == null)
+            try
             {
-                return NotFound(new
-                {
-                    status = 404,
-                    susscess = true
-                });
+                await _mediator.Send(new DeactivateUserCommand(id));
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new ResponseBuilder<Unit>()
+                                    .AddMessage(ex.Message).Build());
             }
 
-            _unitOfWork.UserRepository.DeactivateUser(user);
-            if (!(await _unitOfWork.Complete()))
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new
-                {
-                    status = 500,
-                    sussess = false,
-                    message = "Internal Server Error"
-                });
-            }
-
-            return Accepted(new
-            {
-                status = 202,
-                success = true,
-                message = "User had been deactivate"
-            });
+            return Accepted(new ResponseBuilder<Unit>().Build());
         }
 
         [HttpGet("retrieve/{id}")]
-        public async Task<ActionResult> RetrieveUser(int id)
+        public async Task<ActionResult> RetrieveUser(Guid id)
         {
-            var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Id == id);
-
-            if (user == null)
+            try
             {
-                return NotFound(new
-                {
-                    status = 404,
-                    susscess = true
-                });
+                await _mediator.Send(new RetrieveUserCommand(id));
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new ResponseBuilder<Unit>()
+                                    .AddMessage(ex.Message).Build());
             }
 
-            _unitOfWork.UserRepository.RetrieveUser(user);
-            if (!(await _unitOfWork.Complete()))
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new
-                {
-                    status = 500,
-                    sussess = false,
-                    message = "Internal Server Error"
-                });
-            }
-
-            return Accepted(new
-            {
-                status = 202,
-                success = true,
-                message = "User had been retrieve"
-            });
-
+            return Accepted(new ResponseBuilder<Unit>().Build());
         }
 
     }

@@ -7,6 +7,6 @@ namespace Domain.Models
     {
         public UserDTO User { get; set; }
         public string token { get; set; }
-        public IEnumerable<string> Role { get; set; }
+        // public IEnumerable<string> Role { get; set; }
     }
 }

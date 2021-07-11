@@ -10,13 +10,11 @@ namespace Domain.Interfaces
 {
     public interface IRoomRepository
     {
-        void AddOne(Room info);
-        Task<Pagination<RoomDTO>> GetAllByPaginationAsync(Dictionary<string, int> page,
-                                                                                                             Dictionary<string, string> filter,
-                                                                                                             string sort = "-created_at");
-        Task<RoomDTO> GetOneAsync(int Id);
+        Task<Room> GetRoom(Guid id);
+        Task<Pagination<RoomDTO>> GetAllAsync(Query<RoomFilterModel> query);
+        Task AddOneAsync(Room Room);
         int GetSizeOfEntity(Func<Room, bool> query);
-        void DeletingOne(int Id);
-        void UpdatingOne(RoomDTO room);
+        Task DeleteAsync(Room room);
+        Task UpdateAsync(Room room);
     }
 }

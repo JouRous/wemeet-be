@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Types;
 using System.IO;
 using System.Reflection;
+using Application.Utils;
+using System;
 
 namespace Infrastructure.Data
 {
@@ -21,7 +23,7 @@ namespace Infrastructure.Data
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public int l_id { get; set; }
+        public Guid l_id { get; set; }
     }
 
     public class Seed
@@ -51,8 +53,8 @@ namespace Infrastructure.Data
                     UserName = user.Email.ToLower(),
                     Nickname = user.Email.Split("@")[0],
                     Fullname = user.Fullname,
-                    isFirstLogin = true,
-                    // UnsignedName = Utils.Utils.RemoveAccentedString(user.Fullname),
+                    isFirstLogin = false,
+                    UnsignedName = StringHelper.RemoveAccentedString(user.Fullname),
                     Role = UserRoles.STAFF
                 };
 
@@ -74,36 +76,35 @@ namespace Infrastructure.Data
                 Fullname = "Admin",
                 Nickname = "Admin",
                 UserName = "admin",
-                Email = "admin",
+                Email = "adm.adm@mailinator.com",
                 Role = UserRoles.ADMIN
             };
 
             await userManager.CreateAsync(admin, "123123");
 
-            var teamData = await System.IO.File.ReadAllTextAsync("Data/TeamSeedData.json");
-            var teams = JsonSerializer.Deserialize<List<SeedTeamModel>>(teamData);
+            // var teamData = await System.IO.File.ReadAllTextAsync("Data/TeamSeedData.json");
+            // var teams = JsonSerializer.Deserialize<List<SeedTeamModel>>(teamData);
 
-            foreach (var team in teams)
-            {
-                var leader = await userManager.Users.FirstOrDefaultAsync(u => u.Id == team.l_id);
-                var _team = new Team
-                {
-                    Name = team.Name,
-                    Description = team.Description,
-                    Leader = leader,
-                    LeaderId = leader.Id,
-                    AppUserTeams = new List<AppUserTeam>()
-                };
-                await context.Teams.AddAsync(_team);
-                await context.SaveChangesAsync();
-                _team.AppUserTeams.Add(new AppUserTeam
-                {
-                    TeamId = _team.Id,
-                    AppUserId = _team.LeaderId
-                });
-                await context.SaveChangesAsync();
-            }
-
+            // foreach (var team in teams)
+            // {
+            //     var leader = await userManager.Users.FirstOrDefaultAsync(u => u.Id == team.l_id);
+            //     var _team = new Team
+            //     {
+            //         Name = team.Name,
+            //         Description = team.Description,
+            //         Leader = leader,
+            //         LeaderId = leader.Id,
+            //         AppUserTeams = new List<AppUserTeam>()
+            //     };
+            //     await context.Teams.AddAsync(_team);
+            //     await context.SaveChangesAsync();
+            //     // _team.AppUserTeams.Add(new AppUserTeam
+            //     // {
+            //     //     TeamId = _team.Id,
+            //     //     AppUserId = _team.LeaderId
+            //     // });
+            //     await context.SaveChangesAsync();
         }
+
     }
 }
