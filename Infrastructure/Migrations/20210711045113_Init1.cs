@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Infrastructure.Migrations
 {
-    public partial class Init : Migration
+    public partial class Init1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,8 +12,7 @@ namespace Infrastructure.Migrations
                 name: "AspNetRoles",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "text", nullable: true)
@@ -27,8 +26,7 @@ namespace Infrastructure.Migrations
                 name: "AspNetUsers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Fullname = table.Column<string>(type: "text", nullable: true),
                     UnsignedName = table.Column<string>(type: "text", nullable: true),
                     Nickname = table.Column<string>(type: "text", nullable: true),
@@ -130,7 +128,7 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
                     ClaimValue = table.Column<string>(type: "text", nullable: true)
                 },
@@ -151,7 +149,7 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
                     ClaimValue = table.Column<string>(type: "text", nullable: true)
                 },
@@ -173,7 +171,7 @@ namespace Infrastructure.Migrations
                     LoginProvider = table.Column<string>(type: "text", nullable: false),
                     ProviderKey = table.Column<string>(type: "text", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "text", nullable: true),
-                    UserId = table.Column<int>(type: "integer", nullable: false)
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -190,11 +188,11 @@ namespace Infrastructure.Migrations
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
                     Discriminator = table.Column<string>(type: "text", nullable: false),
-                    UserId1 = table.Column<int>(type: "integer", nullable: true),
-                    RoleId1 = table.Column<int>(type: "integer", nullable: true)
+                    UserId1 = table.Column<Guid>(type: "uuid", nullable: true),
+                    RoleId1 = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -229,7 +227,7 @@ namespace Infrastructure.Migrations
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     LoginProvider = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Value = table.Column<string>(type: "text", nullable: true)
@@ -253,7 +251,7 @@ namespace Infrastructure.Migrations
                     Name = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
                     Avatar = table.Column<string>(type: "text", nullable: true),
-                    LeaderId = table.Column<int>(type: "integer", nullable: false),
+                    LeaderId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
@@ -298,7 +296,7 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     TeamsId = table.Column<Guid>(type: "uuid", nullable: false),
-                    UsersId = table.Column<int>(type: "integer", nullable: false)
+                    UsersId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -321,7 +319,7 @@ namespace Infrastructure.Migrations
                 name: "AppUserTeams",
                 columns: table => new
                 {
-                    AppUserId = table.Column<int>(type: "integer", nullable: false),
+                    AppUserId = table.Column<Guid>(type: "uuid", nullable: false),
                     TeamId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -348,7 +346,7 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true),
-                    CreatorId = table.Column<int>(type: "integer", nullable: true),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     StartTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     EndTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
@@ -451,7 +449,7 @@ namespace Infrastructure.Migrations
                 name: "ParticipantMeeting",
                 columns: table => new
                 {
-                    ParticipantId = table.Column<int>(type: "integer", nullable: false),
+                    ParticipantId = table.Column<Guid>(type: "uuid", nullable: false),
                     MeetingId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>

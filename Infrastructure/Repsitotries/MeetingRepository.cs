@@ -108,7 +108,10 @@ namespace Infrastructure.Repositories
                     break;
             }
             var query = stat.AsQueryable();
-            return await PaginationService.GetPagination<MeetingDTO>(query, paginationParams.number, paginationParams.size);
+            return await PaginationService
+                            .GetPagination<MeetingDTO>(query,
+                                                       paginationParams.number,
+                                                       paginationParams.size);
 
         }
 
@@ -119,13 +122,7 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public void DeletingOne(int Id)
-        {
-            var entity = _context.Meetings.Find(Id);
-            _context.Meetings.Remove(entity);
-        }
-
-        public async Task AddUserToMeetingAsync(Guid meetingId, ICollection<int> userIds)
+        public async Task AddUserToMeetingAsync(Guid meetingId, ICollection<Guid> userIds)
         {
             if (userIds.Count < 0) return;
 

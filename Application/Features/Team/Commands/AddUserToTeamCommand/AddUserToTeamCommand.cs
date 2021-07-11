@@ -7,9 +7,9 @@ namespace Application.Features.Commands
     public class AddUserToTeamCommand : IRequest
     {
         public Guid teamId { get; set; }
-        public ICollection<int> userIds { get; set; }
+        public ICollection<Guid> userIds { get; set; }
 
-        public AddUserToTeamCommand(Guid teamId, ICollection<int> userIds)
+        public AddUserToTeamCommand(Guid teamId, ICollection<Guid> userIds)
         {
             this.teamId = teamId;
             this.userIds = userIds;

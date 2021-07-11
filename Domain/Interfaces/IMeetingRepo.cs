@@ -16,9 +16,8 @@ namespace Domain.Interfaces
         Task<Meeting> GetOneAsync(Guid Id);
         Task<Pagination<MeetingDTO>> GetAllAsync(Query<MeetingFilterModel> meetingQuery);
         Task Update(Meeting meeting);
-        void DeletingOne(int Id);
         Task DeleteOneAsync(Meeting meeting);
-        Task AddUserToMeetingAsync(Guid meetingId, ICollection<int> userIds);
+        Task AddUserToMeetingAsync(Guid meetingId, ICollection<Guid> userIds);
         Task AddTagToMeeting(Guid meetingId, ICollection<Guid> tagIds);
         Task AddFileToMeeting(Guid meetingId, Guid fileId);
         Task AddTeams(Guid meetingId, ICollection<Guid> teamIds);

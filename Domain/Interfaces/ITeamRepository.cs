@@ -12,12 +12,12 @@ namespace Domain.Interfaces
     {
         Task<TeamWithUserDTO> GetTeamAsync(Guid teamId);
         Task<Team> GetTeamEntityAsync(Guid teamId);
-        Task<IEnumerable<TeamBaseDTO>> GetLeadingTeamAsync(int leaderId);
+        Task<IEnumerable<TeamBaseDTO>> GetLeadingTeamAsync(Guid leaderId);
         Task<Pagination<TeamWithUserDTO>> GetAllAsync(Query<FilterTeamModel> query);
         Task AddTeamAsync(Team team);
         Task UpdateTeamAsync(Team team);
-        Task AddOneUSerToTeam(Guid teamId, int userId);
-        Task AddUserToTeamAsync(Guid teamId, ICollection<int> userIds);
-        Task RemoveUserFromTeam(Guid teamId, ICollection<int> userIds);
+        Task AddOneUSerToTeam(Guid teamId, Guid userId);
+        Task AddUserToTeamAsync(Guid teamId, ICollection<Guid> userIds);
+        Task RemoveUserFromTeam(Guid teamId, ICollection<Guid> userIds);
     }
 }

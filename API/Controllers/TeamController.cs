@@ -81,7 +81,7 @@ namespace API.Controllers
                 .Select(c => c.Value)
                 .SingleOrDefault();
 
-            command.CreatorId = Int32.Parse(creatorId);
+            command.CreatorId = new Guid(creatorId);
             Guid result = Guid.Empty;
             try
             {
@@ -171,7 +171,7 @@ namespace API.Controllers
                 .Select(c => c.Value)
                 .SingleOrDefault();
 
-            var query = new GetLeadingTeamQuery(Int32.Parse(leaderId));
+            var query = new GetLeadingTeamQuery(new Guid(leaderId));
             var result = await _mediator.Send(query);
 
             var response = new ResponseBuilder<IEnumerable<TeamBaseDTO>>()

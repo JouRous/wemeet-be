@@ -35,12 +35,12 @@ namespace Infrastructure.Repositories
             user.isActive = false;
         }
 
-        public async Task<AppUser> GetUserEntityAsync(int id)
+        public async Task<AppUser> GetUserEntityAsync(Guid id)
         {
             return await _context.Users.FindAsync(id);
         }
 
-        public async Task<UserWithTeamUsersDTO> GetUserAsync(int id)
+        public async Task<UserWithTeamUsersDTO> GetUserAsync(Guid id)
         {
             return await _context.Users.Where(user => user.Id == id)
                 .Include(u => u.AppUserTeams)
@@ -105,7 +105,7 @@ namespace Infrastructure.Repositories
             user.DeletedAt = null;
         }
 
-        public async Task<AppUser> UpdateUserAsync(AppUser user, int id)
+        public async Task<AppUser> UpdateUserAsync(AppUser user, Guid id)
         {
             var _user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
             if (_user != null)
@@ -120,7 +120,7 @@ namespace Infrastructure.Repositories
             return _user;
         }
 
-        public async Task<string> GetEmailAsync(int id)
+        public async Task<string> GetEmailAsync(Guid id)
         {
             return await _context.Users.Where(u => u.Id == id).Select(u => u.Email).FirstOrDefaultAsync();
         }

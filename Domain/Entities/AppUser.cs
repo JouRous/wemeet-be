@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Entities
 {
-    public class AppUser : IdentityUser<int>
+    public class AppUser : IdentityUser<Guid>
     {
         public string Fullname { get; set; }
         public string UnsignedName { get; set; }

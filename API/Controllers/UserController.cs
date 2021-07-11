@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Application.Utils;
+using System;
 
 namespace API.Controllers
 {
@@ -87,7 +88,7 @@ namespace API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserWithTeamUsersDTO>> GetUser(int id)
+        public async Task<ActionResult<UserWithTeamUsersDTO>> GetUser(Guid id)
         {
             var user = await _unitOfWork.UserRepository.GetUserAsync(id);
 
@@ -156,7 +157,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateUser([FromBody] UserActionModel userActionModel, int id)
+        public async Task<ActionResult> UpdateUser([FromBody] UserActionModel userActionModel, Guid id)
         {
             var user = _mapper.Map<AppUser>(userActionModel);
             var _user = await _unitOfWork.UserRepository.UpdateUserAsync(user, id);
@@ -176,7 +177,7 @@ namespace API.Controllers
 
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeactivateUser(int id)
+        public async Task<ActionResult> DeactivateUser(Guid id)
         {
             var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Id == id);
 
@@ -209,7 +210,7 @@ namespace API.Controllers
         }
 
         [HttpGet("retrieve/{id}")]
-        public async Task<ActionResult> RetrieveUser(int id)
+        public async Task<ActionResult> RetrieveUser(Guid id)
         {
             var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Id == id);
 
