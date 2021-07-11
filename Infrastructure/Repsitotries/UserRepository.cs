@@ -40,6 +40,11 @@ namespace Infrastructure.Repositories
             return await _context.Users.FindAsync(id);
         }
 
+        public async Task<AppUser> GetUserEntityByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
         public async Task<UserWithTeamUsersDTO> GetUserAsync(Guid id)
         {
             return await _context.Users.Where(user => user.Id == id)

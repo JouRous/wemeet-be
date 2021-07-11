@@ -13,6 +13,7 @@ namespace Domain.Interfaces
         Task<AppUser> GetUserEntityAsync(Guid id);
         Task<UserWithTeamUsersDTO> GetUserAsync(Guid id);
         Task<IEnumerable<AdminUserDTO>> GetUserAdminsAsync();
+        Task<AppUser> GetUserEntityByEmailAsync(string email);
         Task<string> GetEmailAsync(Guid id);
         Task<UserDTO> GetUserByEmailAsync(string email);
         Task<AppUser> UpdateUserAsync(AppUser user, Guid id);

@@ -22,17 +22,11 @@ namespace API.Controllers
 {
     public class MeetingController : BaseApiController
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
         private readonly IMediator _mediator;
-        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public MeetingController(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator, IWebHostEnvironment hostEnvironment)
+        public MeetingController(IMediator mediator, IWebHostEnvironment hostEnvironment)
         {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
             _mediator = mediator;
-            _hostEnvironment = hostEnvironment;
         }
 
         [HttpGet]

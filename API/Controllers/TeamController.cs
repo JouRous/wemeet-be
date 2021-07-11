@@ -21,12 +21,10 @@ namespace API.Controllers
     [Authorize]
     public class TeamController : BaseApiController
     {
-        private readonly IMapper _mapper;
         private readonly IMediator _mediator;
 
         public TeamController(IMapper mapper, IMediator mediator)
         {
-            _mapper = mapper;
             _mediator = mediator;
         }
 
