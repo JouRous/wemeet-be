@@ -242,13 +242,22 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<MeetingBase>> GetMeetingByTimeAndRoom(Guid roomId, DateTime timestart, DateTime timeend)
         {
-            return await _context.Meetings
+            var m1 = await _context.Meetings
+                   .Where(m => m.RoomId == roomId)
+                   .Where(
+                       m => m.StartTime >= timestart
+                   )
+                   .ProjectTo<MeetingBase>(_mapper.ConfigurationProvider)
+                   .ToListAsync();
+            var m2 = await _context.Meetings
                     .Where(m => m.RoomId == roomId)
                     .Where(
-                        m => m.StartTime >= timestart && m.EndTime <= timeend
+                        m => m.EndTime <= timeend
                     )
                     .ProjectTo<MeetingBase>(_mapper.ConfigurationProvider)
                     .ToListAsync();
+
+            return m1.Intersect(m2);
         }
     }
 }
