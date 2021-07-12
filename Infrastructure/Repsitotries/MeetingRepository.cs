@@ -239,5 +239,14 @@ namespace Infrastructure.Repositories
                                                        paginationParams.number,
                                                        paginationParams.size);
         }
+
+        public async Task<IEnumerable<Meeting>> GetMeetingByTime(DateTime timestart, DateTime timeend)
+        {
+            return await _context.Meetings
+                    .Where(
+                        m => m.StartTime >= timestart && m.EndTime <= timeend
+                    )
+                    .ToListAsync();
+        }
     }
 }

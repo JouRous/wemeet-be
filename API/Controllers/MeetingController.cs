@@ -1,22 +1,16 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.DTO;
-using Domain.Interfaces;
 using Domain.Types;
-using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Application.Utils;
-using Domain.Entities;
 using Application.Features.Commands;
 using MediatR;
 using System;
 using Application.Features.Queries;
 using Domain.Models;
-using API.Extensions;
 using Microsoft.AspNetCore.Hosting;
-using System.IO;
 using Domain.Enums;
-using Microsoft.AspNetCore.Cors;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication;
 using System.Linq;
@@ -110,7 +104,18 @@ namespace API.Controllers
 
             var result = await _mediator.Send(query);
 
-            return Ok(result);
+            var paginationDTO = new PaginationDTO
+            {
+                CurrentPage = result.CurrentPage,
+                PerPage = result.PerPage,
+                Total = result.Total,
+                Count = result.Count,
+                TotalPages = result.TotalPages
+            };
+            return Ok(new ResponseWithPaginationBuilder<IEnumerable<MeetingDTO>>()
+                            .AddData(result.Items)
+                            .AddPagination(paginationDTO)
+                            .Build());
         }
 
         [HttpGet("{MeetingId}")]

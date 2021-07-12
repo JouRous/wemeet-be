@@ -16,6 +16,7 @@ namespace Domain.Interfaces
         Task<Meeting> GetMeetingEntity(Guid Id);
         Task<Pagination<MeetingDTO>> GetAllAsync(Query<MeetingFilterModel> meetingQuery);
         Task<Pagination<MeetingDTO>> GetAllByTeamAsync(Guid TeamId, Query<MeetingFilterModel> meetingQuery);
+        Task<IEnumerable<Meeting>> GetMeetingByTime(DateTime timestart, DateTime timeend);
         Task Update(Meeting meeting);
         Task DeleteOneAsync(Meeting meeting);
         Task AddUserToMeetingAsync(Guid meetingId, ICollection<Guid> userIds);
