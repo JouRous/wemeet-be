@@ -245,19 +245,24 @@ namespace Infrastructure.Repositories
             var m1 = await _context.Meetings
                    .Where(m => m.RoomId == roomId)
                    .Where(
-                       m => m.StartTime >= timestart
+                       m => (
+                           (timestart < m.StartTime && timeend < m.EndTime && timeend > m.StartTime) ||
+                           (timestart < m.StartTime && timeend > m.EndTime) ||
+                           (timestart > m.StartTime && timeend < m.EndTime) ||
+                           (timestart > m.StartTime && timeend > m.EndTime && timestart < m.EndTime)
+                       )
                    )
                    .ProjectTo<MeetingBase>(_mapper.ConfigurationProvider)
                    .ToListAsync();
-            var m2 = await _context.Meetings
-                    .Where(m => m.RoomId == roomId)
-                    .Where(
-                        m => m.EndTime <= timeend
-                    )
-                    .ProjectTo<MeetingBase>(_mapper.ConfigurationProvider)
-                    .ToListAsync();
-
-            return m1.Intersect(m2);
+            // var m2 = await _context.Meetings
+            //         .Where(m => m.RoomId == roomId)
+            //         .Where(
+            //             m => m.EndTime <= timeend || m.EndTime < timeend
+            //         )
+            //         .ProjectTo<MeetingBase>(_mapper.ConfigurationProvider)
+            //         .ToListAsync();
+            return m1;
+            // return m1.Intersect(m2);
         }
     }
 }
