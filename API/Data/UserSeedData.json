@@ -30,6 +30,12 @@
     "Role": "LEAD"
   },
   {
+    "Email": "khoi@gmail.com",
+    "Password": "password",
+    "Fullname": "Khôi",
+    "Role": "LEAD"
+  },
+  {
     "Email": "dpm11234@gmail.com",
     "Fullname": "Dương Mậu",
     "Role": "LEAD"
