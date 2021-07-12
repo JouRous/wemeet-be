@@ -246,10 +246,10 @@ namespace Infrastructure.Repositories
                    .Where(m => m.RoomId == roomId)
                    .Where(
                        m => (
-                           (timestart < m.StartTime && timeend < m.EndTime && timeend > m.StartTime) ||
-                           (timestart < m.StartTime && timeend > m.EndTime) ||
-                           (timestart > m.StartTime && timeend < m.EndTime) ||
-                           (timestart > m.StartTime && timeend > m.EndTime && timestart < m.EndTime)
+                           (timestart <= m.StartTime && timeend <= m.EndTime && timeend >= m.StartTime) ||
+                           (timestart <= m.StartTime && timeend >= m.EndTime) ||
+                           (timestart >= m.StartTime && timeend <= m.EndTime) ||
+                           (timestart >= m.StartTime && timeend >= m.EndTime && timestart <= m.EndTime)
                        )
                    )
                    .ProjectTo<MeetingBase>(_mapper.ConfigurationProvider)
