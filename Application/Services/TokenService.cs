@@ -49,7 +49,8 @@ namespace Application.Services
             var claims = new List<Claim>
             {
             new Claim("UserId", user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.UserName)
+            new Claim(ClaimTypes.Email, user.UserName),
+            new Claim(ClaimTypes.Role, user.Role)
             };
 
             var roles = await _userManager.GetRolesAsync(user);

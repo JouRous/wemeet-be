@@ -17,6 +17,9 @@ using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using Domain.Enums;
 using Microsoft.AspNetCore.Cors;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication;
+using System.Linq;
 
 namespace API.Controllers
 {
@@ -86,6 +89,27 @@ namespace API.Controllers
                                 .Build();
 
             return Ok(response);
+        }
+
+        [HttpGet("get-by-team/{teamId}")]
+        public async Task<ActionResult> GetMeetingByTeam(Guid teamId,
+            [FromQuery] Dictionary<string, int> page,
+            [FromQuery] Dictionary<string, string> filter,
+            [FromQuery] Dictionary<string, string> sort)
+        {
+            var token = await HttpContext.GetTokenAsync("access_token");
+            var handler = new JwtSecurityTokenHandler();
+            var role = handler.ReadJwtToken(token).Claims
+                .Where(c => c.Type.Equals("role"))
+                .Select(c => c.Value)
+                .SingleOrDefault();
+
+            var meetingQuery = QueryBuilder<MeetingFilterModel>.Build(page, filter, sort);
+            var query = new GetMeetingByTeamQuery(teamId, meetingQuery);
+
+            var result = await _mediator.Send(query);
+
+            return Ok(result);
         }
 
         [HttpGet("{MeetingId}")]

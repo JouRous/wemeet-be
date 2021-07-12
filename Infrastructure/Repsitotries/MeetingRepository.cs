@@ -204,6 +204,30 @@ namespace Infrastructure.Repositories
             return user;
         }
 
+        public async Task<Pagination<MeetingDTO>> GetAllByTeamAsync(Guid TeamId, Query<MeetingFilterModel> meetingQuery)
+        {
+            var _filter = meetingQuery.filter;
+            var paginationParams = meetingQuery.paginationParams;
+            var sort = meetingQuery.sort;
 
+            var stat = _context.Meetings
+                        .Where(m => m.MeetingTeams.Any(mt => mt.TeamId == TeamId))
+                        .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider);
+
+            switch (sort)
+            {
+                case "created_at":
+                    stat = stat.OrderBy(t => t.CreatedAt);
+                    break;
+                case "-created_at":
+                    stat = stat.OrderByDescending(t => t.CreatedAt);
+                    break;
+            }
+            var query = stat.AsQueryable();
+            return await PaginationService
+                            .GetPagination<MeetingDTO>(query,
+                                                       paginationParams.number,
+                                                       paginationParams.size);
+        }
     }
 }
