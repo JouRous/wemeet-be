@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Extensions;
 using AutoMapper;
+using Domain.DTO;
 using Domain.Entities;
 using Domain.Interfaces;
 using MediatR;
@@ -41,6 +44,16 @@ namespace Application.Features.Commands
             var meetingEntity = _mapper.Map<Meeting>(request);
 
             meetingEntity.RoomId = request.Room_Id;
+
+            var conflictMeeting = await _meetingRepo.GetMeetingByTimeAndRoom(
+                request.Room_Id,
+                request.StartTime,
+                request.EndTime);
+
+            if (conflictMeeting.Any())
+            {
+                throw new CreateMeetingException(conflictMeeting);
+            }
 
             await _meetingRepo.AddOneAsync(meetingEntity);
 

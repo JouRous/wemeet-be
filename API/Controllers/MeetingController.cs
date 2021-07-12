@@ -135,7 +135,21 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult> AddMeeting([FromForm] CreateMeetingCommand command)
         {
-            var result = await _mediator.Send(command);
+            var result = Guid.Empty;
+
+            try
+            {
+                result = await _mediator.Send(command);
+            }
+            catch (CreateMeetingException ex)
+            {
+                var exResponse = new ResponseBuilder<IEnumerable<MeetingBase>>()
+                                    .AddData(ex.conflictMeetings)
+                                    .AddHttpStatus(409, false)
+                                    .AddMessage("Cant create meeting")
+                                    .Build();
+                return Conflict(exResponse);
+            }
 
             var response = new ResponseBuilder<Guid>()
                         .AddData(result)

@@ -240,12 +240,14 @@ namespace Infrastructure.Repositories
                                                        paginationParams.size);
         }
 
-        public async Task<IEnumerable<Meeting>> GetMeetingByTime(DateTime timestart, DateTime timeend)
+        public async Task<IEnumerable<MeetingBase>> GetMeetingByTimeAndRoom(Guid roomId, DateTime timestart, DateTime timeend)
         {
             return await _context.Meetings
+                    .Where(m => m.RoomId == roomId)
                     .Where(
                         m => m.StartTime >= timestart && m.EndTime <= timeend
                     )
+                    .ProjectTo<MeetingBase>(_mapper.ConfigurationProvider)
                     .ToListAsync();
         }
     }

@@ -11,8 +11,8 @@ namespace Application.Features.Commands
         public string Name { get; set; }
         public string Description { get; set; }
         public string Note { get; set; }
-        public DateTime? StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
         public Guid Room_Id { get; set; }
         public ICollection<Guid> Team_Ids { get; set; } = new List<Guid>();
         public ICollection<Guid> users_in_meeting { get; set; } = new List<Guid>();
