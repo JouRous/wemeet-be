@@ -16,5 +16,6 @@ namespace Application.Features.Queries
 
         public Guid TeamId { get; set; }
         public Query<MeetingFilterModel> MeetingQuery { get; set; }
+        public string Role { get; set; }
     }
 }

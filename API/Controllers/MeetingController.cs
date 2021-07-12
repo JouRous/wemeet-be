@@ -105,6 +105,7 @@ namespace API.Controllers
                 .SingleOrDefault();
 
             var meetingQuery = QueryBuilder<MeetingFilterModel>.Build(page, filter, sort);
+            meetingQuery.filter.Role = role;
             var query = new GetMeetingByTeamQuery(teamId, meetingQuery);
 
             var result = await _mediator.Send(query);

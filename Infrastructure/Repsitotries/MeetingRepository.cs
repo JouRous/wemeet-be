@@ -214,6 +214,16 @@ namespace Infrastructure.Repositories
                         .Where(m => m.MeetingTeams.Any(mt => mt.TeamId == TeamId))
                         .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider);
 
+            if (_filter.Role.Equals(UserRoles.STAFF))
+            {
+                stat = stat.Where(m => m.Status == StatusMeeting.Accepted);
+            }
+
+            if (_filter.Role.Equals(UserRoles.LEAD))
+            {
+                stat = stat.Where(m => m.Status == StatusMeeting.Accepted || m.Status == StatusMeeting.Waiting);
+            }
+
             switch (sort)
             {
                 case "created_at":
