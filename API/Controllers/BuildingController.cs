@@ -13,9 +13,11 @@ using Application.Utils;
 using Application.Features.Commands;
 using MediatR;
 using Application.Features.Queries;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class BuildingController : BaseApiController
     {
         private NotificationService _notificationService = new NotificationService();

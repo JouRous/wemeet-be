@@ -77,6 +77,7 @@ namespace API.Controllers
             return Ok(response);
         }
 
+
         [HttpGet("{id}")]
         public async Task<ActionResult> GetUser(Guid id)
         {

@@ -12,9 +12,11 @@ using MediatR;
 using Application.Features.Commands;
 using Application.Features.Queries;
 using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class RoomController : BaseApiController
     {
         private readonly IMediator _mediator;

@@ -5,10 +5,12 @@ using AutoMapper;
 using Domain.DTO;
 using Domain.Entities;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class TagController : BaseApiController
     {
         private readonly ITagRepository _tagRepository;

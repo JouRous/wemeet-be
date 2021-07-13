@@ -16,9 +16,11 @@ using Microsoft.AspNetCore.Authentication;
 using System.Linq;
 using Domain.Interfaces;
 using System.Globalization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class MeetingController : BaseApiController
     {
         private readonly IMediator _mediator;
@@ -36,8 +38,16 @@ namespace API.Controllers
             [FromQuery] Dictionary<string, string> filter,
             [FromQuery] Dictionary<string, string> sort)
         {
+            var token = await HttpContext.GetTokenAsync("access_token");
+            var handler = new JwtSecurityTokenHandler();
+            var role = handler.ReadJwtToken(token).Claims
+                .Where(c => c.Type.Equals("role"))
+                .Select(c => c.Value)
+                .SingleOrDefault();
+
             var meetingQuery = QueryBuilder<MeetingFilterModel>
                         .Build(page, filter, sort);
+            meetingQuery.filter.Role = role;
             var query = new GetAllMeetingQuery(meetingQuery);
 
             var result = await _mediator.Send(query);
