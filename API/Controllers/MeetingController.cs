@@ -14,16 +14,19 @@ using Domain.Enums;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication;
 using System.Linq;
+using Domain.Interfaces;
 
 namespace API.Controllers
 {
     public class MeetingController : BaseApiController
     {
         private readonly IMediator _mediator;
+        private readonly IMeetingRepo _meetingRepo;
 
-        public MeetingController(IMediator mediator, IWebHostEnvironment hostEnvironment)
+        public MeetingController(IMediator mediator, IWebHostEnvironment hostEnvironment, IMeetingRepo meetingRepo)
         {
             _mediator = mediator;
+            _meetingRepo = meetingRepo;
         }
 
         [HttpGet]
@@ -199,6 +202,17 @@ namespace API.Controllers
             await _mediator.Send(command);
 
             return Ok(new ResponseBuilder<Unit>().AddMessage("Meeting has been processed").Build());
+        }
+
+        [HttpGet("week/{roomId}/{monday}")]
+        public async Task<ActionResult> GetCalendarByWeek(Guid roomId, DateTime monday)
+        {
+            var query = new GetCalendarByWeekQuery(roomId, monday);
+            var result = await _mediator.Send(query);
+
+            return Ok(new ResponseBuilder<IEnumerable<object>>()
+                            .AddData(result)
+                            .Build());
         }
     }
 }

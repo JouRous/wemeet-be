@@ -242,7 +242,7 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<MeetingBase>> GetMeetingByTimeAndRoom(Guid roomId, DateTime timestart, DateTime timeend)
         {
-            var m1 = await _context.Meetings
+            var m = await _context.Meetings
                    .Where(m => m.RoomId == roomId)
                    .Where(
                        m => (
@@ -254,15 +254,17 @@ namespace Infrastructure.Repositories
                    )
                    .ProjectTo<MeetingBase>(_mapper.ConfigurationProvider)
                    .ToListAsync();
-            // var m2 = await _context.Meetings
-            //         .Where(m => m.RoomId == roomId)
-            //         .Where(
-            //             m => m.EndTime <= timeend || m.EndTime < timeend
-            //         )
-            //         .ProjectTo<MeetingBase>(_mapper.ConfigurationProvider)
-            //         .ToListAsync();
-            return m1;
-            // return m1.Intersect(m2);
+
+            return m;
         }
+
+        public async Task<IEnumerable<MeetingBase>> GetMeetingByRoomAndDate(Guid roomId, DateTime date, int dayNumber)
+        {
+            return await _context.Meetings.Where(
+                m => m.RoomId == roomId && m.StartTime >= date && m.StartTime <= date.AddDays(dayNumber)
+            ).ProjectTo<MeetingBase>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+        }
+
     }
 }
