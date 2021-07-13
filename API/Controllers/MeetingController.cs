@@ -15,6 +15,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication;
 using System.Linq;
 using Domain.Interfaces;
+using System.Globalization;
 
 namespace API.Controllers
 {
@@ -213,6 +214,19 @@ namespace API.Controllers
             return Ok(new ResponseBuilder<IEnumerable<object>>()
                             .AddData(result)
                             .Build());
+        }
+
+        [HttpGet("month/{roomId}/{firstDay}")]
+        public async Task<ActionResult> GetCalendaByMonth(Guid roomId, DateTime firstDay)
+        {
+            var query = new GetCalendaByMonthQuery(roomId, firstDay);
+            var result = await _mediator.Send(query);
+
+            var response = new ResponseBuilder<IEnumerable<object>>()
+                            .AddData(result)
+                            .Build();
+
+            return Ok(response);
         }
     }
 }
