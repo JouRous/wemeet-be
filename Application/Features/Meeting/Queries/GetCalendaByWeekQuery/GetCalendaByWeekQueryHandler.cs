@@ -43,6 +43,7 @@ namespace Application.Features.Queries
             var sundaySchedule = new Dictionary<string, object>();
             var sundayMeeting = meetings.Where(m => (int)m.StartTime.DayOfWeek == 0).Select(m => new
             {
+                id = m.Id,
                 start = m.StartTime,
                 end = m.EndTime,
                 minute_of_day = m.StartTime.Hour * 60 + m.StartTime.Minute,

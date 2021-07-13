@@ -29,6 +29,7 @@ namespace Application.Features.Queries
                         .OrderBy(x => x.StartTime)
                         .Select(m => new
                         {
+                            id = m.Id,
                             start = m.StartTime,
                             end = m.EndTime,
                             minute_of_day = m.StartTime.Hour * 60 + m.StartTime.Minute,
