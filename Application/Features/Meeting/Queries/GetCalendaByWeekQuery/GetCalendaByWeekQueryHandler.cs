@@ -27,6 +27,7 @@ namespace Application.Features.Queries
                 var item = new Dictionary<string, object>();
                 var schedule = meetings.Where(m => (int)m.StartTime.DayOfWeek == i).Select(m => new
                 {
+                    id = m.Id,
                     start = m.StartTime,
                     end = m.EndTime,
                     minute_of_day = m.StartTime.Hour * 60 + m.StartTime.Minute,
