@@ -6,6 +6,7 @@ namespace Domain.DTO
     {
         public Guid Id { get; set; }
         public string Fullname { get; set; }
+        public string UnsignedName { get; set; }
         public string Nickname { get; set; }
         public string Avatar { get; set; }
     }

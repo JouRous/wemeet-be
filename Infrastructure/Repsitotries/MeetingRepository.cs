@@ -13,6 +13,7 @@ using Application.Services;
 using Domain.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Application.Utils;
 
 namespace Infrastructure.Repositories
 {
@@ -76,7 +77,8 @@ namespace Infrastructure.Repositories
 
             if (!string.IsNullOrEmpty(filter.Creator))
             {
-                stat = stat.Where(m => m.Creator.Fullname.Contains(filter.Creator));
+                var normalizeFilterName = StringHelper.RemoveAccentedString(filter.Creator);
+                stat = stat.Where(m => m.Creator.UnsignedName.Contains(normalizeFilterName));
             }
 
             switch (sort)
