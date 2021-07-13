@@ -75,6 +75,11 @@ namespace Infrastructure.Repositories
                 stat = stat.Where(m => m.Teams.First().Id == filter.Team);
             }
 
+            if (filter.Room != Guid.Empty)
+            {
+                stat = stat.Where(m => m.Room.Id == filter.Room);
+            }
+
             if (!string.IsNullOrEmpty(filter.Creator))
             {
                 var normalizeFilterName = StringHelper.RemoveAccentedString(filter.Creator);
