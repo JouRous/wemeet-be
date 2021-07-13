@@ -280,9 +280,12 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<MeetingBase>> GetMeetingByRoomAndDate(Guid roomId, DateTime date, int dayNumber)
         {
-            return await _context.Meetings.Where(
+            return await _context.Meetings
+            .Where(m => m.Status == StatusMeeting.Accepted)
+            .Where(
                 m => m.RoomId == roomId && m.StartTime >= date && m.StartTime <= date.AddDays(dayNumber)
-            ).ProjectTo<MeetingBase>(_mapper.ConfigurationProvider)
+            )
+            .ProjectTo<MeetingBase>(_mapper.ConfigurationProvider)
             .ToListAsync();
         }
 
