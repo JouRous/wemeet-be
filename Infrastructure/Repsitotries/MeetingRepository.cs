@@ -57,15 +57,28 @@ namespace Infrastructure.Repositories
 
         public async Task<Pagination<MeetingBaseDTO>> GetWaitingMeetingAsync(Query<MeetingFilterModel> meetingQuery)
         {
+            var filter = meetingQuery.filter;
             var paginationParams = meetingQuery.paginationParams;
             var sort = meetingQuery.sort;
 
             var stat = _context.Meetings
                         .Where(t => t.Status == StatusMeeting.Waiting)
+                        .Where(m => m.Name.Contains(filter.Name))
                         .Include(m => m.MeetingTeams)
                         .ThenInclude(mt => mt.Team)
                         .ThenInclude(t => t.Leader)
                         .ProjectTo<MeetingBaseDTO>(_mapper.ConfigurationProvider);
+
+            if (filter.Team != Guid.Empty)
+            {
+                stat = stat.Where(m => m.Teams.First().Id == filter.Team);
+            }
+
+            if (!string.IsNullOrEmpty(filter.Creator))
+            {
+                stat = stat.Where(m => m.Creator.Fullname.Contains(filter.Creator));
+            }
+
             switch (sort)
             {
                 case "created_at":
