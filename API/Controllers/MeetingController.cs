@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
-    [Authorize]
+    // [Authorize]
     public class MeetingController : BaseApiController
     {
         private readonly IMediator _mediator;
