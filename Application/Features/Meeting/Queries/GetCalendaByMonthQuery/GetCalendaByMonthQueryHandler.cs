@@ -22,8 +22,9 @@ namespace Application.Features.Queries
         public async Task<IEnumerable<object>> Handle(GetCalendaByMonthQuery request, CancellationToken cancellationToken)
         {
             CalendarWeekRule rule = CalendarWeekRule.FirstDay;
+            var userId = Guid.Parse(request.userId);
 
-            var meetings = await _meetingRepo.GetMeetingByRoomAndDate(request.RoomId, request.firstDay, 30);
+            var meetings = await _meetingRepo.GetMeetingByRoomAndDate(request.RoomId, request.firstDay, 30, userId);
 
             var result = meetings
                         .OrderBy(x => x.StartTime)

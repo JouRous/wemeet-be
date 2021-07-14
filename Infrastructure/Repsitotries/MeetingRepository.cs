@@ -289,9 +289,10 @@ namespace Infrastructure.Repositories
             return m;
         }
 
-        public async Task<IEnumerable<MeetingBase>> GetMeetingByRoomAndDate(Guid roomId, DateTime date, int dayNumber)
+        public async Task<IEnumerable<MeetingBase>> GetMeetingByRoomAndDate(Guid roomId, DateTime date, int dayNumber, Guid userId)
         {
             return await _context.Meetings
+            .Where(m => m.ParticipantMeetings.Any(x => x.ParticipantId == userId))
             .Where(m => m.Status == StatusMeeting.Accepted)
             .Where(
                 m => m.RoomId == roomId && m.StartTime >= date && m.StartTime <= date.AddDays(dayNumber)

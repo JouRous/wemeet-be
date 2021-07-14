@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -18,7 +19,8 @@ namespace Application.Features.Queries
 
         public async Task<IEnumerable<object>> Handle(GetCalendarByWeekQuery request, CancellationToken cancellationToken)
         {
-            var meetings = await _meetingRepo.GetMeetingByRoomAndDate(request.RoomId, request.Monday, 7);
+            var userId = Guid.Parse(request.UserId);
+            var meetings = await _meetingRepo.GetMeetingByRoomAndDate(request.RoomId, request.Monday, 7, userId);
 
             var result = new List<object>();
 

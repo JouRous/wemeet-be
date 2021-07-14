@@ -17,7 +17,7 @@ namespace Domain.Interfaces
         Task<Pagination<MeetingDTO>> GetAllAsync(Query<MeetingFilterModel> meetingQuery);
         Task<Pagination<MeetingDTO>> GetAllByTeamAsync(Guid TeamId, Query<MeetingFilterModel> meetingQuery);
         Task<IEnumerable<MeetingBase>> GetMeetingByTimeAndRoom(Guid roomId, DateTime timestart, DateTime timeend);
-        Task<IEnumerable<MeetingBase>> GetMeetingByRoomAndDate(Guid roomId, DateTime date, int dayNumber);
+        Task<IEnumerable<MeetingBase>> GetMeetingByRoomAndDate(Guid roomId, DateTime date, int dayNumber, Guid userId);
         Task Update(Meeting meeting);
         Task DeleteOneAsync(Meeting meeting);
         Task AddUserToMeetingAsync(Guid meetingId, ICollection<Guid> userIds);

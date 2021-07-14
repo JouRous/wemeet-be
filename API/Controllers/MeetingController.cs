@@ -224,7 +224,14 @@ namespace API.Controllers
         [HttpGet("week/{roomId}/{monday}")]
         public async Task<ActionResult> GetCalendarByWeek(Guid roomId, DateTime monday)
         {
-            var query = new GetCalendarByWeekQuery(roomId, monday);
+            var token = await HttpContext.GetTokenAsync("access_token");
+            var handler = new JwtSecurityTokenHandler();
+            var userId = handler.ReadJwtToken(token).Claims
+                .Where(c => c.Type.Equals("UserId"))
+                .Select(c => c.Value)
+                .SingleOrDefault();
+
+            var query = new GetCalendarByWeekQuery(roomId, monday, userId);
             var result = await _mediator.Send(query);
 
             return Ok(new ResponseBuilder<IEnumerable<object>>()
@@ -235,7 +242,14 @@ namespace API.Controllers
         [HttpGet("month/{roomId}/{firstDay}")]
         public async Task<ActionResult> GetCalendaByMonth(Guid roomId, DateTime firstDay)
         {
-            var query = new GetCalendaByMonthQuery(roomId, firstDay);
+            var token = await HttpContext.GetTokenAsync("access_token");
+            var handler = new JwtSecurityTokenHandler();
+            var userId = handler.ReadJwtToken(token).Claims
+                .Where(c => c.Type.Equals("UserId"))
+                .Select(c => c.Value)
+                .SingleOrDefault();
+
+            var query = new GetCalendaByMonthQuery(roomId, firstDay, userId);
             var result = await _mediator.Send(query);
 
             var response = new ResponseBuilder<IEnumerable<object>>()
