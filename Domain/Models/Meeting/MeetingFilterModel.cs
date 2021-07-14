@@ -4,6 +4,7 @@ namespace Domain.Models
 {
     public class MeetingFilterModel
     {
+        public Guid me { get; set; } = Guid.Empty;
         public string Role { get; set; }
         public string Name { get; set; } = "";
         public Guid Room { get; set; } = Guid.Empty;

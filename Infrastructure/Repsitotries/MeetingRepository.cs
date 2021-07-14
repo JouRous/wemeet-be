@@ -109,6 +109,7 @@ namespace Infrastructure.Repositories
             var sort = meetingQuery.sort;
 
             var stat = _context.Meetings
+                        .Where(m => m.ParticipantMeetings.Any(x => x.ParticipantId == _filter.me))
                         .ProjectTo<MeetingDTO>(_mapper.ConfigurationProvider);
 
             if (_filter.Role.Equals(UserRoles.STAFF))

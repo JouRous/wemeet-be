@@ -44,10 +44,16 @@ namespace API.Controllers
                 .Where(c => c.Type.Equals("role"))
                 .Select(c => c.Value)
                 .SingleOrDefault();
+            var userId = handler.ReadJwtToken(token).Claims
+                .Where(c => c.Type.Equals("UserId"))
+                .Select(c => c.Value)
+                .SingleOrDefault();
 
             var meetingQuery = QueryBuilder<MeetingFilterModel>
                         .Build(page, filter, sort);
             meetingQuery.filter.Role = role;
+            meetingQuery.filter.me = Guid.Parse(userId);
+
             var query = new GetAllMeetingQuery(meetingQuery);
 
             var result = await _mediator.Send(query);
