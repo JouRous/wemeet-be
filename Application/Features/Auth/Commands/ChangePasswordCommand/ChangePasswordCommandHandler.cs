@@ -34,7 +34,7 @@ namespace Application.Features.Commands
             await _userManager.RemovePasswordAsync(user);
             await _userManager.AddPasswordAsync(user, request.password);
 
-            user.isFirstLogin = false;
+            user.isFirstLogin = true;
             await _userManager.UpdateAsync(user);
 
             return Unit.Value;
