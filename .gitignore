@@ -12,8 +12,8 @@
 *.sln.docstates
 
 **/Uploads
-**/Migrations
-**/Migrations/*
+**/Properties/*
+**/storage/*
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -455,3 +455,4 @@ bin
 obj
 API/appsettings.json
 API/Migrations
+API/Properties/launchSettings.json

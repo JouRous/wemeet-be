@@ -1,232 +1,123 @@
 using System;
 using System.IO;
-using System.Web;
 using System.Threading.Tasks;
-using API.DTO;
-using API.Entities;
-using API.Interfaces;
-using API.Models;
-using API.Types;
-using API.Utils;
+using Domain.DTO;
+using Domain.Entities;
+using Domain.Interfaces;
+using Domain.Models;
+using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using API.Services;
 using Microsoft.AspNetCore.Authentication;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Cryptography;
-using API.Errors;
-using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Application.Utils;
+using MediatR;
+using Application.Features.Commands;
+using Application.Features.Queries;
+using Application.Exceptions;
 
 namespace API.Controllers
 {
-  public class AuthController : BaseApiController
-  {
-    private readonly ITokenService _tokenService;
-    private readonly IMapper _mapper;
-    private readonly UserManager<AppUser> _userManager;
-    private readonly SignInManager<AppUser> _signInManager;
-    private readonly RoleManager<AppRole> _roleManager;
-    private readonly IWebHostEnvironment _hostEnvironment;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IEmailService _emailService;
-
-    public AuthController(
-      UserManager<AppUser> userManager,
-      SignInManager<AppUser> signInManager,
-      RoleManager<AppRole> roleManager,
-      ITokenService tokenService,
-      IUnitOfWork unitOfWork,
-      IMapper mapper,
-      IWebHostEnvironment hostEnvironment,
-      IEmailService emailService
-    )
+    public class AuthController : BaseApiController
     {
-      _tokenService = tokenService;
-      _mapper = mapper;
-      _userManager = userManager;
-      _signInManager = signInManager;
-      _roleManager = roleManager;
-      _hostEnvironment = hostEnvironment;
-      _unitOfWork = unitOfWork;
-      _emailService = emailService;
-    }
+        private readonly IMediator _mediator;
 
-    [HttpPost("login")]
-    public async Task<ActionResult<Response<AuthModel>>> Login(LoginModel loginModel)
-    {
-      var user = await _userManager.Users.SingleOrDefaultAsync(x => x.Email == loginModel.Email.ToLower());
-
-      if (user == null)
-      {
-        return Unauthorized("Invalid User");
-      }
-
-      if (user.isDeactivated)
-      {
-        return StatusCode(StatusCodes.Status403Forbidden, new
+        public AuthController(IMediator mediator)
         {
-          status = 403,
-          success = true,
-          message = "User had been deactivated"
-        });
-      }
+            _mediator = mediator;
+        }
 
-      var result = await _signInManager.CheckPasswordSignInAsync(user, loginModel.Password, false);
-
-      if (!result.Succeeded)
-      {
-        return Unauthorized();
-      }
-
-      var authDTO = new AuthModel
-      {
-        User = _mapper.Map<UserDTO>(user),
-        token = await _tokenService.CreateToken(user),
-        Role = await _userManager.GetRolesAsync(user)
-      };
-
-      return new Response<AuthModel>
-      {
-        Data = authDTO,
-        success = true,
-        status = 200
-      };
-    }
-
-    [HttpPost("forget-request")]
-    public async Task<ActionResult> ForgetRequest(ForgetRequest forgetRequest)
-    {
-      var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Email == forgetRequest.email);
-
-      if (user == null)
-      {
-        return Ok(new
+        [HttpPost("login")]
+        public async Task<ActionResult> Login([FromBody] LoginCommand command)
         {
-          status = 404,
-          success = true,
-          message = "User not found!"
-        });
-      }
 
-      var resetPasswordToken = _tokenService.CreateResetPasswordToken(user.Email);
+            var result = new AuthModel();
 
-      var resetPasswordLink = $"{forgetRequest.domain}?token={resetPasswordToken}";
+            try
+            {
+                result = await _mediator.Send(command);
+            }
+            catch (ApplicationException exception)
+            {
+                var exceptionRes = new ResponseBuilder<Unit>()
+                                    .AddMessage(exception.Message)
+                                    .AddHttpStatus(401, false)
+                                    .Build();
 
-      // await _unitOfWork.USerRepository.SaveResetPasswordToken(user.Email, resetPasswordToken);
+                return Unauthorized(exceptionRes);
+            }
 
-      // var saveChangeStatus = await _unitOfWork.Complete();
+            var response = new ResponseBuilder<AuthModel>()
+                                .AddData(result)
+                                .AddMessage("Login success")
+                                .Build();
 
-      await _emailService.sendMailAsync(forgetRequest.email, "Forget password", $@"<a href=""http://{resetPasswordLink}"">http://{resetPasswordLink}</a>");
-      return Ok(new
-      {
-        status = 200,
-        success = true
-      });
-    }
+            return Ok(response);
 
-    [HttpPost("reset-password")]
-    public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordModel model)
-    {
-      var handler = new JwtSecurityTokenHandler();
-      var email = handler.ReadJwtToken(model.token)
-             .Claims.Where(c => c.Type.Equals("email")).Select(c => c.Value).SingleOrDefault();
+        }
 
-      var user = await _userManager.Users.FirstOrDefaultAsync(user => user.Email == email.ToLower());
-
-      if (user == null)
-      {
-        return NotFound(new
+        [HttpPost("forget-request")]
+        public async Task<ActionResult> ForgetRequest(ForgetPasswordRequest request)
         {
-          status = 404,
-          success = true,
-          message = "User not found"
-        });
-      }
 
-      var randomPassword = Utils.Utils.RandomString(9);
+            try
+            {
+                await _mediator.Send(request);
+            }
+            catch (NotFoundException exception)
+            {
+                var excRes = new ResponseBuilder<Unit>()
+                                    .AddMessage(exception.Message)
+                                    .AddHttpStatus(400, false)
+                                    .Build();
+                return NotFound(excRes);
+            }
 
-      await _userManager.RemovePasswordAsync(user);
-      await _userManager.AddPasswordAsync(user, model.password);
+            return Ok(new ResponseBuilder<Unit>()
+                        .AddMessage("Request success")
+                        .Build());
+        }
 
-      return Ok(new
-      {
-        status = 200,
-        success = true,
-        message = "Reset password success"
-      });
+        [HttpPost("reset-password")]
+        public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+        {
+            await _mediator.Send(command);
+
+            return Accepted(new ResponseBuilder<Unit>().AddMessage("Password has been reset").Build());
+        }
+
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<ActionResult> GetProfile()
+        {
+            var token = await HttpContext.GetTokenAsync("access_token");
+
+            var query = new GetProfileQuery(token);
+            var result = await _mediator.Send(query);
+
+            var response = new ResponseBuilder<UserDTO>()
+                                .AddData(result)
+                                .Build();
+
+            return Ok(response);
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
+        {
+            var token = await HttpContext.GetTokenAsync("access_token");
+            command.Token = token;
+
+            await _mediator.Send(command);
+
+            return Accepted(new ResponseBuilder<Unit>().AddMessage("Password has changed").Build());
+        }
     }
-
-    [Authorize]
-    [HttpGet("me")]
-    public async Task<ActionResult> GetProfile()
-    {
-      var token = await HttpContext.GetTokenAsync("access_token");
-      var handler = new JwtSecurityTokenHandler();
-
-      var email = handler.ReadJwtToken(token)
-             .Claims.Where(c => c.Type.Equals("email")).Select(c => c.Value).SingleOrDefault();
-      var roles = handler.ReadJwtToken(token)
-             .Claims.Where(c => c.Type.Equals("role")).Select(c => c.Value).ToList();
-
-      var User = await _unitOfWork.USerRepository.GetUserAsync(email);
-      var profile = new
-      {
-        User = User,
-        Roles = roles
-      };
-
-      return Ok(new Response<object>
-      {
-        success = true,
-        status = 200,
-        Data = profile
-      });
-    }
-
-    [Authorize]
-    [HttpPost("change-password")]
-    public async Task<ActionResult> ChangePassword([FromBody] LoginModel model)
-    {
-      var token = await HttpContext.GetTokenAsync("access_token");
-      var handler = new JwtSecurityTokenHandler();
-
-      var email = handler.ReadJwtToken(token)
-             .Claims.Where(c => c.Type.Equals("email")).Select(c => c.Value).SingleOrDefault();
-      var user = await _userManager.Users.FirstOrDefaultAsync(user => user.Email == email);
-
-      await _userManager.RemovePasswordAsync(user);
-      await _userManager.AddPasswordAsync(user, model.Password);
-
-      user.isFirstLogin = false;
-      await _userManager.UpdateAsync(user);
-
-      return Accepted(new
-      {
-        status = 202,
-        success = true,
-        message = "Password had changed"
-      });
-    }
-
-    private async Task<string> SaveImage(IFormFile imageFile)
-    {
-      string imageName = DateTime.Now.ToString("yyyymmssfff") + "_" + Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-
-      var uploadPath = Path.Combine(_hostEnvironment.ContentRootPath, "Uploads", "Avatars", imageName);
-
-      using (var fileStream = new FileStream(uploadPath, FileMode.Create))
-      {
-        await imageFile.CopyToAsync(fileStream);
-      }
-
-      return imageName;
-    }
-  }
 }

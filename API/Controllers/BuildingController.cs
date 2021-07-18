@@ -1,172 +1,120 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using API.DTO;
-using API.Services;
-using API.Entities;
-using API.Interfaces;
-using API.Models;
-using API.Types;
-using API.Utils;
+using Domain.DTO;
+using Application.Services;
+using Domain.Entities;
+using Domain.Interfaces;
+using Domain.Models;
+using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Application.Utils;
+using Application.Features.Commands;
+using MediatR;
+using Application.Features.Queries;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
-	public class BuildingController : BaseApiController
-	{
-		private readonly IUnitOfWork _unitOfWork;
-		private readonly IMapper _mapper;
-		private NotificationService _notificationService = new NotificationService();
+    [Authorize]
+    public class BuildingController : BaseApiController
+    {
+        private NotificationService _notificationService = new NotificationService();
+        private readonly IMediator _mediator;
 
-		public BuildingController(IUnitOfWork unitOfWork, IMapper mapper)
-		{
-			_unitOfWork = unitOfWork;
-			_mapper = mapper;
-		}
+        public BuildingController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
 
-		[HttpGet]
-		public async Task<ActionResult<Response<IEnumerable<BuildingDTO>>>> GetAllBuildings(
-			[FromQuery] PaginationParams paginationParams, string filter = "", string sort = "created_at"
-			)
-		{
-			var result = await _unitOfWork.BuildingRepository.GetAllByPaginationAsync(paginationParams, filter, sort);
+        [HttpGet]
+        public async Task<ActionResult> GetAllBuildings(
+            [FromQuery] Dictionary<string, int> page,
+            [FromQuery] Dictionary<string, string> filter,
+            [FromQuery] Dictionary<string, string> sort)
+        {
+            var buildingQuery = QueryBuilder<BuildingFilterModel>
+                        .Build(page, filter, sort);
 
+            var query = new GetAllBuildingQuery(buildingQuery);
 
-			var response = new ResponseBuilder<IEnumerable<BuildingDTO>>()
-													.AddData(result.Items)
-													.AddPagination(new PaginationDTO
-													{
-														CurrentPage = result.CurrentPage,
-														PerPage = result.PerPage,
-														Total = result.Total,
-														Count = result.Count,
-														TotalPage = result.TotalPages
-													})
-													.Build();
+            var result = await _mediator.Send(query);
 
-			return response;
-		}
+            var paginationDTO = new PaginationDTO
+            {
+                CurrentPage = result.CurrentPage,
+                PerPage = result.PerPage,
+                Total = result.Total,
+                Count = result.Count,
+                TotalPages = result.TotalPages
+            };
 
-		[HttpGet("{buildingId}")]
-		public async Task<ActionResult<Response<BuildingDTO>>> GetBuildingInfo(int buildingId)
-		{
-			var buildingInfo = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
+            var response = new ResponseWithPaginationBuilder<IEnumerable<BuildingDTO>>()
+                                .AddData(result.Items)
+                                .AddPagination(paginationDTO)
+                                .Build();
 
-			return new ResponseBuilder<BuildingDTO>().AddData(buildingInfo).Build();
-		}
+            return Ok(response);
+        }
 
-		[HttpPost]
-		public async Task<ActionResult<Response<BuildingDTO>>> AddBuilding([FromBody] BuildingModel buildingInfo)
-		{
-			try
-			{
-				var building = _mapper.Map<Building>(buildingInfo);
+        [HttpGet("{buildingId}")]
+        public async Task<ActionResult> GetBuilding(Guid buildingId)
+        {
+            var query = new GetBuildingQuery(buildingId);
+            var result = await _mediator.Send(query);
 
-				_unitOfWork.BuildingRepository.AddOne(building);
+            var response = new ResponseBuilder<BuildingDTO>()
+                                .AddData(result)
+                                .Build();
 
-				var isCreated = await _unitOfWork.Complete();
+            return Ok(response);
+        }
 
-				if (!isCreated)
-				{
-					return BadRequest();
-				}
+        [HttpPost]
+        public async Task<ActionResult> CreateBuilding([FromBody] CreateBuildingCommand command)
+        {
+            var result = await _mediator.Send(command);
 
-				// var msg = new Notification()
-				// {
-				// 	EntityType = Enums.EntityEnum.Building,
-				// 	EntityId = building.Id,
-				// 	EndpointDetails = $"/api/building/{building.Id}",
-				// 	Message = "New building has created !"
-				// };
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .AddMessage("Building has been created")
+                                .Build();
 
-				// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
+            return Ok(response);
+        }
 
-				// await _notificationService.CreateNotify(msgDto);
+        [HttpPut]
+        [Route("{buildingId}")]
+        public async Task<ActionResult> UpdateBuilding([FromRoute] Guid buildingId, [FromBody] UpdatebuildingCommand command)
+        {
+            command.Id = buildingId;
 
-				var res = new ResponseBuilder<BuildingDTO>()
-												.AddData(_mapper.Map<BuildingDTO>(building))
-												.Build();
+            var result = await _mediator.Send(command);
 
-				return res;
-			}
-			catch (Exception e)
-			{
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .AddMessage("Building has been updated")
+                                .Build();
 
-				throw e;
-			}
-		}
+            return Ok(response);
+        }
 
-		[HttpPut]
-		[Route("{buildingId}")]
-		public async Task<ActionResult> EditInfoBuilding([FromRoute] int buildingId, [FromBody] BuildingModel body)
-		{
-			var building = _mapper.Map<BuildingDTO>(body);
+        [HttpDelete("{buildingId}")]
+        public async Task<ActionResult> RemoveBuilding(Guid buildingId)
+        {
+            var command = new DeleteBuildingCommand(buildingId);
 
-			building.Id = buildingId;
+            var result = await _mediator.Send(command);
 
-			_unitOfWork.BuildingRepository.ModifyOne(building);
-			var isCompleted = await _unitOfWork.Complete();
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .AddMessage("Building has been deleted")
+                                .Build();
 
-			if (!isCompleted)
-			{
-				return BadRequest();
-			}
-
-			// var msg = new Notification()
-			// {
-			// 	EntityType = Enums.EntityEnum.Building,
-			// 	EntityId = building.Id,
-			// 	EndpointDetails = $"/api/building/{building.Id}",
-			// 	Message = "The building has updated !"
-			// };
-
-			// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
-
-			// await _notificationService.CreateNotify(msgDto);
-
-			return Accepted(new
-			{
-				status = 202,
-				success = true,
-				message = "Building had been updated",
-				updated = building
-			});
-		}
-
-		[HttpDelete("{buildingId}")]
-		public async Task<ActionResult<Response<string>>> RemoveBuilding(int buildingId)
-		{
-			BuildingDTO building = await _unitOfWork.BuildingRepository.GetOneAsync(buildingId);
-
-			_unitOfWork.BuildingRepository.DeletingOne(buildingId);
-
-			var isCompleted = await _unitOfWork.Complete();
-
-			if (!isCompleted)
-			{
-				return BadRequest();
-			}
-
-			// var msg = new Notification()
-			// {
-			// 	EntityType = Enums.EntityEnum.Building,
-			// 	EntityId = building.Id,
-			// 	EndpointDetails = $"/api/building/{building.Id}",
-			// 	Message = "New building has deleted !"
-			// };
-
-			// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
-
-			// await _notificationService.CreateNotify(msgDto);
-
-			var res = new ResponseBuilder<string>()
-											.AddData(_mapper.Map<string>("deleted"))
-											.Build();
-
-			return res;
-		}
+            return Ok(response);
+        }
 
 
-	}
+    }
 }

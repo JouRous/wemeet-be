@@ -1,218 +1,184 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.DTO;
-using API.Entities;
-using API.Interfaces;
-using API.Models;
-using API.Types;
-using API.Utils;
+using Domain.DTO;
+using Domain.Entities;
+using Domain.Interfaces;
+using Domain.Models;
+using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Application.Utils;
+using System;
+using Application.Features.Commands;
+using MediatR;
+using Application.Features.Queries;
+using Application.Exceptions;
 
 namespace API.Controllers
 {
-  public class UsersController : BaseApiController
-  {
-    private readonly UserManager<AppUser> _userManager;
-    private readonly IMapper _mapper;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IEmailService _emailService;
-    private readonly ITokenService _tokenService;
-
-    public UsersController(
-      IMapper mapper,
-      UserManager<AppUser> userManager,
-      IUnitOfWork unitOfWork,
-      ITokenService tokenService,
-      IEmailService emailService
-      )
+    public class UsersController : BaseApiController
     {
-      _userManager = userManager;
-      _mapper = mapper;
-      _unitOfWork = unitOfWork;
-      _emailService = emailService;
-      _tokenService = tokenService;
-    }
+        private readonly UserManager<AppUser> _userManager;
+        private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailService _emailService;
+        private readonly ITokenService _tokenService;
+        private readonly IMediator _mediator;
 
-    private async Task<bool> CheckUserExist(string email)
-    {
-      return await _userManager.Users.AnyAsync(user => user.Email == email);
-    }
-
-    [HttpPost("create-user")]
-    public async Task<ActionResult<Response<AuthModel>>> CreateUser([FromBody] UserActionModel userActionModel)
-    {
-      if (await CheckUserExist(userActionModel.Email))
-      {
-        return StatusCode(StatusCodes.Status409Conflict, new
+        public UsersController(
+            IMapper mapper,
+            UserManager<AppUser> userManager,
+            IUnitOfWork unitOfWork,
+            ITokenService tokenService,
+            IEmailService emailService,
+            IMediator mediator)
         {
-          status = 409,
-          success = false,
-          message = "User already exist"
-        });
-      }
+            _userManager = userManager;
+            _mapper = mapper;
+            _unitOfWork = unitOfWork;
+            _emailService = emailService;
+            _tokenService = tokenService;
+            _mediator = mediator;
+        }
 
-      var transaction = await DbContext.Database.BeginTransactionAsync();
-      var user = _mapper.Map<AppUser>(userActionModel);
-
-      user.UserName = user.Email;
-      user.isFirstLogin = true;
-      user.AppUserTeams = new List<AppUserTeam>();
-      user.UnsignedName = Utils.Utils.RemoveAccentedString(user.Fullname);
-
-      var randomPassword = Utils.Utils.RandomString(9);
-
-      var createStatus = await _userManager.CreateAsync(user, randomPassword);
-
-      if (!createStatus.Succeeded)
-      {
-        await transaction.RollbackAsync();
-        return BadRequest(createStatus.Errors);
-      }
-
-      var addRoleStatus = await _userManager.AddToRoleAsync(user, userActionModel.Role);
-
-      if (!addRoleStatus.Succeeded)
-      {
-        await transaction.RollbackAsync();
-        return BadRequest(addRoleStatus.Errors);
-      }
-
-      transaction.Commit();
-
-      await _emailService.sendMailAsync(user.Email, "Dang ky thanh cong.", $"Mat khau la {randomPassword}");
-
-      return Ok(new
-      {
-        success = true,
-        status = 200,
-        message = "Create user success"
-      });
-
-    }
-
-    [HttpGet("{username}")]
-    public async Task<ActionResult<UserDTO>> GetUser(string username)
-    {
-      return await _unitOfWork.USerRepository.GetUserAsync(username);
-    }
-
-    [HttpGet]
-    public async Task<ActionResult<Response<IEnumerable<UserDTO>>>> GetUsers(
-    [FromQuery] Dictionary<string, int> page,
-    [FromQuery] Dictionary<string, string> filter,
-    [FromQuery] Dictionary<string, string> sort)
-    {
-      var result = await _unitOfWork.USerRepository.GetUsersAsync(page, filter, sort);
-
-      var response = new ResponseBuilder<IEnumerable<UserDTO>>()
-             .AddData(result.Items)
-             .AddPagination(new PaginationDTO
-             {
-               CurrentPage = result.CurrentPage,
-               PerPage = result.PerPage,
-               Total = result.Total,
-               Count = (int)result.Count,
-               TotalPage = result.TotalPages
-             })
-             .Build();
-
-      return response;
-    }
-
-    // [Authorize]
-    [HttpPut]
-    public async Task<ActionResult> UpdateUser([FromBody] UserActionModel userActionModel)
-    {
-      var user = _mapper.Map<AppUser>(userActionModel);
-      var _user = await _unitOfWork.USerRepository.UpdateUserAsync(user);
-
-      await _unitOfWork.Complete();
-
-      var roles = _user.UserRoles.ToList().Select(x => x.Role.Name).ToList();
-      await _userManager.RemoveFromRolesAsync(_user, roles);
-      await _userManager.AddToRoleAsync(_user, userActionModel.Role);
-
-      return Accepted(new
-      {
-        status = 202,
-        success = true,
-        message = "User had been updated"
-      });
-
-    }
-
-
-    [HttpDelete("deactivate/{email}")]
-    public async Task<ActionResult> DeactivateUser(string email)
-    {
-      var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Email == email);
-
-      if (user == null)
-      {
-        return NotFound(new
+        private async Task<bool> CheckUserExist(string email)
         {
-          status = 404,
-          susscess = true
-        });
-      }
+            return await _userManager.Users.AnyAsync(user => user.Email == email);
+        }
 
-      _unitOfWork.USerRepository.DeactivateUser(user);
-      if (!(await _unitOfWork.Complete()))
-      {
-        return StatusCode(StatusCodes.Status500InternalServerError, new
+
+        [HttpPost()]
+        public async Task<ActionResult> CreateUser([FromForm] CreateUserCommand commnad)
         {
-          status = 500,
-          sussess = false,
-          message = "Internal Server Error"
-        });
-      }
+            var result = Guid.Empty;
 
-      return Accepted(new
-      {
-        status = 202,
-        success = true,
-        message = "User had been deactivate"
-      });
+            try
+            {
+                result = await _mediator.Send(commnad);
+            }
+            catch (ApplicationException ex)
+            {
+                var exRes = new ResponseBuilder<Unit>()
+                                .AddMessage(ex.Message)
+                                .AddHttpStatus(400, false)
+                                .Build();
+                return BadRequest(exRes);
+            }
+
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .AddMessage("Create user success")
+                                .Build();
+
+            return Ok(response);
+        }
+
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetUser(Guid id)
+        {
+            var result = await _mediator.Send(new GetUserQuery(id));
+
+            var response = new ResponseBuilder<UserWithTeamUsersDTO>()
+                                .AddData(result)
+                                .Build();
+            return Ok(response);
+        }
+
+        [HttpGet("get-by-email/{email}")]
+        public async Task<ActionResult> GetUserByEmail(string email)
+        {
+            var result = await _mediator.Send(new GetUserByEmailQuery(email));
+
+            var response = new ResponseBuilder<UserDTO>()
+                                .AddData(result)
+                                .Build();
+            return Ok(response);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<Response<IEnumerable<UserWithTeamDTO>>>> GetUsers(
+        [FromQuery] Dictionary<string, int> page,
+        [FromQuery] Dictionary<string, string> filter,
+        [FromQuery] Dictionary<string, string> sort)
+        {
+            var userQuery = QueryBuilder<UserFilterModel>.Build(page, filter, sort);
+
+            var result = await _unitOfWork.UserRepository.GetUsersAsync(userQuery);
+
+            var response = new ResponseWithPaginationBuilder<IEnumerable<UserWithTeamDTO>>()
+                   .AddData(result.Items)
+                   .AddPagination(new PaginationDTO
+                   {
+                       CurrentPage = result.CurrentPage,
+                       PerPage = result.PerPage,
+                       Total = result.Total,
+                       Count = (int)result.Count,
+                       TotalPages = result.TotalPages
+                   })
+                   .Build();
+
+            return response;
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateUser([FromForm] UpdateUserCommand command, Guid id)
+        {
+            command.Id = id;
+            var result = Guid.Empty;
+
+            try
+            {
+                result = await _mediator.Send(command);
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new ResponseBuilder<Unit>()
+                                    .AddMessage(ex.Message)
+                                    .AddHttpStatus(404, false)
+                                    .Build());
+            }
+            return Ok(new ResponseBuilder<Guid>()
+                            .AddData(result)
+                            .Build());
+        }
+
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeactivateUser(Guid id)
+        {
+            try
+            {
+                await _mediator.Send(new DeactivateUserCommand(id));
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new ResponseBuilder<Unit>()
+                                    .AddMessage(ex.Message).Build());
+            }
+
+            return Accepted(new ResponseBuilder<Unit>().Build());
+        }
+
+        [HttpGet("retrieve/{id}")]
+        public async Task<ActionResult> RetrieveUser(Guid id)
+        {
+            try
+            {
+                await _mediator.Send(new RetrieveUserCommand(id));
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new ResponseBuilder<Unit>()
+                                    .AddMessage(ex.Message).Build());
+            }
+
+            return Accepted(new ResponseBuilder<Unit>().Build());
+        }
+
     }
-
-    [HttpGet("retrieve/{email}")]
-    public async Task<ActionResult> RetrieveUser(string email)
-    {
-      var user = await _userManager.Users.SingleOrDefaultAsync(user => user.Email == email);
-
-      if (user == null)
-      {
-        return NotFound(new
-        {
-          status = 404,
-          susscess = true
-        });
-      }
-
-      _unitOfWork.USerRepository.RetrieveUser(user);
-      if (!(await _unitOfWork.Complete()))
-      {
-        return StatusCode(StatusCodes.Status500InternalServerError, new
-        {
-          status = 500,
-          sussess = false,
-          message = "Internal Server Error"
-        });
-      }
-
-      return Accepted(new
-      {
-        status = 202,
-        success = true,
-        message = "User had been retrieve"
-      });
-
-    }
-
-  }
 }

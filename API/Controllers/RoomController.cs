@@ -1,134 +1,117 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using API.DTO;
-using API.Services;
-using API.Entities;
-using API.Interfaces;
-using API.Models;
-using API.Types;
-using API.Utils;
+using Domain.DTO;
+using Application.Services;
+using Domain.Interfaces;
+using Domain.Types;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Application.Utils;
+using System;
+using MediatR;
+using Application.Features.Commands;
+using Application.Features.Queries;
+using Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
-	public class RoomController : BaseApiController
-	{
-		private readonly IUnitOfWork _unitOfWork;
-		private readonly IMapper _mapper;
-		private NotificationService _notificationService = new NotificationService();
+    [Authorize]
+    public class RoomController : BaseApiController
+    {
+        private readonly IMediator _mediator;
+        private NotificationService _notificationService = new NotificationService();
 
-		public RoomController(IUnitOfWork unitOfWork, IMapper mapper)
-		{
-			_unitOfWork = unitOfWork;
-			_mapper = mapper;
-		}
+        public RoomController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
 
-		[HttpGet]
-		public async Task<ActionResult<Response<IEnumerable<RoomDTO>>>> GetAlls(
-			[FromQuery] PaginationParams paginationParams, string filter = "", string sort = "-created_at")
-		{
-			var result = await _unitOfWork.RoomRepository.GetAllByPaginationAsync(paginationParams, filter, sort);
+        [HttpGet]
+        public async Task<ActionResult<Response<IEnumerable<RoomDTO>>>> GetAlls(
+            [FromQuery] Dictionary<string, int> page,
+            [FromQuery] Dictionary<string, string> filter,
+            [FromQuery] Dictionary<string, string> sort)
+        {
+            var roomQuery = QueryBuilder<RoomFilterModel>
+                                .Build(page, filter, sort);
 
-			var response = new ResponseBuilder<IEnumerable<RoomDTO>>()
-													.AddData(result.Items)
-													.AddPagination(new PaginationDTO
-													{
-														CurrentPage = result.CurrentPage,
-														PerPage = result.PerPage,
-														Total = result.Total,
-														Count = result.Count,
-														TotalPage = result.TotalPages
-													})
-													.Build();
+            var query = new GetAllRoomQuery(roomQuery);
+            var result = await _mediator.Send(query);
 
-			return response;
-		}
+            var pagination = new PaginationDTO
+            {
+                Count = result.Count,
+                CurrentPage = result.CurrentPage,
+                PerPage = result.PerPage,
+                Total = result.Total,
+                TotalPages = result.TotalPages
+            };
 
-		[HttpGet("{RoomId}")]
-		public async Task<ActionResult<Response<RoomDTO>>> GetRoomInfo(int RoomId)
-		{
-			var RoomInfo = await _unitOfWork.RoomRepository.GetOneAsync(RoomId);
-			return new ResponseBuilder<RoomDTO>().AddData(RoomInfo).Build();
-		}
+            var response = new ResponseWithPaginationBuilder<IEnumerable<RoomDTO>>()
+                                .AddData(result.Items)
+                                .AddPagination(pagination)
+                                .Build();
 
-		[HttpPost]
-		public async Task<ActionResult<Response<RoomDTO>>> AddRoom([FromBody] RoomModel body)
-		{
-			var roomMapper = _mapper.Map<Room>(body);
+            return Ok(response);
+        }
 
-			_unitOfWork.RoomRepository.AddOne(roomMapper);
+        [HttpGet("{RoomId}")]
+        public async Task<ActionResult> GetRoomInfo(Guid roomId)
+        {
+            var query = new GetRoomQuery(roomId);
+            var result = await _mediator.Send(query);
 
-			var isCompleted = await _unitOfWork.Complete();
+            var response = new ResponseBuilder<RoomDTO>()
+                                .AddData(result)
+                                .Build();
 
-			if (!isCompleted) return BadRequest();
+            return Ok(response);
+        }
 
-			// var msg = new Notification()
-			// {
-			// 	EntityType = Enums.EntityEnum.Building,
-			// 	EntityId = roomMapper.Id,
-			// 	EndpointDetails = $"/api/room/{roomMapper.Id}",
-			// 	Message = "New Room has created !"
-			// };
-			// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
-			// await _notificationService.CreateNotify(msgDto);
+        [HttpPost]
+        public async Task<ActionResult> AddRoom([FromBody] CreateRoomCommand command)
+        {
+            var result = await _mediator.Send(command);
 
-			var res = new ResponseBuilder<RoomDTO>().AddData(_mapper.Map<RoomDTO>(roomMapper)).Build();
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .Build();
 
-			return res;
+            return Ok(response);
 
-		}
+        }
 
-		[HttpPut]
-		[Route("{roomId}")]
-		public async Task<ActionResult<Response<RoomDTO>>> EditInfoRoom([FromRoute] int roomId, [FromBody] RoomModel body)
-		{
-			var roomMapper = _mapper.Map<RoomDTO>(body);
-			roomMapper.Id = roomId;
+        [HttpPut]
+        [Route("{roomId}")]
+        public async Task<ActionResult> EditInfoRoom(
+            [FromRoute] Guid roomId,
+            [FromBody] UpdateRoomCommand command)
+        {
+            command.RoomId = roomId;
 
-			_unitOfWork.RoomRepository.UpdatingOne(roomMapper);
+            var result = await _mediator.Send(command);
+            var response = new ResponseBuilder<Guid>()
+                                .AddData(result)
+                                .AddMessage("Room has been updated")
+                                .Build();
 
-			var isCompleted = await _unitOfWork.Complete();
+            return Ok(response);
+        }
 
-			if (!isCompleted) return BadRequest();
+        [HttpDelete("{roomId}")]
+        public async Task<ActionResult> RemoveRoom(Guid roomId)
+        {
+            var command = new DeleteRoomCommand(roomId);
+            var result = await _mediator.Send(command);
 
-			// var msg = new Notification()
-			// {
-			// 	EntityType = Enums.EntityEnum.Building,
-			// 	EntityId = roomMapper.Id,
-			// 	EndpointDetails = $"/api/room/{roomMapper.Id}",
-			// 	Message = "New Room has updated !"
-			// };
-			// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
-			// await _notificationService.CreateNotify(msgDto);
+            var response = new ResponseBuilder<Guid>()
+                            .AddData(result)
+                            .AddMessage("Room has been deleted")
+                            .Build();
 
-			var res = new ResponseBuilder<RoomDTO>().AddData(roomMapper).Build();
+            return Ok(response);
+        }
 
-			return Accepted(res);
-		}
-
-		[HttpDelete("{roomId}")]
-		public async Task<ActionResult<Response<string>>> RemoveRoom(int roomId)
-		{
-			var room = await _unitOfWork.RoomRepository.GetOneAsync(roomId);
-			_unitOfWork.RoomRepository.DeletingOne(roomId);
-			var isCompleted = await _unitOfWork.Complete();
-			if (!isCompleted) return BadRequest();
-			// var msg = new Notification()
-			// {
-			// 	EntityType = Enums.EntityEnum.Building,
-			// 	EntityId = room.Id,
-			// 	EndpointDetails = $"/api/room/{room.Id}",
-			// 	Message = "New Room has deleted !"
-			// };
-			// var msgDto = _mapper.Map<NotificationMessageDTO>(msg);
-			// await _notificationService.CreateNotify(msgDto);
-
-			var res = new ResponseBuilder<string>().AddData("deleted").Build();
-
-			return res;
-		}
-
-	}
+    }
 }

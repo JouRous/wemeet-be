@@ -26,20 +26,48 @@
   {
     "Email": "5712xuanvu@gmail.com",
     "Password": "5712xuanvu",
-    "Fullname": "Vũ Lê"
+    "Fullname": "Vũ Lê",
+    "Role": "LEAD"
+  },
+  {
+    "Email": "khoi@gmail.com",
+    "Password": "password",
+    "Fullname": "Khôi",
+    "Role": "LEAD"
   },
   {
     "Email": "dpm11234@gmail.com",
-    "Fullname": "Dương Mậu"
+    "Fullname": "Dương Mậu",
+    "Role": "LEAD"
   },
   {
     "Email": "thanhanto0604@gmail.com",
     "Password": "codeAnTT",
-    "Fullname": "An Thanh"
+    "Fullname": "An Thanh",
+    "Role": "LEAD"
   },
   {
     "Email": "duyuit@mailinator.com",
     "Password": "duy123A!",
-    "Fullname": "Đức Duy"
+    "Fullname": "Đức Duy",
+    "Role": "LEAD"
+  },
+  {
+    "Email": "mau.adm@mailinator.com",
+    "Password": "123123",
+    "Fullname": "Mau Admin",
+    "Role": "ADMIN"
+  },
+  {
+    "Email": "duy.adm@mailinator.com",
+    "Password": "123123",
+    "Fullname": "Duy Admin",
+    "Role": "ADMIN"
+  },
+  {
+    "Email": "vu.adm@mailinator.com",
+    "Password": "123123",
+    "Fullname": "Vu Admin",
+    "Role": "ADMIN"
   }
 ]
